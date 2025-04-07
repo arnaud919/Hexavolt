@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+:root {
+  --yellow: #F4C542;
+  --yellow-hover: rgba(244, 197, 66, 0.5);
+  --primary: #2C3E50;
+  --background:#F8F1E5;
+  --shadow-right: 3px 3px 4px 2px rgba(0, 0, 0, 0.4);
+  --shadow-left: -3px 3px 4px 2px rgba(0,0,0,0.4);
+}
+
+@layer base {
+
+  body {
+    background: var(--background);
+    color: var(--primary);
+    font-family: "Poppins", sans-serif;
+  
+    h1, h2, h3, h4, h5, h6{
+      font-family:"Inter", sans-serif;
+    }
+  
+    header{
+      background-color: var(--yellow);
+
+      .connect{
+        border: var(--primary) solid 1px;
+        border-radius: 10%;
+      }
+    }
+  }
+
+  h1 {
+    font-size: var(--text-4xl);
+    font-weight: bold;
+  }
+  h2 {
+    font-size: var(--text-3xl);
+  }
+
+}
+
+@theme{
+  --shadow-right: var(--shadow-right);
+  --shadow-left: var(--shadow-left);
+  --color-yellow-hover: var(--yellow-hover);
+  --color-yellow: var(--yellow);
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("assets/fonts/Inter-VariableFont_opsz,wght.ttf") format("ttf");
+
+  font-family: "Poppins";
+  src: url("assets/fonts/Poppins-Regular.ttf") format("ttf");
+}
+
+.margin-section{
+  margin: 110px 0;
+
+  a{
+    padding:10px;
+    /* background-color:var(--yellow); */
+    border-radius: 10px;
+
+    /* &:hover{
+      background-color: var(--yellow-hover);
+    } */
+  }
+}
+
+hr{
+  margin: 20px 0 50px;
+}
