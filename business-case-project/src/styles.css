@@ -70,7 +70,6 @@
   }
 
   input[type="checkbox"]:checked{
-
      &::before{
       color:var(--primary);
      }
@@ -111,6 +110,10 @@
 
   .blue-button:hover{
     background-color: var(--primary);
+  }
+
+  .responsive-menu-items{
+    @apply hover:underline decoration-(--primary) underline-offset-4;
   }
 
 }
