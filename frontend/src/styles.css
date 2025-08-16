@@ -1,0 +1,134 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+:root {
+  --yellow: #F4C542;
+  --yellow-hover: rgba(244, 197, 66, 0.5);
+  --primary: #2c3e50;
+  --background-primary: #F8F1E5;
+  --background-secondary: #D6C5A0;
+  --shadow-right: 3px 3px 4px 2px rgba(0, 0, 0, 0.4);
+  --shadow-left: -3px 3px 4px 2px rgba(0, 0, 0, 0.4);
+}
+
+@layer base {
+
+  body {
+    background: var(--background-primary);
+    color: var(--primary);
+    font-family: "Poppins", sans-serif;
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: "Inter", sans-serif;
+    }
+
+  }
+  
+  header, footer {
+    background-color: var(--yellow);
+
+    .connect {
+      border: var(--primary) solid 1px;
+      border-radius: 10%;
+    }
+  }
+
+  h1 {
+    @apply mt-4 mb-6;
+    font-size: var(--text-4xl);
+    font-weight: bold;
+
+  }
+
+  h2 {
+    font-size: var(--text-3xl);
+  }
+
+  hr {
+    margin: 20px 0 50px;
+  }
+
+  input[type="submit"]{
+    @apply bg-yellow hover:bg-yellow/50 p-3 rounded-2xl m-auto block cursor-pointer;
+  }
+
+  /* Icone calendrier input date en noir */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: none; /* clair par défaut */
+  }
+
+  input[type="checkbox"]:not(:checked){
+
+    &::before{
+      color: var(--primary);
+    }
+  }
+
+  input[type="checkbox"]:checked{
+     &::before{
+      color:var(--primary);
+     }
+  }
+
+  .dark input[type="date"]::-webkit-calendar-picker-indicator  {
+    filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%);
+  }
+}
+
+@layer utilities {
+
+  .section-bg-secondary {
+    background-color: var(--background-secondary);
+  }
+
+  .text-blue-primary{
+    color: var(--primary);
+  }
+
+  .border-blue-primary{
+    @apply border-2 p-4 rounded-3xl border-(--primary);
+  }
+
+  .margin-section {
+
+    @apply px-8 py-20;
+
+    a {
+      padding: 10px;
+      border-radius: 10px;
+    }
+  }
+
+  .logo{
+    @apply h-12 sm:h-14 lg:h-20 xl:h-24 w-auto;
+  }
+
+  .blue-button:hover{
+    background-color: var(--primary);
+  }
+
+  .responsive-menu-items{
+    @apply hover:underline decoration-(--primary) underline-offset-4;
+  }
+
+}
+
+@theme {
+  --shadow-right: var(--shadow-right);
+  --shadow-left: var(--shadow-left);
+  --color-yellow-hover: var(--yellow-hover);
+  --color-yellow: var(--yellow);
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("assets/fonts/Inter-VariableFont_opsz,wght.ttf") format("ttf");
+
+  font-family: "Poppins";
+  src: url("assets/fonts/Poppins-Regular.ttf") format("ttf");
+}
