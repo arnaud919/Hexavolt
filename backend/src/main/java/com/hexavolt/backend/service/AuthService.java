@@ -1,8 +1,17 @@
 package com.hexavolt.backend.service;
 
+import com.hexavolt.backend.dto.LoginRequest;
 import com.hexavolt.backend.dto.RegisterRequest;
 import com.hexavolt.backend.dto.UserResponse;
 
 public interface AuthService {
-  UserResponse register(RegisterRequest request);
+  void register(RegisterRequest request);
+
+  void verifyEmail(String token);
+
+  String login(LoginRequest request); // retourne le JWT
+
+  void requestPasswordReset(String email);
+
+  void resetPassword(String token, String newPassword);
 }

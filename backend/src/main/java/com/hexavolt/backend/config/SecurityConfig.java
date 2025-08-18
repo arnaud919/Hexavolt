@@ -11,13 +11,15 @@ public class SecurityConfig {
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
-      .csrf(csrf -> csrf.disable()) // API stateless
-      .authorizeHttpRequests(auth -> auth
-        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
-        .anyRequest().permitAll() // à durcir plus tard
-      )
-      .httpBasic(httpBasic -> {}) // pas de formulaire HTML
-      .formLogin(form -> form.disable());
+        .csrf(csrf -> csrf.disable()) // API stateless
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/auth/verify").permitAll()
+            .anyRequest().permitAll() // à durcir plus tard
+        )
+        .httpBasic(httpBasic -> {
+        }) // pas de formulaire HTML
+        .formLogin(form -> form.disable());
     return http.build();
   }
 }
