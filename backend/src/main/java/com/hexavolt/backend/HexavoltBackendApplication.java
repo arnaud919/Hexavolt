@@ -9,5 +9,4 @@ public class HexavoltBackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(HexavoltBackendApplication.class, args);
 	}
-
 }

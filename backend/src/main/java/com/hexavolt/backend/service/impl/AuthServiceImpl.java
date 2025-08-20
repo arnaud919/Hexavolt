@@ -1,156 +1,114 @@
+// src/main/java/com/hexavolt/backend/service/impl/AuthServiceImpl.java
 package com.hexavolt.backend.service.impl;
 
 import com.hexavolt.backend.dto.LoginRequest;
 import com.hexavolt.backend.dto.RegisterRequest;
 import com.hexavolt.backend.entity.User;
-import com.hexavolt.backend.entity.UserToken;
+import com.hexavolt.backend.mapper.UserMapper;
 import com.hexavolt.backend.repository.CityRepository;
 import com.hexavolt.backend.repository.UserRepository;
-import com.hexavolt.backend.repository.UserTokenRepository;
 import com.hexavolt.backend.service.AuthService;
 import com.hexavolt.backend.service.JwtService;
-
+import com.hexavolt.backend.service.MailService;
+import com.hexavolt.backend.service.UserTokenService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.time.Duration;
 
 @Service
+@Transactional
 public class AuthServiceImpl implements AuthService {
 
-  private final UserRepository userRepo;
-  private final CityRepository cityRepo;
-  private final UserTokenRepository tokenRepo;
-  private final JwtService jwtService;
-  private final PasswordEncoder encoder;
+    private final UserRepository userRepo;
+    private final CityRepository cityRepo;
+    private final PasswordEncoder encoder;
+    private final UserMapper userMapper;
+    private final JwtService jwtService;
+    private final UserTokenService tokenService;
+    private final MailService mailService;
 
-  public AuthServiceImpl(UserRepository userRepo,
-      CityRepository cityRepo,
-      UserTokenRepository tokenRepo,
-      JwtService jwtService,
-      PasswordEncoder encoder) {
-    this.userRepo = userRepo;
-    this.cityRepo = cityRepo;
-    this.tokenRepo = tokenRepo;
-    this.jwtService = jwtService;
-    this.encoder = encoder;
-  }
+    private final String baseUrl = "http://localhost:8080"; // ⚠️ à externaliser plus tard
 
-  @Override
-  @Transactional
-  public void register(RegisterRequest request) {
-
-    if (userRepo.findByEmail(request.email()).isPresent()) {
-      throw new IllegalArgumentException("Email already in use");
+    public AuthServiceImpl(UserRepository userRepo,
+                           CityRepository cityRepo,
+                           PasswordEncoder encoder,
+                           UserMapper userMapper,
+                           JwtService jwtService,
+                           UserTokenService tokenService,
+                           MailService mailService) {
+        this.userRepo = userRepo;
+        this.cityRepo = cityRepo;
+        this.encoder = encoder;
+        this.userMapper = userMapper;
+        this.jwtService = jwtService;
+        this.tokenService = tokenService;
+        this.mailService = mailService;
     }
 
-    var city = cityRepo.findById(request.cityId())
-        .orElseThrow(() -> new IllegalArgumentException("City not found"));
+    @Override
+    public void register(RegisterRequest req) {
+        var emailNorm = req.email().trim().toLowerCase();
+        if (userRepo.existsByEmail(emailNorm)) {
+            throw new IllegalArgumentException("Email already registered");
+        }
 
-    User user = new User();
-    user.setFirstName(request.firstName());
-    user.setLastName(request.lastName());
-    user.setAddress(request.address());
-    user.setPostalCode(request.postalCode());
-    user.setPhone(request.phone());
-    user.setBirthdate(request.birthdate());
+        var city = cityRepo.findById(req.cityId())
+                .orElseThrow(() -> new IllegalArgumentException("City not found"));
 
-    // ⚠️ city à mapper via CityRepository si besoin
-    user.setCity(city);
+        var encodedPwd = encoder.encode(req.password());
+        var user = userMapper.toEntity(req, city, encodedPwd);
+        userRepo.save(user);
 
-    user.setEmail(request.email());
-    user.setPassword(encoder.encode(request.password()));
-    user.setEmailIsValid(false);
+        // Génération du token d’activation
+        var tk = tokenService.createActivationToken(user, Duration.ofHours(24));
 
-    userRepo.save(user);
+        // Construction du lien d’activation
+        var link = baseUrl + "/api/auth/verify?token=" + tk.getToken();
 
-    // Génération du token d’activation
-    UserToken token = new UserToken();
-    token.setToken(UUID.randomUUID().toString());
-    token.setUser(user);
-    token.setType(UserToken.TokenType.ACTIVATION);
-    token.setExpiresAt(LocalDateTime.now().plusHours(24));
-    tokenRepo.save(token);
-
-    // TODO : envoyer email avec lien http://.../api/auth/verify?token=...
-  }
-
-  @Override
-  @Transactional
-  public void verifyEmail(String tokenValue) {
-    UserToken token = tokenRepo.findByToken(tokenValue)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
-
-    if (token.getType() != UserToken.TokenType.ACTIVATION) {
-      throw new IllegalArgumentException("Invalid token type");
-    }
-    if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
-      throw new IllegalArgumentException("Token expired");
-    }
-    if (token.getUsedAt() != null) {
-      throw new IllegalArgumentException("Token already used");
+        // Envoi du mail
+        mailService.send(
+                user.getEmail(),
+                "Vérifiez votre e-mail",
+                "Bonjour " + user.getFirstName() + ",\n\nCliquez sur ce lien pour activer votre compte :\n" + link
+        );
     }
 
-    User user = token.getUser();
-    user.setEmailIsValid(true);
-    token.setUsedAt(LocalDateTime.now());
-
-    userRepo.save(user);
-    tokenRepo.save(token);
-  }
-
-  @Override
-  public String login(LoginRequest request) {
-    var email = request.email().trim().toLowerCase();
-    var user = userRepo.findByEmail(email)
-        .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
-    if (!Boolean.TRUE.equals(user.getEmailIsValid()))
-      throw new BadCredentialsException("Email not verified");
-    if (!encoder.matches(request.password(), user.getPassword()))
-      throw new BadCredentialsException("Invalid credentials");
-    return jwtService.generateToken(user);
-  }
-
-  @Override
-  @Transactional
-  public void requestPasswordReset(String email) {
-    User user = userRepo.findByEmail(email)
-        .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-    UserToken token = new UserToken();
-    token.setToken(UUID.randomUUID().toString());
-    token.setUser(user);
-    token.setType(UserToken.TokenType.RESET_PASSWORD);
-    token.setExpiresAt(LocalDateTime.now().plusHours(2));
-    tokenRepo.save(token);
-
-    // TODO : envoyer email avec lien http://.../api/auth/reset?token=...
-  }
-
-  @Override
-  @Transactional
-  public void resetPassword(String tokenValue, String newPassword) {
-    UserToken token = tokenRepo.findByToken(tokenValue)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
-
-    if (token.getType() != UserToken.TokenType.RESET_PASSWORD) {
-      throw new IllegalArgumentException("Invalid token type");
-    }
-    if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
-      throw new IllegalArgumentException("Token expired");
-    }
-    if (token.getUsedAt() != null) {
-      throw new IllegalArgumentException("Token already used");
+    @Override
+    public void verifyEmail(String token) {
+        var t = tokenService.consumeActivationToken(token);
+        var u = t.getUser();
+        u.setEmailIsValid(true);
+        userRepo.save(u);
     }
 
-    User user = token.getUser();
-    user.setPassword(encoder.encode(newPassword));
-    token.setUsedAt(LocalDateTime.now());
+    @Override
+    public String login(LoginRequest req) {
+        var email = req.email().trim().toLowerCase();
+        var user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
 
-    userRepo.save(user);
-    tokenRepo.save(token);
-  }
+        if (!Boolean.TRUE.equals(user.getEmailIsValid())) {
+            throw new BadCredentialsException("Email not verified");
+        }
+        if (!encoder.matches(req.password(), user.getPassword())) {
+            throw new BadCredentialsException("Invalid credentials");
+        }
+
+        return jwtService.generateToken(user);
+    }
+
+    @Override
+    public void requestPasswordReset(String email) {
+      // TODO Auto-generated method stub
+      throw new UnsupportedOperationException("Unimplemented method 'requestPasswordReset'");
+    }
+
+    @Override
+    public void resetPassword(String token, String newPassword) {
+      // TODO Auto-generated method stub
+      throw new UnsupportedOperationException("Unimplemented method 'resetPassword'");
+    }
 }
