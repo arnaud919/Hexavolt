@@ -2,5 +2,5 @@
 package com.hexavolt.backend.service;
 
 public interface MailService {
-    void send(String to, String subject, String text);
+    void sendHtml(String to, String subject, String html);
 }
