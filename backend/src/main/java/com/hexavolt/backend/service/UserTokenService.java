@@ -7,7 +7,11 @@ import com.hexavolt.backend.entity.UserToken;
 
 public interface UserTokenService {
   UserToken createActivationToken(User user, Duration ttl);
-  UserToken createResetToken(User user, Duration ttl);
-  UserToken consumeActivationToken(String token);
-  UserToken consumeResetToken(String token);
+  UserToken createResetPasswordToken(User user, Duration ttl);
+
+  UserToken validateActivationToken(String rawToken);
+  UserToken validateResetPasswordToken(String rawToken);
+
+  void consume(UserToken token);
+  void invalidateAllResetTokens(Integer userId);
 }

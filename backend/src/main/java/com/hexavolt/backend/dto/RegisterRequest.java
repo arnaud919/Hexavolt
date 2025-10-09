@@ -3,6 +3,8 @@ package com.hexavolt.backend.dto;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
+import com.hexavolt.backend.validation.StrongPassword;
+
 public record RegisterRequest(
 
     @NotBlank(message = "Le prénom est obligatoire")
@@ -36,7 +38,7 @@ public record RegisterRequest(
     String email,
 
     @NotBlank(message = "Le mot de passe est obligatoire")
-    @Size(min = 8, message = "Le mot de passe doit contenir au moins 8 caractères")
+    @StrongPassword
     String password
 ) {}
 

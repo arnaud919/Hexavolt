@@ -2,6 +2,7 @@ package com.hexavolt.backend.controller;
 
 import com.hexavolt.backend.dto.LoginRequest;
 import com.hexavolt.backend.dto.RegisterRequest;
+import com.hexavolt.backend.dto.ResetPasswordRequest;
 import com.hexavolt.backend.service.AuthService;
 
 import jakarta.validation.Valid;

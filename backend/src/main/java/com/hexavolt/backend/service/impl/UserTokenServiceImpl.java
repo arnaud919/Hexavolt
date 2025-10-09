@@ -3,12 +3,17 @@ package com.hexavolt.backend.service.impl;
 
 import com.hexavolt.backend.entity.User;
 import com.hexavolt.backend.entity.UserToken;
+import com.hexavolt.backend.entity.UserToken.TokenType;
 import com.hexavolt.backend.repository.UserTokenRepository;
 import com.hexavolt.backend.service.TimeService;
 import com.hexavolt.backend.service.UserTokenService;
+
+import org.springframework.transaction.annotation.Transactional;
+
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -28,7 +33,7 @@ public class UserTokenServiceImpl implements UserTokenService {
     }
 
     @Override
-    public UserToken createResetToken(User user, Duration ttl) {
+    public UserToken createResetPasswordToken(User user, Duration ttl) {
         return create(user, UserToken.TokenType.RESET_PASSWORD, ttl);
     }
 
@@ -43,28 +48,42 @@ public class UserTokenServiceImpl implements UserTokenService {
     }
 
     @Override
-    public UserToken consumeActivationToken(String token) {
-        return consume(token, UserToken.TokenType.ACTIVATION);
+    @Transactional(readOnly = true)
+    public UserToken validateActivationToken(String rawToken) {
+        return validate(rawToken, TokenType.ACTIVATION);
     }
 
     @Override
-    public UserToken consumeResetToken(String token) {
-        return consume(token, UserToken.TokenType.RESET_PASSWORD);
+    @Transactional(readOnly = true)
+    public UserToken validateResetPasswordToken(String rawToken) {
+        return validate(rawToken, TokenType.RESET_PASSWORD);
     }
 
-    private UserToken consume(String token, UserToken.TokenType expected) {
-        var t = repo.findByToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
-        if (t.getType() != expected) {
-            throw new IllegalArgumentException("Invalid token type");
+    private UserToken validate(String rawToken, TokenType expectedType) {
+        UserToken tk = repo.findByToken(rawToken)
+                .orElseThrow(() -> new IllegalArgumentException("Jeton invalide."));
+        if (tk.getType() != expectedType) {
+            throw new IllegalArgumentException("Type de jeton invalide.");
         }
-        if (t.getUsedAt() != null) {
-            throw new IllegalArgumentException("Token already used");
+        if (tk.getUsedAt() != null) {
+            throw new IllegalArgumentException("Le jeton a déjà été utilisé.");
         }
-        if (t.getExpiresAt().isBefore(time.now())) {
-            throw new IllegalArgumentException("Token expired");
+        if (tk.getExpiresAt() == null || LocalDateTime.now().isAfter(tk.getExpiresAt())) {
+            throw new IllegalArgumentException("Le jeton a expiré.");
         }
-        t.setUsedAt(time.now());
-        return repo.save(t);
+        return tk;
+    }
+
+        @Override
+    @Transactional
+    public void consume(UserToken token) {
+        token.setUsedAt(LocalDateTime.now());
+        repo.save(token);
+    }
+
+    @Override
+    @Transactional
+    public void invalidateAllResetTokens(Integer userId) {
+        repo.deleteByUser_IdAndType(userId, TokenType.RESET_PASSWORD);
     }
 }
