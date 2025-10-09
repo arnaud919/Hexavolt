@@ -129,47 +129,44 @@ l-14 -59 47 44 c189 180 345 322 340 309 -17 -43 -192 -465 -277 -670 -55
       </div>
     </div>
 
-    <!-- MENU BURGER CENTRÉ MOBILE -->
-    <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 md:hidden z-50">
-      <!-- Input invisible pour toggle -->
-      <input type="checkbox" #menuToggle id="menu-toggle" class="peer hidden" />
+    <!-- MENU BURGER MOBILE CENTRÉ -->
+    <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 md:hidden z-50" #menuContainer>
 
-      <!-- Bouton menu -->
+      <!-- Input toggle caché -->
+      <input type="checkbox" id="menu-toggle" #menuToggle class="peer hidden" />
+
+      <!-- Label pour ouvrir/fermer le menu -->
       <label for="menu-toggle" class="btn btn-ghost btn-square blue-button swap swap-rotate">
-        <!-- Burger -->
+        <!-- Icône burger -->
         <svg class="swap-off fill-current h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round" />
         </svg>
-        <!-- Croix -->
+
+        <!-- Icône croix -->
         <svg class="swap-on fill-current h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round" />
         </svg>
       </label>
 
-      <ul #menuContent (click)="$event.stopPropagation()" class="absolute mt-3 px-4 py-4 shadow bg-white rounded-box w-[90vw] min-w-[200px] left-1/2 -translate-x-1/2
-         divide-y divide-gray-300
-         hidden opacity-0 scale-95 translate-y-2 transition-all duration-300 ease-out
-         peer-checked:block peer-checked:opacity-100 peer-checked:scale-100 peer-checked:translate-y-0">
-
+      <!-- Menu déroulant -->
+      <ul class="absolute mt-3 px-4 py-4 shadow bg-white rounded-box w-[90vw]
+           left-1/2 -translate-x-1/2
+           divide-y divide-gray-300
+           hidden peer-checked:block">
         <li>
-          <a class="responsive-menu-items py-2 block text-center break-words" routerLink="/reserver_une_borner"
-            (click)="menuToggle.checked = false">
+          <a class="py-2 block text-center" routerLink="/reserver_une_borner" (click)="menuToggle.checked = false">
             Réserver une borne
           </a>
         </li>
-
         <li>
-          <a class="responsive-menu-items py-2 block text-center break-words" routerLink="/louer_une_borne"
-            (click)="menuToggle.checked = false">
+          <a class="py-2 block text-center" routerLink="/louer_une_borne" (click)="menuToggle.checked = false">
             Louer ma borne
           </a>
         </li>
       </ul>
     </div>
-
-
 
     <!-- ICÔNE UTILISATEUR POUR MOBILE -->
     <div class="block md:hidden p-2">

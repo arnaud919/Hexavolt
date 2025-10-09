@@ -10,25 +10,31 @@ import { RouterLink } from '@angular/router';
 export class HeaderComponent {
 
   @ViewChild('menuToggle') menuToggle!: ElementRef<HTMLInputElement>;
-  @ViewChild('menuContent') menuContent!: ElementRef;
+  @ViewChild('menuContainer') menuContainer!: ElementRef;
 
-  // Ferme le menu quand on clique ailleurs
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
+  ngAfterViewInit(): void {
+    document.addEventListener('click', this.handleClickOutside);
+  }
+
+  ngOnDestroy(): void {
+    document.removeEventListener('click', this.handleClickOutside);
+  }
+
+  handleClickOutside = (event: MouseEvent): void => {
+    const toggle = this.menuToggle?.nativeElement;
+    const container = this.menuContainer?.nativeElement;
+
     if (
-      this.menuToggle &&
-      this.menuContent &&
-      !this.menuToggle.nativeElement.contains(event.target as Node) &&
-      !this.menuContent.nativeElement.contains(event.target as Node)
+      toggle?.checked &&
+      container &&
+      !container.contains(event.target as Node)
     ) {
-      this.menuToggle.nativeElement.checked = false;
+      toggle.checked = false;
     }
+  };
+
+  toggleMenu(menuToggle: HTMLInputElement) {
+    menuToggle.checked = !menuToggle.checked;
   }
 
-  // Ferme le menu manuellement (quand on clique sur un lien)
-  closeMenu() {
-    if (this.menuToggle) {
-      this.menuToggle.nativeElement.checked = false;
-    }
-  }
 }
