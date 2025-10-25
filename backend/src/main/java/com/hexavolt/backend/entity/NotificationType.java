@@ -18,7 +18,7 @@ public class NotificationType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(length = 20, nullable = false)
+    @Column(length = 64, nullable = false)
     private String label;
 
     // --- Constructors ---

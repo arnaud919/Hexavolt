@@ -1,0 +1,10 @@
+-- flyway:executeInTransaction=false
+
+LOAD DATA LOCAL INFILE '${csvPath}'
+INTO TABLE city
+CHARACTER SET utf8mb4
+FIELDS TERMINATED BY ',' ENCLOSED BY '"' ESCAPED BY '\\'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(@name)
+SET name = TRIM(TRAILING '\r' FROM @name);

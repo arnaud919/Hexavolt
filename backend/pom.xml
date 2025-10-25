@@ -3,92 +3,277 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
+  <parent>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-parent</artifactId>
+      <version>3.5.0</version>
+      <relativePath/>
+  </parent>
+
+  <groupId>com.hexavolt</groupId>
+  <artifactId>hexavolt-backend</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>hexavolt-backend</name>
+  <description>Hexavolt Project</description>
+
+  <properties>
+      <java.version>17</java.version>
+  </properties>
+
+  <dependencies>
+
+      <!-- Mail -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-mail</artifactId>
+      </dependency>
+      <!-- Web MVC & Multipart -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-web</artifactId>
+      </dependency>
+
+      <!-- JPA / Hibernate -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-data-jpa</artifactId>
+      </dependency>
+
+      <!-- MySQL driver -->
+      <dependency>
+          <groupId>com.mysql</groupId>
+          <artifactId>mysql-connector-j</artifactId>
+          <version>9.0.0</version>
+          <scope>runtime</scope>
+      </dependency>
+
+      <!-- Validation (Bean Validation - javax + hibernate-validator) -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-validation</artifactId>
+      </dependency>
+
+      <!-- Spring Security (optionnel mais recommandé) -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-security</artifactId>
+      </dependency>
+
+      <!-- JWT pour authentification sécurisée -->
+      <dependency>
+          <groupId>com.auth0</groupId>
+          <artifactId>java-jwt</artifactId>
+          <version>4.4.0</version>
+      </dependency>
+
+      <!-- SpringDoc OpenAPI / Swagger UI -->
+      <dependency>
+          <groupId>org.springdoc</groupId>
+          <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+          <version>2.2.0</version>
+      </dependency>
+
+      <!-- Tests -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-test</artifactId>
+          <scope>test</scope>
+      </dependency>
+
+      <!-- Flyway Migrations -->
+      <dependency>
+          <groupId>org.flywaydb</groupId>
+          <artifactId>flyway-core</artifactId>
+          <version>11.14.0</version>
+      </dependency>
+      <dependency>
+          <groupId>org.flywaydb</groupId>
+          <artifactId>flyway-mysql</artifactId>
+          <version>11.14.0</version>
+        </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Spring Boot (inchangé) -->
+      <plugin>
         <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.0</version>
-        <relativePath/>
-    </parent>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
 
-    <groupId>com.hexavolt</groupId>
-    <artifactId>hexavolt-backend</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>hexavolt-backend</name>
-    <description>Hexavolt Project</description>
+    <!-- 👇 Ajout pour Eclipse/m2e : lifecycle mapping -->
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
 
-    <properties>
-        <java.version>17</java.version>
-    </properties>
+                <!-- Ignorer les exécutions Flyway côté m2e (info/migrate/repair) -->
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.flywaydb</groupId>
+                    <artifactId>flyway-maven-plugin</artifactId>
+                    <versionRange>[0,)</versionRange>
+                    <goals>
+                      <goal>info</goal>
+                      <goal>migrate</goal>
+                      <goal>repair</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore/>
+                  </action>
+                </pluginExecution>
 
-    <dependencies>
+                <!-- Exécuter la lecture du .env.maven côté m2e -->
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>properties-maven-plugin</artifactId>
+                    <versionRange>[0,)</versionRange>
+                    <goals>
+                      <goal>read-project-properties</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute/>
+                  </action>
+                </pluginExecution>
 
-        <!-- Mail -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
-        </dependency>
-        <!-- Web MVC & Multipart -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
-        <!-- JPA / Hibernate -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
-        <!-- MySQL driver -->
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <!-- Validation (Bean Validation - javax + hibernate-validator) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-
-        <!-- Spring Security (optionnel mais recommandé) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-
-        <!-- JWT pour authentification sécurisée -->
-        <dependency>
-            <groupId>com.auth0</groupId>
-            <artifactId>java-jwt</artifactId>
-            <version>4.4.0</version>
-        </dependency>
-
-        <!-- SpringDoc OpenAPI / Swagger UI -->
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.2.0</version>
-        </dependency>
-
-        <!-- Tests -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
+  <profiles>
+    <!-- DEV local : lit .env.maven -->
+  <profile>
+    <id>dev-dotenv</id>
+    <activation>
+      <file><exists>${project.basedir}/.env.maven</exists></file>
+    </activation>
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+      <plugins>
+        <!-- Lire .env.maven tôt dans le cycle -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>properties-maven-plugin</artifactId>
+          <version>1.2.1</version>
+          <executions>
+            <execution>
+              <id>load-env</id>
+              <phase>validate</phase>
+              <goals><goal>read-project-properties</goal></goals>
+              <configuration>
+                <encoding>UTF-8</encoding>
+                <files><file>${project.basedir}/.env.maven</file></files>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
 
+        <!-- Flyway lit les props déjà chargées -->
+        <plugin>
+          <groupId>org.flywaydb</groupId>
+          <artifactId>flyway-maven-plugin</artifactId>
+          <version>11.14.0</version>
+          <configuration>
+            <url>
+              jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC&amp;characterEncoding=utf8&amp;allowLoadLocalInfile=true&amp;allowUrlInLocalInfile=true
+            </url>
+            <user>${DB_USER}</user>
+            <password>${DB_PASSWORD}</password>
+            <locations>
+              <location>classpath:db/migration</location>
+            </locations>
+            <placeholders>
+              <csvPath>src/main/resources/data/cities_fr.csv</csvPath>
+            </placeholders>
+          </configuration>
+
+          <dependencies>
+            <dependency>
+              <groupId>com.mysql</groupId>
+              <artifactId>mysql-connector-j</artifactId>
+              <version>9.0.0</version>
+            </dependency>
+          </dependencies>
+
+          <executions>
+            <!-- 🧾 Afficher les infos Flyway quand tu fais 'mvn validate' -->
+            <execution>
+              <id>flyway-info-at-validate</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>info</goal>
+              </goals>
+            </execution>
+
+            <!-- 🚀 Migrer automatiquement quand tu fais 'mvn verify' -->
+            <execution>
+              <id>flyway-migrate-at-verify</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>migrate</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+
+
+    <!-- CI/Prod : lit les *variables d'environnement* du runner -->
+    <profile>
+      <id>env</id>
+      <activation>
+        <file>
+          <missing>${project.basedir}/.env.maven</missing>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-maven-plugin</artifactId>
+            <version>11.14.0</version>
+            <configuration>
+              <locations>
+                <location>classpath:db/migration</location>
+              </locations>
+              <placeholders>
+                <csvPath>src/main/resources/data/cities_fr.csv</csvPath>
+              </placeholders>
+
+              <!-- Ici on lit les ENV du système/runner -->
+              <url><![CDATA[
+                jdbc:mysql://${env.DB_HOST}:${env.DB_PORT}/${env.DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=utf8&allowLoadLocalInfile=true&allowUrlInLocalInfile=true
+              ]]></url>
+              <user>${env.DB_USER}</user>
+              <password>${env.DB_PASSWORD}</password>
+            </configuration>
+            <dependencies>
+              <dependency>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>9.0.0</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
