@@ -7,6 +7,8 @@ import { SigninComponent } from './signin/signin.component';
 import { LegalNoticeComponent } from './legal-notice/legal-notice.component';
 import { PrivacyPolicyComponent } from './privacy-policy/privacy-policy.component';
 import { ContactComponent } from './contact/contact.component';
+import { ProfilComponent } from './profil/profil.component';
+import { ModifyProfilComponent } from './modify-profil/modify-profil.component';
 
 export const routes: Routes = [
     { path: '', component: IndexComponent },
@@ -17,4 +19,6 @@ export const routes: Routes = [
     { path: 'mentions_legales', component: LegalNoticeComponent},
     { path: 'politique_de_confidentialite', component: PrivacyPolicyComponent},
     { path: 'contact', component: ContactComponent},
+    { path: 'profil', component: ProfilComponent},
+    { path: 'modify-profil', component: ModifyProfilComponent}
 ];

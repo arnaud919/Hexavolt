@@ -6,7 +6,6 @@ target/
 
 # Secrets locaux
 .env.properties
-.env
 .env.local
 .env.maven
 *.secrets

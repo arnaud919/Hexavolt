@@ -106,7 +106,7 @@
     </plugins>
 
     <!-- 👇 Ajout pour Eclipse/m2e : lifecycle mapping -->
-    <pluginManagement>
+     <pluginManagement>
       <plugins>
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
@@ -116,7 +116,7 @@
             <lifecycleMappingMetadata>
               <pluginExecutions>
 
-                <!-- Ignorer les exécutions Flyway côté m2e (info/migrate/repair) -->
+                <!-- Ignorer Flyway côté m2e -->
                 <pluginExecution>
                   <pluginExecutionFilter>
                     <groupId>org.flywaydb</groupId>
@@ -128,12 +128,10 @@
                       <goal>repair</goal>
                     </goals>
                   </pluginExecutionFilter>
-                  <action>
-                    <ignore/>
-                  </action>
+                  <action><ignore/></action>
                 </pluginExecution>
 
-                <!-- Exécuter la lecture du .env.maven côté m2e -->
+                <!-- Exécuter la lecture du .env.properties côté m2e -->
                 <pluginExecution>
                   <pluginExecutionFilter>
                     <groupId>org.codehaus.mojo</groupId>
@@ -143,9 +141,7 @@
                       <goal>read-project-properties</goal>
                     </goals>
                   </pluginExecutionFilter>
-                  <action>
-                    <execute/>
-                  </action>
+                  <action><execute/></action>
                 </pluginExecution>
 
               </pluginExecutions>
@@ -154,10 +150,11 @@
         </plugin>
       </plugins>
     </pluginManagement>
+
   </build>
 
   <profiles>
-    <!-- DEV local : lit .env.maven -->
+    <!-- DEV local : lit .env.properties -->
   <profile>
     <id>dev-dotenv</id>
     <activation>
@@ -165,7 +162,8 @@
     </activation>
     <build>
       <plugins>
-        <!-- Lire .env.maven tôt dans le cycle -->
+
+        <!-- Lire .env.properties tôt dans le cycle -->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>properties-maven-plugin</artifactId>
@@ -173,11 +171,14 @@
           <executions>
             <execution>
               <id>load-env</id>
-              <phase>validate</phase>
+              <phase>initialize</phase>
               <goals><goal>read-project-properties</goal></goals>
               <configuration>
                 <encoding>UTF-8</encoding>
-                <files><file>${project.basedir}/.env.maven</file></files>
+                    <files>
+                      <file>${project.basedir}/.env.properties</file>
+                    </files>
+                    <quiet>false</quiet>
               </configuration>
             </execution>
           </executions>
@@ -210,25 +211,6 @@
             </dependency>
           </dependencies>
 
-          <executions>
-            <!-- 🧾 Afficher les infos Flyway quand tu fais 'mvn validate' -->
-            <execution>
-              <id>flyway-info-at-validate</id>
-              <phase>validate</phase>
-              <goals>
-                <goal>info</goal>
-              </goals>
-            </execution>
-
-            <!-- 🚀 Migrer automatiquement quand tu fais 'mvn verify' -->
-            <execution>
-              <id>flyway-migrate-at-verify</id>
-              <phase>verify</phase>
-              <goals>
-                <goal>migrate</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
       </plugins>
     </build>
@@ -240,7 +222,7 @@
       <id>env</id>
       <activation>
         <file>
-          <missing>${project.basedir}/.env.maven</missing>
+          <missing>${project.basedir}/.env.properties</missing>
         </file>
       </activation>
       <build>

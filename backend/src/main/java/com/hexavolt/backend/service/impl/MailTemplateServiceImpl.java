@@ -17,7 +17,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
               <body style="font-family:Arial,Helvetica,sans-serif">
                 <h2 style="margin-bottom:8px;">Bienvenue sur Hexavolt</h2>
                 <p>Bonjour %s,</p>
-                <p>Merci de vous être inscrit. Cliquez sur le bouton ci-dessous pour activer votre compte&nbsp;:</p>
+                <p>Merci de vous être inscrit(e). Cliquez sur le bouton ci-dessous pour activer votre compte&nbsp;:</p>
                 <p style="margin:20px 0">
                   <a href="%s" style="display:inline-block;padding:10px 16px;
                      color:#2C3E50;background:#F4C542;text-decoration:none;border-radius:6px">

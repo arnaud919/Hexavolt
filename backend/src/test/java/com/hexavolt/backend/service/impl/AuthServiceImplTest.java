@@ -3,7 +3,6 @@ package com.hexavolt.backend.service.impl;
 import com.hexavolt.backend.entity.User;
 import com.hexavolt.backend.entity.UserToken;
 import com.hexavolt.backend.repository.UserRepository;
-import com.hexavolt.backend.security.PasswordPolicy;
 import com.hexavolt.backend.service.MailService;
 import com.hexavolt.backend.service.MailTemplateService;
 import com.hexavolt.backend.service.UserTokenService;
