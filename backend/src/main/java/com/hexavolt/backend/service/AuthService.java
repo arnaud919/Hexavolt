@@ -9,6 +9,8 @@ public interface AuthService {
 
   void verifyEmail(String token);
 
+  void resendVerificationEmail(String email);
+
   String login(LoginRequest request); // retourne le JWT
 
   void requestPasswordReset(String email);

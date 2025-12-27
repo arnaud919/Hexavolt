@@ -2,6 +2,7 @@ package com.hexavolt.backend.controller;
 
 import com.hexavolt.backend.dto.LoginRequest;
 import com.hexavolt.backend.dto.RegisterRequest;
+import com.hexavolt.backend.dto.ResendActivationRequest;
 import com.hexavolt.backend.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -31,6 +32,12 @@ public class AuthController {
     public ResponseEntity<Void> verify(@RequestParam("token") String token) {
         authService.verifyEmail(token);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/verify/resend")
+    public ResponseEntity<Void> resendVerification(@Valid @RequestBody ResendActivationRequest req) {
+        authService.resendVerificationEmail(req.email());
+        return ResponseEntity.noContent().build(); // ou ok(), mais 204 est cohérent avec verify()
     }
 
     @PostMapping("/login")

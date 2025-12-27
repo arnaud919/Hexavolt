@@ -4,7 +4,6 @@ package com.hexavolt.backend.service.impl;
 import com.hexavolt.backend.dto.LoginRequest;
 import com.hexavolt.backend.dto.RegisterRequest;
 import com.hexavolt.backend.dto.ResetPasswordConfirm;
-import com.hexavolt.backend.dto.ResetPasswordRequest;
 import com.hexavolt.backend.entity.User;
 import com.hexavolt.backend.entity.UserToken;
 import com.hexavolt.backend.mapper.UserMapper;
@@ -120,13 +119,40 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
+    public void resendVerificationEmail(String email) {
+
+        var emailNorm = email.trim().toLowerCase();
+
+        userRepo.findByEmail(emailNorm).ifPresent(user -> {
+
+            if (Boolean.TRUE.equals(user.getEmailIsValid())) {
+                return;
+            }
+
+            // Anti-spam : 1 renvoi toutes les 2 minutes (exemple)
+            if (!tokenService.canResendActivation(user, Duration.ofMinutes(2))) {
+                return;
+            }
+
+            var tk = tokenService.createActivationToken(user, Duration.ofHours(24));
+            var link = baseUrl + "/api/auth/verify?token=" + tk.getToken();
+
+            String html = mailTemplates.activationEmail(user, link);
+            mailService.sendHtml(user.getEmail(), "Activation de votre compte Hexavolt", html);
+        });
+
+        // Réponse neutre côté controller, quoi qu’il arrive
+    }
+
+    @Override
     public String login(LoginRequest req) {
         var email = req.email().trim().toLowerCase();
         var user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
 
         if (!Boolean.TRUE.equals(user.getEmailIsValid())) {
-            throw new BadCredentialsException("Email not verified");
+            throw new BadCredentialsException("Invalid credentials");
         }
         if (!encoder.matches(req.password(), user.getPassword())) {
             throw new BadCredentialsException("Invalid credentials");

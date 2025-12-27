@@ -27,8 +27,13 @@ public class UserToken {
     @Column(nullable = false, length = 30)
     private TokenType type;
 
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @PrePersist
+    private void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 
     @Column(nullable = false)
     private LocalDateTime expiresAt;
@@ -91,4 +96,3 @@ public class UserToken {
         this.usedAt = usedAt;
     }
 }
-

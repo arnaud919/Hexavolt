@@ -12,6 +12,8 @@ public interface UserTokenService {
   UserToken validateActivationToken(String rawToken);
   UserToken validateResetPasswordToken(String rawToken);
 
+  boolean canResendActivation(User user, Duration ttl);
+
   void consume(UserToken token);
   void invalidateAllResetTokens(Integer userId);
 }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -59,6 +60,14 @@ public class UserTokenServiceImpl implements UserTokenService {
         return validate(rawToken, TokenType.RESET_PASSWORD);
     }
 
+    @Override
+    public boolean canResendActivation(User user, Duration cooldown) {
+        LocalDateTime after = LocalDateTime.now().minus(cooldown);
+        boolean recentExists = repo.existsByUserAndTypeAndCreatedAtAfter(
+                user, UserToken.TokenType.ACTIVATION, after);
+        return !recentExists;
+    }
+
     private UserToken validate(String rawToken, TokenType expectedType) {
         UserToken tk = repo.findByToken(rawToken)
                 .orElseThrow(() -> new IllegalArgumentException("Jeton invalide."));
@@ -74,7 +83,7 @@ public class UserTokenServiceImpl implements UserTokenService {
         return tk;
     }
 
-        @Override
+    @Override
     @Transactional
     public void consume(UserToken token) {
         token.setUsedAt(LocalDateTime.now());
