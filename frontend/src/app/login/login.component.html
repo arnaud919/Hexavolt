@@ -3,7 +3,7 @@
   <a routerLink="/inscription" class="text-center underline">Déjà inscrit ? Rejoingnez-nous</a>
 </div>
 
-<form class="max-w-2xl mx-auto p-6 m-10 space-y-6 flex flex-col gap--">
+<form (ngSubmit)="onSubmit()" [formGroup]="loginForm" class="max-w-2xl mx-auto p-6 m-10 space-y-6 flex flex-col gap--">
   <!-- Email -->
   <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
     <label for="email" class="w-full md:w-40 text-gray-700">Email</label>

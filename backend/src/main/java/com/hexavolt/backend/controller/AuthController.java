@@ -3,6 +3,9 @@ package com.hexavolt.backend.controller;
 import com.hexavolt.backend.dto.LoginRequest;
 import com.hexavolt.backend.dto.RegisterRequest;
 import com.hexavolt.backend.dto.ResendActivationRequest;
+import com.hexavolt.backend.dto.UserMe;
+import com.hexavolt.backend.entity.User;
+import com.hexavolt.backend.repository.UserRepository;
 import com.hexavolt.backend.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -10,6 +13,7 @@ import jakarta.validation.Valid;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,9 +21,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserRepository userRepo;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserRepository userRepo) {
         this.authService = authService;
+        this.userRepo = userRepo;
     }
 
     @PostMapping("/register")
@@ -56,5 +62,12 @@ public class AuthController {
     public ResponseEntity<Void> resetPassword(@RequestParam String token, @RequestParam String password) {
         authService.resetPassword(token, password);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserMe> me(Authentication auth) {
+        String email = auth.getName(); // subject
+        User user = userRepo.findByEmail(email).orElseThrow();
+        return ResponseEntity.ok(new UserMe(user.getId(), user.getEmail()));
     }
 }
