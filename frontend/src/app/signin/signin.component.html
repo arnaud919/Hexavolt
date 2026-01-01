@@ -56,24 +56,36 @@
         class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
     </div>
 
-    <!-- Ville -->
-    <!-- Champ ville avec autocomplétion -->
-    <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16 autocomplete-wrapper relative">
-      <label for="cityQuery" class="w-full md:w-40 text-gray-700">Ville</label>
-      <input id="cityQuery" type="text" formControlName="cityQuery" (input)="onCityInputChange()" autocomplete="off"
-        class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
-      <ul *ngIf="showDropdown()"
-        class="absolute z-10 bg-white border border-gray-300 mt-1 w-full rounded shadow max-h-60 overflow-auto">
-        <li *ngFor="let city of suggestions()" (click)="selectCity(city)"
-          class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-          {{ city.name }}
-        </li>
-        <li *ngIf="suggestions().length === 0" class="px-4 py-2 text-gray-500 italic">
-          Aucun résultat
-        </li>
-      </ul>
-    </div>
+    <!-- Ville (champ de recherche avec suggestions) -->
+    <div class="flex flex-col md:flex-row md:items-start gap-2 md:gap-16 relative">
+      <label for="city" class="w-full md:w-40 text-gray-700 pt-2">Ville</label>
 
+      <!-- ⚠️ le conteneur entier doit être dans autocomplete-container -->
+      <div class="autocomplete-container w-full relative flex-1" #autocompleteContainer>
+
+        <input type="text" id="city" [formControl]="cityQuery" #cityInputRef placeholder="Commencez à taper..."
+          class="w-full px-4 py-2 border border-gray-400 rounded-full bg-white" (focus)="setCityFieldFocus(true)"
+          autocomplete="off" />
+
+        <!-- Dropdown -->
+        <div #dropdownRef>
+          <ul *ngIf="suggestions().length > 0 && cityFieldFocused()"
+            class="absolute left-0 right-0 z-10 border border-gray-300 rounded-lg bg-white shadow-md max-h-60 overflow-y-auto">
+            <li *ngFor="let city of suggestions()" (mousedown)="selectCity(city)"
+              class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+              {{ city.name }}
+            </li>
+          </ul>
+
+          <ng-container *ngIf="cityQuery.value as query">
+            <div *ngIf="query.length >= 2 && suggestions().length === 0 && cityFieldFocused()"
+              class="absolute left-0 right-0 z-10 border border-gray-300 rounded-lg bg-white shadow-md px-4 py-2 text-gray-600">
+              Aucun résultat
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
 
     <!-- Mot de passe -->
     <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">

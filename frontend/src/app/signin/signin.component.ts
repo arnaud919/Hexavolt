@@ -1,12 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { RouterLink, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { City } from '../models/city';
 import { CityService } from '../services/city';
 import { RegisterRequest } from '../models/register-request';
-import { catchError, debounceTime, distinctUntilChanged, filter, of, switchMap } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap } from 'rxjs';
+import { HostListener } from '@angular/core';
+
 
 @Component({
   selector: 'app-signin',
@@ -14,86 +16,99 @@ import { catchError, debounceTime, distinctUntilChanged, filter, of, switchMap }
   templateUrl: './signin.component.html',
   styleUrl: './signin.component.css'
 })
-export class SigninComponent {
-  readonly fb = inject(FormBuilder);
-  readonly authService = inject(AuthService);
-  readonly cityApi = inject(CityService);
 
-  readonly form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    firstName: ['', Validators.required],
-    lastName: ['', Validators.required],
-    address: ['', Validators.required],
-    postalCode: ['', Validators.required],
-    phone: ['', Validators.required],
-    birthdate: ['', Validators.required],
-    password: ['', Validators.required],
-    confirmPassword: ['', Validators.required],
-    cityQuery: new FormControl('', Validators.required)
-  });
+export class SigninComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly cityApi = inject(CityService);
 
-  readonly suggestions = signal<readonly City[]>([]);
-  readonly selectedCityId = signal<number | null>(null);
-  readonly showDropdown = signal(false);
+  // Formulaire
+  readonly form: FormGroup = this.fb.group(
+    {
+      email: ['', [Validators.required, Validators.email]],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      address: ['', Validators.required],
+      postalCode: ['', Validators.required],
+      phone: ['', Validators.required],
+      birthdate: ['', Validators.required],
+      password: ['', Validators.required],
+      confirmPassword: ['', Validators.required]
+    },
+    { validators: this.passwordsMatchValidator }
+  );
 
-  constructor() {
-    this.form.controls['cityQuery'].valueChanges.pipe(
+  // Champs d’autocomplétion
+  readonly cityQuery = new FormControl('');
+  readonly suggestions = signal<City[]>([]);
+  readonly cityFieldFocused = signal(false);
+  private selectedCityId: number | null = null;
+
+  ngOnInit(): void {
+
+    this.cityQuery.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      filter((query: string | null) => (query?.length ?? 0) >= 2),
-      switchMap(query => this.cityApi.searchCities(query!)),
-      catchError(() => of([]))
-    ).subscribe(cities => {
-      this.suggestions.set(cities);
-      this.showDropdown.set(true);
+      filter((q): q is string => typeof q === 'string' && q.length >= 2),
+      tap(() => this.selectedCityId = null),
+      switchMap(q => this.cityApi.searchCities(q).pipe(
+        catchError(() => of([]))
+      ))
+    ).subscribe(results => {
+      this.suggestions.set([...results]);
+      this.cityFieldFocused.set(true);
     });
   }
 
-  selectCity(city: City) {
-    this.form.controls['cityQuery'].setValue(city.name);
-    this.selectedCityId.set(city.id);
-    this.showDropdown.set(false);
+  setCityFieldFocus(value: boolean): void {
+    console.log('Dropdown visibility:', value);
+    this.cityFieldFocused.set(value);
   }
 
-  onCityInputChange() {
-    this.selectedCityId.set(null);
+  selectCity(city: City): void {
+    this.cityQuery.setValue(city.name);
+    this.selectedCityId = city.id;
+    setTimeout(() => this.setCityFieldFocus(false), 0);
   }
 
-  hideDropdownIfClickedOutside(event: MouseEvent) {
+  private passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
+    const password = group.get('password')?.value;
+    const confirm = group.get('confirmPassword')?.value;
+    return password === confirm ? null : { passwordMismatch: true };
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent): void {
+    console.log('Document clicked', event.target); // 👈 test ici
+
     const target = event.target as HTMLElement;
-    if (!target.closest('.autocomplete-wrapper')) {
-      this.showDropdown.set(false);
+    const clickedInside = target.closest('.autocomplete-container');
+
+    if (!clickedInside) {
+      this.setCityFieldFocus(false);
     }
   }
 
-  onSubmit() {
-    if (this.form.invalid || !this.selectedCityId()) return;
+  onSubmit(): void {
+    if (this.form.invalid || this.selectedCityId === null) return;
 
     const value = this.form.value;
 
-    const data = {
-      email: value.email ?? '',
-      firstName: value.firstName ?? '',
-      lastName: value.lastName ?? '',
-      address: value.address ?? '',
-      postalCode: value.postalCode ?? '',
-      phone: value.phone ?? '',
-      birthdate: value.birthdate ?? '',
-      password: value.password ?? '',
-      cityId: this.selectedCityId()!
+    const data: RegisterRequest = {
+      email: value.email,
+      firstName: value.firstName,
+      lastName: value.lastName,
+      address: value.address,
+      postalCode: value.postalCode,
+      phone: value.phone,
+      birthdate: value.birthdate,
+      password: value.password,
+      cityId: this.selectedCityId
     };
 
     this.authService.register(data).subscribe({
       next: () => console.log('Inscription réussie'),
-      error: err => console.error('Erreur inscription', err)
+      error: err => console.error('Erreur :', err)
     });
-  }
-
-  ngOnInit() {
-    document.addEventListener('click', this.hideDropdownIfClickedOutside.bind(this));
-  }
-
-  ngOnDestroy() {
-    document.removeEventListener('click', this.hideDropdownIfClickedOutside.bind(this));
   }
 }

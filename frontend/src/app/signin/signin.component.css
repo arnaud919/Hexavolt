@@ -1,0 +1,4 @@
+/* Empêche la fermeture instantanée lors du clic sur une suggestion */
+ul, li {
+  user-select: none;
+}
