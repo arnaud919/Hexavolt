@@ -39,6 +39,7 @@ public class AuthServiceImpl implements AuthService {
     private final MailTemplateService mailTemplates;
 
     String baseUrl;
+    String frontendUrl;
 
     public AuthServiceImpl(UserRepository userRepo,
             CityRepository cityRepo,
@@ -48,7 +49,8 @@ public class AuthServiceImpl implements AuthService {
             UserTokenService tokenService,
             MailService mailService,
             MailTemplateService mailTemplates,
-            @Value("${app.base-url}") String baseUrl) {
+            @Value("${app.base-url}") String baseUrl,
+            @Value("${app.frontend-url}") String frontendUrl) {
 
         this.userRepo = userRepo;
         this.cityRepo = cityRepo;
@@ -59,6 +61,7 @@ public class AuthServiceImpl implements AuthService {
         this.mailService = mailService;
         this.mailTemplates = mailTemplates;
         this.baseUrl = baseUrl;
+        this.frontendUrl = frontendUrl;
     }
 
     @Override
@@ -96,7 +99,7 @@ public class AuthServiceImpl implements AuthService {
         var tk = tokenService.createActivationToken(user, Duration.ofHours(24));
 
         // 7) Construction du lien d’activation
-        var link = baseUrl + "/api/auth/verify?token=" + tk.getToken();
+        var link = frontendUrl + "/verify?token=" + tk.getToken();
 
         // 8) Envoi du mail d’activation
         String html = mailTemplates.activationEmail(user, link);
@@ -136,7 +139,7 @@ public class AuthServiceImpl implements AuthService {
             }
 
             var tk = tokenService.createActivationToken(user, Duration.ofHours(24));
-            var link = baseUrl + "/api/auth/verify?token=" + tk.getToken();
+            var link = frontendUrl + "/verify?token=" + tk.getToken();
 
             String html = mailTemplates.activationEmail(user, link);
             mailService.sendHtml(user.getEmail(), "Activation de votre compte Hexavolt", html);

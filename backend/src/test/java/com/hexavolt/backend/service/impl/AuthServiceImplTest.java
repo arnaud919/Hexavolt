@@ -38,7 +38,7 @@ class AuthServiceImplTest {
         mailService = mock(MailService.class);
         mailTemplates = mock(MailTemplateService.class);
 
-        service = new AuthServiceImpl(userRepo, null, encoder, null, null, tokenService, mailService, mailTemplates, null);
+        service = new AuthServiceImpl(userRepo, null, encoder, null, null, tokenService, mailService, mailTemplates, null, null);
         // injecte si besoin la baseUrl :
         service.baseUrl = "https://app.hexavolt.com";
     }

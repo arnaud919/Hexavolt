@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { AuthStateService } from '../services/auth-state.service';
 
 @Component({
   selector: 'app-signup-confirmation',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './signup-confirmation.component.html',
   styleUrl: './signup-confirmation.component.css'
 })

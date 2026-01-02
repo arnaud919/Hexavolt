@@ -1,0 +1,16 @@
+<section class="max-w-xl mx-auto mt-12 p-6 text-center">
+  <h1 class="text-2xl font-bold mb-4">Confirmation de votre compte</h1>
+
+  <div *ngIf="loading">Vérification en cours...</div>
+
+  <div *ngIf="!loading && success" class="text-green-700">
+    ✅ Votre compte a bien été confirmé.<br />
+    <a routerLink="/connexion" class="underline mt-4 inline-block">Se connecter</a>
+  </div>
+
+  <div *ngIf="!loading && success === false" class="text-red-700">
+    ❌ Le lien est invalide ou a expiré.<br />
+    <a routerLink="/inscription" class="underline mt-4 inline-block">Créer un nouveau compte</a>
+  </div>
+</section>
+
