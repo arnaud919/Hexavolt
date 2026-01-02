@@ -7,6 +7,10 @@
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="max-w-2xl mx-auto p-6 m-10 space-y-6 flex flex-col">
 
+    <div *ngIf="errorMessage" class="text-red-600 mt-4">
+      {{ errorMessage }}
+    </div>
+
     <!-- Email -->
     <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
       <label for="email" class="w-full md:w-40 text-gray-700">Email</label>
@@ -94,6 +98,23 @@
         class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
     </div>
 
+    <div class="text-sm text-gray-600 mt-2">
+      <p><strong>Votre mot de passe doit respecter les conditions suivantes :</strong></p>
+      <ul class="list-disc list-inside mt-1">
+        <li>Au moins 12 caractères</li>
+        <li>Au moins une majuscule, une minuscule, un chiffre et un caractère spécial</li>
+        <li>Ne doit pas contenir :
+          <ul class="list-disc list-inside ml-4">
+            <li>votre adresse e-mail (ou une partie)</li>
+            <li>le nom de domaine de votre e-mail</li>
+            <li>votre nom ou prénom</li>
+            <li>des termes trop communs (ex : <code>password</code>, <code>1234</code>)</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+
     <!-- Confirmation mot de passe -->
     <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
       <label for="confirmPassword" class="w-full md:w-40 text-gray-700">Confirmer le mot de passe</label>
@@ -102,12 +123,12 @@
     </div>
 
     <!-- Message d'erreur si les mots de passe ne correspondent pas -->
-    <!-- <div class="text-red-600 text-sm text-center" *ngIf="form.errors?.passwordMismatch && form.touched">
+    <div class="text-red-600 text-sm text-center" *ngIf="form.errors?.['passwordMismatch'] && form.touched">
       Les mots de passe ne correspondent pas.
-    </div> -->
+    </div>
 
     <!-- Submit -->
-    <input type="submit" value="S'inscrire" class="button" />
+    <input type="submit" class="button" value="S'inscrire" [disabled]="form.invalid || selectedCityId === null">
 
   </form>
 </section>

@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -29,9 +30,11 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequest req) {
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest req) {
         authService.register(req);
-        return ResponseEntity.ok().build(); // ✅
+        Map<String, String> response = Map.of(
+                "message", "Inscription réussie. Veuillez confirmer votre email pour activer votre compte.");
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/verify")

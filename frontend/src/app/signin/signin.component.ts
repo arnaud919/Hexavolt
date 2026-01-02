@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { RouterLink, RouterModule } from '@angular/router';
+import { Router, RouterLink, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { City } from '../models/city';
 import { CityService } from '../services/city';
 import { RegisterRequest } from '../models/register-request';
 import { catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap } from 'rxjs';
 import { HostListener } from '@angular/core';
+import { AuthStateService } from '../services/auth-state.service';
 
 
 @Component({
@@ -21,6 +22,8 @@ export class SigninComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly cityApi = inject(CityService);
+  private readonly router = inject(Router);
+  private readonly authState = inject(AuthStateService);
 
   // Formulaire
   readonly form: FormGroup = this.fb.group(
@@ -42,7 +45,8 @@ export class SigninComponent implements OnInit {
   readonly cityQuery = new FormControl('');
   readonly suggestions = signal<City[]>([]);
   readonly cityFieldFocused = signal(false);
-  private selectedCityId: number | null = null;
+  selectedCityId: number | null = null;
+  errorMessage: string | null = null;
 
   ngOnInit(): void {
 
@@ -61,7 +65,6 @@ export class SigninComponent implements OnInit {
   }
 
   setCityFieldFocus(value: boolean): void {
-    console.log('Dropdown visibility:', value);
     this.cityFieldFocused.set(value);
   }
 
@@ -79,7 +82,6 @@ export class SigninComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent): void {
-    console.log('Document clicked', event.target); // 👈 test ici
 
     const target = event.target as HTMLElement;
     const clickedInside = target.closest('.autocomplete-container');
@@ -90,7 +92,12 @@ export class SigninComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.invalid || this.selectedCityId === null) return;
+    console.log('Tentative de soumission');
+    if (this.form.invalid || this.selectedCityId === null) {
+      console.warn('Formulaire invalide ou ville non sélectionnée');
+      console.log('selectedCityId:', this.selectedCityId);
+      return;
+    }
 
     const value = this.form.value;
 
@@ -107,8 +114,13 @@ export class SigninComponent implements OnInit {
     };
 
     this.authService.register(data).subscribe({
-      next: () => console.log('Inscription réussie'),
-      error: err => console.error('Erreur :', err)
+      next: () => {
+        this.authState.setLastRegisteredEmail(data.email); // <- on sauvegarde l'email
+        this.router.navigate(['/inscription/confirmation']);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Erreur inconnue lors de l’inscription';
+      }
     });
   }
 }

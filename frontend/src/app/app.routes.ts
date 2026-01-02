@@ -9,6 +9,7 @@ import { PrivacyPolicyComponent } from './privacy-policy/privacy-policy.componen
 import { ContactComponent } from './contact/contact.component';
 import { ProfilComponent } from './profil/profil.component';
 import { ModifyProfilComponent } from './modify-profil/modify-profil.component';
+import { SignupConfirmationComponent } from './signup-confirmation/signup-confirmation.component';
 
 export const routes: Routes = [
     { path: '', component: IndexComponent },
@@ -16,6 +17,7 @@ export const routes: Routes = [
     { path: 'louer_une_borne', component: RentStationComponent},
     { path: 'connexion', component: LoginComponent},
     { path: 'inscription', component: SigninComponent},
+    { path: 'inscription/confirmation', component: SignupConfirmationComponent },
     { path: 'mentions_legales', component: LegalNoticeComponent},
     { path: 'politique_de_confidentialite', component: PrivacyPolicyComponent},
     { path: 'contact', component: ContactComponent},

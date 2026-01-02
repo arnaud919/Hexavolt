@@ -1,0 +1,15 @@
+<section class="max-w-xl mx-auto p-6 space-y-4 text-center">
+  <h1 class="text-2xl font-bold">Inscription réussie</h1>
+  <p>Un email de confirmation vous a été envoyé.</p>
+
+  <button
+    (click)="resend()"
+    [disabled]="isSending"
+    class="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
+  >
+    Renvoyer l'email
+  </button>
+
+  <div *ngIf="successMessage" class="text-green-600">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="text-red-600">{{ errorMessage }}</div>
+</section>
