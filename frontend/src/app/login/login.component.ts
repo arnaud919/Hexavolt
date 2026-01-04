@@ -1,38 +1,40 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { AuthService, LoginRequest } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent implements OnInit {
-  loginForm!: FormGroup;
-  errorMessage: string = '';
+export class LoginComponent {
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  readonly loginForm = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', Validators.required],
+  });
 
-  ngOnInit() {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
-    });
-  }
+  errorMessage = '';
 
-  onSubmit() {
+  onSubmit(): void {
     if (this.loginForm.invalid) return;
 
-    this.authService.login(this.loginForm.value).subscribe({
-      next: () => this.router.navigate(['/profil']), // rediriger si succès
-      error: err => this.errorMessage = 'Échec de connexion. Vérifie tes identifiants.'
+    const loginData: LoginRequest = {
+      email: this.loginForm.value.email!,
+      password: this.loginForm.value.password!
+    };
+
+    this.authService.login(loginData).subscribe({
+      next: () => this.router.navigateByUrl('/profil'),
+      error: () => this.errorMessage = 'Échec de la connexion. Vérifiez vos identifiants.'
     });
   }
 }
