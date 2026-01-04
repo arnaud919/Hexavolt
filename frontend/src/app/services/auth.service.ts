@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 
 interface RegisterRequest {
@@ -25,9 +25,11 @@ export interface LoginRequest {
 
 export class AuthService {
 
-  constructor(private http: HttpClient) {}
-  
+  constructor(private http: HttpClient) { }
+
   private apiUrl = '/api/auth';
+  readonly isLoggedIn = signal(!!this.getToken());
+
 
   // Inscription
   register(data: RegisterRequest): Observable<any> {
@@ -51,13 +53,20 @@ export class AuthService {
     return localStorage.getItem('access_token');
   }
 
+  loginSuccess(token: string): void {
+    localStorage.setItem('access_token', token); // même clé
+    this.isLoggedIn.set(true);
+  }
+
   // Déconnexion
   logout(): void {
     localStorage.removeItem('access_token');
+    this.isLoggedIn.set(false);
   }
 
   // Vérifier si connecté
-  isLoggedIn(): boolean {
+  isAuthenticated(): boolean {
     return !!this.getToken();
   }
+
 }

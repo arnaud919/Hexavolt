@@ -117,17 +117,20 @@ l-14 -59 47 44 c189 180 345 322 340 309 -17 -43 -192 -465 -277 -670 -55
 
     <!-- BOUTONS À DROITE (visible en desktop) -->
     <div class="hidden md:block">
-
       <div class="flex md:gap-9 items-center">
-        <div>
-          <a class="border-blue-primary" routerLink="/inscription">Inscription</a>
-        </div>
+        <ng-container *ngIf="isLoggedIn(); else guest">
+          <a class="border-blue-primary" routerLink="/profil">Profil</a>
+          <button class="border-blue-primary" (click)="logout()">Déconnexion</button>
+        </ng-container>
 
-        <div>
+        <ng-template #guest>
+          <a class="border-blue-primary" routerLink="/inscription">Inscription</a>
           <a class="border-blue-primary" routerLink="/connexion">Connexion</a>
-        </div>
+        </ng-template>
+
       </div>
     </div>
+
 
     <!-- MENU BURGER MOBILE CENTRÉ -->
     <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 md:hidden z-50" #menuContainer>
@@ -170,7 +173,7 @@ l-14 -59 47 44 c189 180 345 322 340 309 -17 -43 -192 -465 -277 -670 -55
 
     <!-- ICÔNE UTILISATEUR POUR MOBILE -->
     <div class="block md:hidden p-2">
-      <a routerLink="/connexion">
+      <a [routerLink]="isLoggedIn() ? '/profil' : '/connexion'">
         <img src="assets/icons/user_icon.webp" class="h-12 sm:h-14 lg:h-20 xl:h-24" alt="">
       </a>
     </div>

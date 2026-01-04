@@ -1,9 +1,11 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { Component, ElementRef, HostListener, inject, ViewChild } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink],
+  imports: [RouterLink, CommonModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })
@@ -11,6 +13,11 @@ export class HeaderComponent {
 
   @ViewChild('menuToggle') menuToggle!: ElementRef<HTMLInputElement>;
   @ViewChild('menuContainer') menuContainer!: ElementRef;
+
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  readonly isLoggedIn = this.authService.isLoggedIn;
+
 
   ngAfterViewInit(): void {
     document.addEventListener('click', this.handleClickOutside);
@@ -36,5 +43,11 @@ export class HeaderComponent {
   toggleMenu(menuToggle: HTMLInputElement) {
     menuToggle.checked = !menuToggle.checked;
   }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/connexion']); // ou vers la page d’accueil selon ton choix
+  }
+
 
 }
