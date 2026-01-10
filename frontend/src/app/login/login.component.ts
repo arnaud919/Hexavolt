@@ -33,7 +33,7 @@ export class LoginComponent {
     };
 
     this.authService.login(loginData).subscribe({
-      next: () => this.router.navigateByUrl('/profil'),
+      next: () => this.router.navigateByUrl('/profile'),
       error: () => this.errorMessage = 'Échec de la connexion. Vérifiez vos identifiants.'
     });
   }

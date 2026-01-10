@@ -16,8 +16,7 @@ export class HeaderComponent {
 
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  readonly isLoggedIn = this.authService.isLoggedIn;
-
+  protected readonly isLoggedIn = inject(AuthService).isLoggedIn;
 
   ngAfterViewInit(): void {
     document.addEventListener('click', this.handleClickOutside);
@@ -48,6 +47,4 @@ export class HeaderComponent {
     this.authService.logout();
     this.router.navigate(['/connexion']); // ou vers la page d’accueil selon ton choix
   }
-
-
 }

@@ -1,11 +1,14 @@
 package com.hexavolt.backend.security;
 
+import com.hexavolt.backend.entity.User;
 import com.hexavolt.backend.repository.UserRepository;
 import com.hexavolt.backend.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -25,46 +28,52 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
+    protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain
-    ) throws ServletException, IOException {
+            FilterChain filterChain)
+            throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
+        // 🔽 Lire le token dans les cookies
+        String token = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("access_token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
 
-        if (header == null || !header.startsWith("Bearer ")) {
+        if (token == null || token.isBlank()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = header.substring("Bearer ".length()).trim();
-
         try {
             String email = jwtService.getSubject(token);
 
-            // Si déjà authentifié, ne rien faire
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-                // On s'assure que l'utilisateur existe toujours
                 var userOpt = userRepo.findByEmail(email);
                 if (userOpt.isPresent()) {
+                    User user = userOpt.get();
 
-                    var auth = new UsernamePasswordAuthenticationToken(
-                            email, // principal
+                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                            user,
                             null,
-                            List.of() // roles plus tard
-                    );
-                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            user.getAuthorities());
+
+                    auth.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request));
+
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             }
 
         } catch (Exception ex) {
-            // Token invalide / expiré => on laisse Spring renvoyer 401 sur les endpoints protégés
             SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
     }
+
 }

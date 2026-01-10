@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
+import { Profile } from '../models/profile';
 
 interface RegisterRequest {
   firstName: string;
@@ -25,11 +26,10 @@ export interface LoginRequest {
 
 export class AuthService {
 
+  private readonly apiUrl = '/api/auth';
+  readonly isLoggedIn = signal<boolean>(false);
+
   constructor(private http: HttpClient) { }
-
-  private apiUrl = '/api/auth';
-  readonly isLoggedIn = signal(!!this.getToken());
-
 
   // Inscription
   register(data: RegisterRequest): Observable<any> {
@@ -37,36 +37,28 @@ export class AuthService {
   }
 
   // Connexion
-  login(data: LoginRequest): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, data).pipe(
-      tap((res: any) => {
-        // Exemple : stocker le token dans localStorage
-        if (res && res.token) {
-          localStorage.setItem('access_token', res.token);
-        }
-      })
+  login(data: LoginRequest): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/login`, data, { withCredentials: true }).pipe(
+      tap(() => this.isLoggedIn.set(true))
     );
-  }
-
-  // Récupérer le token
-  getToken(): string | null {
-    return localStorage.getItem('access_token');
-  }
-
-  loginSuccess(token: string): void {
-    localStorage.setItem('access_token', token); // même clé
-    this.isLoggedIn.set(true);
   }
 
   // Déconnexion
   logout(): void {
-    localStorage.removeItem('access_token');
-    this.isLoggedIn.set(false);
+    this.http.post(`${this.apiUrl}/logout`, {}, { withCredentials: true }).subscribe({
+      next: () => this.isLoggedIn.set(false),
+      error: () => this.isLoggedIn.set(false) // même si erreur, on nettoie l'état local
+    });
   }
 
-  // Vérifier si connecté
-  isAuthenticated(): boolean {
-    return !!this.getToken();
+  checkAuth(): void {
+    this.http.get<{ email: string }>(`${this.apiUrl}/me`, { withCredentials: true }).subscribe({
+      next: () => this.isLoggedIn.set(true),
+      error: () => this.isLoggedIn.set(false)
+    });
   }
 
+  getProfile() {
+    return this.http.get<Profile>(`${this.apiUrl}/me`, { withCredentials: true });
+  }
 }

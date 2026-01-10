@@ -1,6 +1,7 @@
 package com.hexavolt.backend.controller;
 
 import com.hexavolt.backend.dto.LoginRequest;
+import com.hexavolt.backend.dto.Profile;
 import com.hexavolt.backend.dto.RegisterRequest;
 import com.hexavolt.backend.dto.ResendActivationRequest;
 import com.hexavolt.backend.dto.UserMe;
@@ -8,8 +9,11 @@ import com.hexavolt.backend.entity.User;
 import com.hexavolt.backend.repository.UserRepository;
 import com.hexavolt.backend.service.AuthService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
+import java.time.Duration;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -50,9 +54,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequest req) {
-        String token = authService.login(req);
-        return ResponseEntity.ok(Map.of("token", token));
+    public ResponseEntity<Void> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+        String token = authService.login(request); // ta méthode renvoie le token
+
+        Cookie cookie = new Cookie("access_token", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // ❗️Seulement si HTTPS
+        cookie.setPath("/");
+        cookie.setMaxAge((int) Duration.ofHours(2).getSeconds());
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/reset/request")
@@ -67,10 +79,17 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("access_token", "");
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/me")
-    public ResponseEntity<UserMe> me(Authentication auth) {
-        String email = auth.getName(); // subject
-        User user = userRepo.findByEmail(email).orElseThrow();
-        return ResponseEntity.ok(new UserMe(user.getId(), user.getEmail()));
+    public ResponseEntity<Profile> me() {
+        return ResponseEntity.ok(authService.getProfile());
     }
 }
