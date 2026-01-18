@@ -12,6 +12,8 @@ import com.hexavolt.backend.repository.UserRepository;
 import com.hexavolt.backend.security.JwtAuthFilter;
 import com.hexavolt.backend.service.JwtService;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @Configuration
 public class SecurityConfig {
 
@@ -37,6 +39,10 @@ public class SecurityConfig {
         .formLogin(form -> form.disable())
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .csrf(csrf -> csrf.disable())
+        .exceptionHandling(ex -> ex
+        .authenticationEntryPoint((request, response, authException) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        }))
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();

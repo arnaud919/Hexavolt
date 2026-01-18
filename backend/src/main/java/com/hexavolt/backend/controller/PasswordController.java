@@ -1,6 +1,6 @@
 package com.hexavolt.backend.controller;
 
-import com.hexavolt.backend.dto.ResetPasswordConfirm;
+import com.hexavolt.backend.dto.ResetPasswordConfirmDTO;
 import com.hexavolt.backend.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +24,7 @@ public class PasswordController {
 
     // 2) Confirmation du reset avec le token et le nouveau mot de passe
     @PostMapping("/reset/confirm")
-    public ResponseEntity<Void> confirmReset(@RequestBody ResetPasswordConfirm dto) {
+    public ResponseEntity<Void> confirmReset(@RequestBody ResetPasswordConfirmDTO dto) {
         authService.confirmPasswordReset(dto);
         return ResponseEntity.ok().build();
     }

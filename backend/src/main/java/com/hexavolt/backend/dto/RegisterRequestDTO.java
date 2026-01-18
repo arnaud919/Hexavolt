@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 import com.hexavolt.backend.validation.StrongPassword;
 
-public record RegisterRequest(
+public record RegisterRequestDTO(
 
     @NotBlank(message = "Le prénom est obligatoire")
     @Size(max = 50, message = "Le prénom ne doit pas dépasser 50 caractères")

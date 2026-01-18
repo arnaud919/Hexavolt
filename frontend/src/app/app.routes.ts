@@ -11,6 +11,10 @@ import { ModifyProfileComponent } from './modify-profile/modify-profile.componen
 import { SignupConfirmationComponent } from './signup-confirmation/signup-confirmation.component';
 import { VerifyPageComponent } from './verify-page/verify-page.component';
 import { authGuard } from './services/auth.guard';
+import { StationCreateComponent } from './station-create/station-create.component';
+import { LocationStationsComponent } from './location-stations/location-stations.component';
+import { LocationCreateComponent } from './location-create/location-create.component';
+import { LocationListComponent } from './location-list/location-list.component';
 
 export const routes: Routes = [
     { path: '', component: IndexComponent },
@@ -28,5 +32,9 @@ export const routes: Routes = [
         loadComponent: () => import('./profile/profile.component').then(m => m.ProfilComponent),
         canActivate: [authGuard]
     },
-    { path: 'modify-profile', component: ModifyProfileComponent }
+    { path: 'modify-profile', component: ModifyProfileComponent },
+    { path: 'locations', component: LocationListComponent },
+    { path: 'locations/:id/stations', component: LocationStationsComponent },
+    { path: 'locations/:id/stations/new', component: StationCreateComponent },
+    { path: 'locations/new', component: LocationCreateComponent }
 ];

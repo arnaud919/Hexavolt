@@ -1,0 +1,32 @@
+<h1>Bornes du lieu</h1>
+
+<div *ngIf="stations.length === 0">
+  Aucune borne pour ce lieu.
+</div>
+
+<div *ngFor="let station of stations" class="station-card">
+
+  <!-- 🖼 Photo (optionnelle) -->
+  <img
+    *ngIf="station.photoName"
+    [src]="'/api/files/' + station.photoName"
+    alt="Photo de la borne"
+  />
+
+  <!-- 🎥 Vidéo (optionnelle) -->
+  <video
+    *ngIf="station.videoName"
+    controls
+    width="300">
+    <source [src]="'/api/files/' + station.videoName" type="video/mp4">
+  </video>
+
+  <p><strong>Puissance :</strong> {{ station.power }} kVA</p>
+  <p><strong>Prix :</strong> {{ station.hourlyRate }} € / h</p>
+  <p *ngIf="station.isCustom">Borne personnalisée</p>
+
+</div>
+
+<button [routerLink]="['/locations', locationId, 'stations', 'new']">
+  Ajouter une borne
+</button>

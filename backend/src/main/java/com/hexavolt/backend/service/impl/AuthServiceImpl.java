@@ -1,10 +1,10 @@
 // src/main/java/com/hexavolt/backend/service/impl/AuthServiceImpl.java
 package com.hexavolt.backend.service.impl;
 
-import com.hexavolt.backend.dto.LoginRequest;
-import com.hexavolt.backend.dto.Profile;
-import com.hexavolt.backend.dto.RegisterRequest;
-import com.hexavolt.backend.dto.ResetPasswordConfirm;
+import com.hexavolt.backend.dto.LoginRequestDTO;
+import com.hexavolt.backend.dto.ProfileDTO;
+import com.hexavolt.backend.dto.RegisterRequestDTO;
+import com.hexavolt.backend.dto.ResetPasswordConfirmDTO;
 import com.hexavolt.backend.entity.User;
 import com.hexavolt.backend.entity.UserToken;
 import com.hexavolt.backend.mapper.UserMapper;
@@ -69,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void register(RegisterRequest req) {
+    public void register(RegisterRequestDTO req) {
 
         // 1) Règles de sécurité sur le mot de passe
         PasswordPolicy.assertNoPersonalInfo(
@@ -152,7 +152,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(LoginRequest req) {
+    public String login(LoginRequestDTO req) {
         var email = req.email().trim().toLowerCase();
         var user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
@@ -195,7 +195,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void confirmPasswordReset(ResetPasswordConfirm dto) {
+    public void confirmPasswordReset(ResetPasswordConfirmDTO dto) {
         // 1) Valider le jeton RESET_PASSWORD
         UserToken tk = tokenService.validateResetPasswordToken(dto.getToken());
         User user = tk.getUser();
@@ -238,14 +238,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Profile getProfile() {
+    public ProfileDTO getProfile() {
 
         Authentication authentication =
             SecurityContextHolder.getContext().getAuthentication();
 
         User user = (User) authentication.getPrincipal();
 
-        return new Profile(
+        return new ProfileDTO(
             user.getId(),
             user.getFirstName(),
             user.getLastName(),

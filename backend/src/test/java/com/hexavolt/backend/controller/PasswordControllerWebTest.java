@@ -1,6 +1,6 @@
 package com.hexavolt.backend.controller;
 
-import com.hexavolt.backend.dto.ResetPasswordConfirm;
+import com.hexavolt.backend.dto.ResetPasswordConfirmDTO;
 import com.hexavolt.backend.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -50,12 +50,12 @@ class PasswordControllerWebTest {
                 .andExpect(status().isOk());
 
         verify(authService).confirmPasswordReset(
-                org.mockito.ArgumentMatchers.any(ResetPasswordConfirm.class));
+                org.mockito.ArgumentMatchers.any(ResetPasswordConfirmDTO.class));
 
-        ArgumentCaptor<ResetPasswordConfirm> captor = ArgumentCaptor.forClass(ResetPasswordConfirm.class);
+        ArgumentCaptor<ResetPasswordConfirmDTO> captor = ArgumentCaptor.forClass(ResetPasswordConfirmDTO.class);
         verify(authService).confirmPasswordReset(captor.capture());
 
-        ResetPasswordConfirm sent = captor.getValue();
+        ResetPasswordConfirmDTO sent = captor.getValue();
         assertEquals("abc123", sent.getToken());
         assertEquals("MonSuperMot2Passe!2025*", sent.getNewPassword());
     }

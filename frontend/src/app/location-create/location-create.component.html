@@ -1,0 +1,68 @@
+<h1 class="text-center">Ajouter un lieu de charge</h1>
+
+<div class="text-center mt-4">
+  <a routerLink="/locations" class="text-center underline">
+    Retour à mes lieux
+  </a>
+</div>
+
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  class="max-w-2xl mx-auto p-6 m-10 space-y-6 flex flex-col gap--">
+
+  <!-- Nom du lieu -->
+  <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
+    <label for="nickname" class="w-full md:w-40 text-gray-700">
+      Nom du lieu
+    </label>
+    <input
+      id="nickname"
+      type="text"
+      formControlName="nickname"
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
+  </div>
+
+  <!-- Adresse -->
+  <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
+    <label for="address" class="w-full md:w-40 text-gray-700">
+      Adresse
+    </label>
+    <input
+      id="address"
+      type="text"
+      formControlName="address"
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
+  </div>
+
+  <!-- Code postal -->
+  <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
+    <label for="postalCode" class="w-full md:w-40 text-gray-700">
+      Code postal
+    </label>
+    <input
+      id="postalCode"
+      type="text"
+      formControlName="postalCode"
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
+  </div>
+
+  <!-- Ville (temporaire en input simple) -->
+  <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
+    <label for="cityId" class="w-full md:w-40 text-gray-700">
+      Ville
+    </label>
+    <input
+      id="cityId"
+      type="number"
+      formControlName="cityId"
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
+  </div>
+
+  <!-- Bouton -->
+  <input
+    type="submit"
+    class="button"
+    value="Enregistrer le lieu"
+    [disabled]="form.invalid">
+</form>

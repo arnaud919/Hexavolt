@@ -1,10 +1,10 @@
 package com.hexavolt.backend.controller;
 
-import com.hexavolt.backend.dto.LoginRequest;
-import com.hexavolt.backend.dto.Profile;
-import com.hexavolt.backend.dto.RegisterRequest;
-import com.hexavolt.backend.dto.ResendActivationRequest;
-import com.hexavolt.backend.dto.UserMe;
+import com.hexavolt.backend.dto.LoginRequestDTO;
+import com.hexavolt.backend.dto.ProfileDTO;
+import com.hexavolt.backend.dto.RegisterRequestDTO;
+import com.hexavolt.backend.dto.ResendActivationRequestDTO;
+import com.hexavolt.backend.dto.UserMeDTO;
 import com.hexavolt.backend.entity.User;
 import com.hexavolt.backend.repository.UserRepository;
 import com.hexavolt.backend.service.AuthService;
@@ -34,7 +34,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest req) {
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequestDTO req) {
         authService.register(req);
         Map<String, String> response = Map.of(
                 "message", "Inscription réussie. Veuillez confirmer votre email pour activer votre compte.");
@@ -48,13 +48,13 @@ public class AuthController {
     }
 
     @PostMapping("/verify/resend")
-    public ResponseEntity<Void> resendVerification(@Valid @RequestBody ResendActivationRequest req) {
+    public ResponseEntity<Void> resendVerification(@Valid @RequestBody ResendActivationRequestDTO req) {
         authService.resendVerificationEmail(req.email());
         return ResponseEntity.noContent().build(); // ou ok(), mais 204 est cohérent avec verify()
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<Void> login(@RequestBody LoginRequestDTO request, HttpServletResponse response) {
         String token = authService.login(request); // ta méthode renvoie le token
 
         Cookie cookie = new Cookie("access_token", token);
@@ -89,7 +89,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<Profile> me() {
+    public ResponseEntity<ProfileDTO> me() {
         return ResponseEntity.ok(authService.getProfile());
     }
 }

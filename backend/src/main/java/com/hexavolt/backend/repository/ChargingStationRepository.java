@@ -1,10 +1,13 @@
 package com.hexavolt.backend.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.hexavolt.backend.entity.ChargingStation;
 
 public interface ChargingStationRepository extends JpaRepository<ChargingStation, Integer> {
+  List<ChargingStation> findByLocationId(Integer locationId);
   // Page<ChargingStation> findByOwner_Id(Integer ownerId, Pageable pageable);
   // Page<ChargingStation> findByActiveTrue(Pageable pageable);
 

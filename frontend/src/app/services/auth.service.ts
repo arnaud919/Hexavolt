@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { catchError, Observable, of, tap } from 'rxjs';
 import { Profile } from '../models/profile';
 
 interface RegisterRequest {
@@ -52,10 +52,16 @@ export class AuthService {
   }
 
   checkAuth(): void {
-    this.http.get<{ email: string }>(`${this.apiUrl}/me`, { withCredentials: true }).subscribe({
-      next: () => this.isLoggedIn.set(true),
-      error: () => this.isLoggedIn.set(false)
-    });
+    this.http
+      .get<{ email: string }>(`${this.apiUrl}/me`, { withCredentials: true })
+      .pipe(
+        tap(() => this.isLoggedIn.set(true)),
+        catchError(() => {
+          this.isLoggedIn.set(false);
+          return of(null);
+        })
+      )
+      .subscribe();
   }
 
   getProfile() {

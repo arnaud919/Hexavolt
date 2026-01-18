@@ -1,25 +1,25 @@
 package com.hexavolt.backend.service;
 
-import com.hexavolt.backend.dto.LoginRequest;
-import com.hexavolt.backend.dto.Profile;
-import com.hexavolt.backend.dto.RegisterRequest;
-import com.hexavolt.backend.dto.ResetPasswordConfirm;
+import com.hexavolt.backend.dto.LoginRequestDTO;
+import com.hexavolt.backend.dto.ProfileDTO;
+import com.hexavolt.backend.dto.RegisterRequestDTO;
+import com.hexavolt.backend.dto.ResetPasswordConfirmDTO;
 
 public interface AuthService {
-  void register(RegisterRequest request);
+  void register(RegisterRequestDTO request);
 
   void verifyEmail(String token);
 
   void resendVerificationEmail(String email);
 
-  String login(LoginRequest request); // retourne le JWT
+  String login(LoginRequestDTO request); // retourne le JWT
 
   void requestPasswordReset(String email);
 
   void resetPassword(String token, String newPassword);
 
-  void confirmPasswordReset(ResetPasswordConfirm dto);
+  void confirmPasswordReset(ResetPasswordConfirmDTO dto);
 
-  Profile getProfile();
+  ProfileDTO getProfile();
 
 }

@@ -3,15 +3,15 @@ package com.hexavolt.backend.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-public class ResetPasswordRequest {
+public class ResetPasswordRequestDTO {
     @NotBlank
     @Email
     private String email;
 
-    public ResetPasswordRequest() {
+    public ResetPasswordRequestDTO() {
     }
 
-    public ResetPasswordRequest(String email) {
+    public ResetPasswordRequestDTO(String email) {
         this.email = email;
     }
 

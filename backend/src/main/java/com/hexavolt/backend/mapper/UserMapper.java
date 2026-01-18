@@ -1,7 +1,7 @@
 package com.hexavolt.backend.mapper;
 
-import com.hexavolt.backend.dto.RegisterRequest;
-import com.hexavolt.backend.dto.UserResponse;
+import com.hexavolt.backend.dto.RegisterRequestDTO;
+import com.hexavolt.backend.dto.UserResponseDTO;
 import com.hexavolt.backend.entity.City;
 import com.hexavolt.backend.entity.User;
 import org.springframework.stereotype.Component;
@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
 
-  /** Construit l'entité User à partir du RegisterRequest + City + mot de passe déjà encodé. */
-  public User toEntity(RegisterRequest dto, City city, String encodedPassword) {
+  /** Construit l'entité User à partir du RegisterRequestDTO + City + mot de passe déjà encodé. */
+  public User toEntity(RegisterRequestDTO dto, City city, String encodedPassword) {
     User u = new User();
     u.setFirstName(trim(dto.firstName()));
     u.setLastName(trim(dto.lastName()));
@@ -26,8 +26,8 @@ public class UserMapper {
   }
 
   /** Expose un DTO de sortie sans champs sensibles. */
-  public UserResponse toResponse(User user) {
-    return new UserResponse(
+  public UserResponseDTO toResponse(User user) {
+    return new UserResponseDTO(
         user.getId(),
         user.getFirstName(),
         user.getLastName(),

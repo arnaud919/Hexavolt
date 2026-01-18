@@ -1,14 +1,14 @@
 package com.hexavolt.backend.dto;
 
-public class ResetPasswordConfirm {
+public class ResetPasswordConfirmDTO {
 
     private String token;
     private String newPassword;
 
-    public ResetPasswordConfirm() {
+    public ResetPasswordConfirmDTO() {
     }
 
-    public ResetPasswordConfirm(String token, String newPassword) {
+    public ResetPasswordConfirmDTO(String token, String newPassword) {
         this.token = token;
         this.newPassword = newPassword;
     }

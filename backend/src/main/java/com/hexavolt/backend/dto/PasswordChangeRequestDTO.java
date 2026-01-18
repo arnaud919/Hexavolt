@@ -4,7 +4,7 @@ import com.hexavolt.backend.validation.StrongPassword;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record PasswordChangeRequest(
+public record PasswordChangeRequestDTO(
     @NotBlank String currentPassword,
     @NotBlank @StrongPassword String newPassword
 ) {}

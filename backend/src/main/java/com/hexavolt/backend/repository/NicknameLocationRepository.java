@@ -6,16 +6,20 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.hexavolt.backend.entity.NicknameLocation;
+import com.hexavolt.backend.entity.User;
 
 public interface NicknameLocationRepository extends JpaRepository<NicknameLocation, Integer> {
   // par lieu (stationLocation)
   List<NicknameLocation> findByStationLocation_Id(Integer stationLocationId);
 
   // par utilisateur
-  List<NicknameLocation> findByUser_Id(Integer userId);
+  List<NicknameLocation> findByUser(User user);
 
-  // un enregistrement précis (utile avec ta contrainte UNIQUE (user_id, station_location))
-  Optional<NicknameLocation> findByUser_IdAndStationLocation_Id(Integer userId, Integer stationLocationId);
+  // un enregistrement précis (utile avec ta contrainte UNIQUE (user_id,
+  // station_location))
+  Optional<NicknameLocation> findByStationLocationIdAndUser(
+      Integer stationLocationId,
+      User user);
 
   // contrôles d’existence (pour éviter les doublons côté service)
   boolean existsByUser_IdAndStationLocation_Id(Integer userId, Integer stationLocationId);

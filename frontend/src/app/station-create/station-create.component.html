@@ -1,0 +1,34 @@
+<h1>Ajouter une borne</h1>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+
+  <label>
+    Puissance
+    <select formControlName="powerId">
+      <option value="">-- Choisir --</option>
+      <option *ngFor="let p of powers" [value]="p.id">
+        {{ p.kvaPower }} kVA
+      </option>
+    </select>
+  </label>
+
+  <label>
+    Prix par heure (€)
+    <input type="number" formControlName="hourlyRate" step="0.1">
+  </label>
+
+  <label>
+    <input type="checkbox" formControlName="isCustom">
+    Borne personnalisée
+  </label>
+
+  <label>
+    Instructions (optionnel)
+    <textarea formControlName="instruction"></textarea>
+  </label>
+
+  <button type="submit" [disabled]="form.invalid">
+    Enregistrer
+  </button>
+
+</form>

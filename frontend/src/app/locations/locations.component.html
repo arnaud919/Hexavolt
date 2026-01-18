@@ -1,0 +1,10 @@
+<h1>Mes lieux de charge</h1>
+
+<div *ngFor="let loc of locations">
+  <h3>{{ loc.nickname }}</h3>
+  <p>{{ loc.address }}, {{ loc.postalCode }} {{ loc.cityName }}</p>
+
+  <button>Gérer les bornes</button>
+</div>
+
+<button>+ Ajouter un lieu</button>

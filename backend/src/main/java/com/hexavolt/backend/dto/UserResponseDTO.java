@@ -2,7 +2,7 @@ package com.hexavolt.backend.dto;
 
 import java.time.LocalDate;
 
-public record UserResponse(
+public record UserResponseDTO(
   Integer id,
   String firstName,
   String lastName,
