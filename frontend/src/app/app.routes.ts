@@ -29,7 +29,7 @@ export const routes: Routes = [
     { path: 'contact', component: ContactComponent },
     {
         path: 'profile',
-        loadComponent: () => import('./profile/profile.component').then(m => m.ProfilComponent),
+        loadComponent: () => import('./profile/profile.component').then(m => m.ProfileComponent),
         canActivate: [authGuard]
     },
     { path: 'modify-profile', component: ModifyProfileComponent },

@@ -1,62 +1,84 @@
 <section class="lg:mx-25 mx-5">
-    <div *ngIf="profile" class="text-center md:text-left py-15">
-        <h1>{{ profile.firstName }} {{ profile.lastName }}</h1>
-        <p>{{ profile.email }}</p>
-        <p>
-            <a routerLink="modify-profile" class="text-center md:text-left underline">Modifier mon profil</a>
-        </p>
-    </div>
 
-    <div class="mb-10">
-        <h2 class="font-bold">Réservations en cours</h2>
-        <hr>
-        <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
-            <p class="font-bold">sdsqsq</p>
-            <p>qsdsqd</p>
-            <p>zdsqdc</p>
-        </div>
-    </div>
+  <!-- Profil utilisateur -->
+  <div *ngIf="profile() as p; else loading" class="text-center md:text-left py-15">
+    <h1>{{ p.firstName }} {{ p.lastName }}</h1>
+    <p>{{ p.email }}</p>
+    <p>
+      <a
+        routerLink="modify-profile"
+        class="text-center md:text-left underline"
+      >
+        Modifier mon profil
+      </a>
+    </p>
+  </div>
 
-    <div class="mb-10">
-        <h2 class="font-bold">Demandes à traiter</h2>
-        <hr>
-        <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
-            <p class="font-bold">sdsqsq</p>
-            <p>qsdsqd</p>
-            <p>zdsqdc</p>
-        </div>
-    </div>
+  <ng-template #loading>
+    <p class="text-center py-10">Chargement du profil…</p>
+  </ng-template>
 
-    <div class="mb-10">
-        <h2 class="font-bold">Mes bornes de recharges</h2>
-        <hr>
-        <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
-            <p class="font-bold">sdsqsq</p>
-            <p>qsdsqd</p>
-            <div>
-                <img src="" alt="alt">
-            </div>
-        </div>
+  <!-- Réservations en cours -->
+  <div class="mb-10">
+    <h2 class="font-bold">Réservations en cours</h2>
+    <hr>
+    <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
+      <p class="font-bold">sdsqsq</p>
+      <p>qsdsqd</p>
+      <p>zdsqdc</p>
     </div>
+  </div>
 
-    <div class="mb-10">
-        <h2 class="font-bold">Réservations passées</h2>
-        <hr>
-        <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
-            <p class="font-bold">sdsqsq</p>
-            <p>qsdsqd</p>
-            <p>zdsqdc</p>
-        </div>
+  <!-- Demandes à traiter -->
+  <div class="mb-10">
+    <h2 class="font-bold">Demandes à traiter</h2>
+    <hr>
+    <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
+      <p class="font-bold">sdsqsq</p>
+      <p>qsdsqd</p>
+      <p>zdsqdc</p>
     </div>
+  </div>
 
-    <div class="mb-10">
-        <h2 class="font-bold">Demandes traités</h2>
-        <hr>
-        <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
-            <p class="font-bold">sdsqsq</p>
-            <p>qsdsqd</p>
-            <p>zdsqdc</p>
-        </div>
+  <!-- Mes bornes de recharge -->
+  <div class="mb-10">
+    <h2 class="font-bold">Mes bornes de recharge</h2>
+    <hr>
+    <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
+      <p class="font-bold">sdsqsq</p>
+      <p>qsdsqd</p>
+      <div>
+        <!-- Image optionnelle -->
+        <img
+          *ngIf="false"
+          src=""
+          alt="Photo de la borne"
+          class="mt-2"
+        >
+      </div>
     </div>
+  </div>
+
+  <!-- Réservations passées -->
+  <div class="mb-10">
+    <h2 class="font-bold">Réservations passées</h2>
+    <hr>
+    <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
+      <p class="font-bold">sdsqsq</p>
+      <p>qsdsqd</p>
+      <p>zdsqdc</p>
+    </div>
+  </div>
+
+  <!-- Demandes traitées -->
+  <div class="mb-10">
+    <h2 class="font-bold">Demandes traitées</h2>
+    <hr>
+    <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
+      <p class="font-bold">sdsqsq</p>
+      <p>qsdsqd</p>
+      <p>zdsqdc</p>
+    </div>
+  </div>
 
 </section>

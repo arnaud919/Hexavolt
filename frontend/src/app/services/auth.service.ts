@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
-import { catchError, Observable, of, tap } from 'rxjs';
+import { catchError, map, Observable, of, switchMap, tap } from 'rxjs';
 import { Profile } from '../models/profile';
 
 interface RegisterRequest {
@@ -27,7 +27,8 @@ export interface LoginRequest {
 export class AuthService {
 
   private readonly apiUrl = '/api/auth';
-  readonly isLoggedIn = signal<boolean>(false);
+  readonly isLoggedIn = signal<boolean | null>(null);
+  readonly currentUser = signal<Profile | null>(null);
 
   constructor(private http: HttpClient) { }
 
@@ -38,9 +39,14 @@ export class AuthService {
 
   // Connexion
   login(data: LoginRequest): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/login`, data, { withCredentials: true }).pipe(
-      tap(() => this.isLoggedIn.set(true))
-    );
+    return this.http
+      .post<void>(`${this.apiUrl}/login`, data, { withCredentials: true })
+      .pipe(
+        tap(() => {
+          // 🔥 on débloque immédiatement le guard
+          this.isLoggedIn.set(true);
+        })
+      );
   }
 
   // Déconnexion
@@ -53,11 +59,19 @@ export class AuthService {
 
   checkAuth(): void {
     this.http
-      .get<{ email: string }>(`${this.apiUrl}/me`, { withCredentials: true })
+      .get<Profile>(`${this.apiUrl}/me`, { withCredentials: true })
       .pipe(
-        tap(() => this.isLoggedIn.set(true)),
-        catchError(() => {
-          this.isLoggedIn.set(false);
+        tap(profile => {
+          this.currentUser.set(profile);
+          this.isLoggedIn.set(true);
+        }),
+        catchError(err => {
+          if (err.status === 401) {
+            this.currentUser.set(null);
+            this.isLoggedIn.set(false);
+            return of(null);
+          }
+          console.error(err);
           return of(null);
         })
       )

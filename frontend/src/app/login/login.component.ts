@@ -25,16 +25,31 @@ export class LoginComponent {
   errorMessage = '';
 
   onSubmit(): void {
-    if (this.loginForm.invalid) return;
+    console.log('SUBMIT TRIGGERED');
+
+    if (this.loginForm.invalid) {
+      console.log('FORM INVALID');
+      return;
+    }
+
+    console.log('FORM VALID');
 
     const loginData: LoginRequest = {
       email: this.loginForm.value.email!,
       password: this.loginForm.value.password!
     };
 
+    console.log('CALL LOGIN', loginData);
+
     this.authService.login(loginData).subscribe({
-      next: () => this.router.navigateByUrl('/profile'),
-      error: () => this.errorMessage = 'Échec de la connexion. Vérifiez vos identifiants.'
+      next: () => {
+        console.log('LOGIN SUCCESS');
+        this.router.navigateByUrl('/profile');
+      },
+      error: err => {
+        console.log('LOGIN ERROR', err);
+        this.errorMessage = 'Échec de la connexion.';
+      }
     });
   }
 }

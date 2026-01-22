@@ -20,9 +20,23 @@ export class LocationStationsComponent {
   ) { }
 
   ngOnInit(): void {
-    this.locationId = Number(this.route.snapshot.paramMap.get('id'));
+    const idParam = this.route.snapshot.paramMap.get('id');
 
-    this.stationService.getByLocation(this.locationId)
+    if (!idParam) {
+      console.error('Location id missing in route');
+      return;
+    }
+
+    this.locationId = Number(idParam);
+
+    if (isNaN(this.locationId)) {
+      console.error('Invalid location id:', idParam);
+      return;
+    }
+
+    this.stationService
+      .getByLocation(this.locationId)
       .subscribe(stations => this.stations = stations);
   }
+
 }

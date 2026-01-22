@@ -16,7 +16,9 @@ import jakarta.validation.Valid;
 import java.time.Duration;
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -54,15 +56,20 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody LoginRequestDTO request, HttpServletResponse response) {
-        String token = authService.login(request); // ta méthode renvoie le token
+    public ResponseEntity<Void> login(
+            @RequestBody LoginRequestDTO request,
+            HttpServletResponse response) {
+        String token = authService.login(request);
 
-        Cookie cookie = new Cookie("access_token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false); // ❗️Seulement si HTTPS
-        cookie.setPath("/");
-        cookie.setMaxAge((int) Duration.ofHours(2).getSeconds());
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("access_token", token)
+                .httpOnly(true)
+                .secure(false) // ✅ HTTP en local
+                .sameSite("Lax") // ✅ INDISPENSABLE
+                .path("/")
+                .maxAge(Duration.ofHours(2))
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok().build();
     }

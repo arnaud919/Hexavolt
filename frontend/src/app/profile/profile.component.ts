@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Profile } from '../models/profile';
 import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
 
@@ -10,14 +9,13 @@ import { CommonModule } from '@angular/common';
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
-export class ProfilComponent {
-  profile?: Profile;
+export class ProfileComponent {
 
-  constructor(private authService: AuthService) {}
+  readonly profile;
 
-  ngOnInit(): void {
-    this.authService.getProfile().subscribe(profile => {
-      this.profile = profile;
-    });
+  constructor(private authService: AuthService) {
+    this.profile = this.authService.currentUser;
   }
+
 }
+
