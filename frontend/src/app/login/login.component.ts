@@ -25,29 +25,21 @@ export class LoginComponent {
   errorMessage = '';
 
   onSubmit(): void {
-    console.log('SUBMIT TRIGGERED');
 
     if (this.loginForm.invalid) {
-      console.log('FORM INVALID');
       return;
     }
-
-    console.log('FORM VALID');
 
     const loginData: LoginRequest = {
       email: this.loginForm.value.email!,
       password: this.loginForm.value.password!
     };
 
-    console.log('CALL LOGIN', loginData);
-
     this.authService.login(loginData).subscribe({
       next: () => {
-        console.log('LOGIN SUCCESS');
         this.router.navigateByUrl('/profile');
       },
       error: err => {
-        console.log('LOGIN ERROR', err);
         this.errorMessage = 'Échec de la connexion.';
       }
     });

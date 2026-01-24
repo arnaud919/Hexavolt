@@ -7,7 +7,18 @@ public class LocationListDTO {
     private String postalCode;
     private String cityName;
 
-    public LocationListDTO(Integer id, String nickname2, String address2, String postalCode2, String name) {}
+    public LocationListDTO(
+            Integer locationId,
+            String nickname,
+            String address,
+            String postalCode,
+            String cityName) {
+        this.locationId = locationId;
+        this.nickname = nickname;
+        this.address = address;
+        this.postalCode = postalCode;
+        this.cityName = cityName;
+    }
 
     public Integer getLocationId() {
         return locationId;
