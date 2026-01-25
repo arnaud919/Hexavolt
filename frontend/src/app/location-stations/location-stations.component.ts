@@ -34,9 +34,15 @@ export class LocationStationsComponent {
       return;
     }
 
-    this.stationService
-      .getByLocation(this.locationId)
-      .subscribe(stations => this.stations = stations);
+    this.stationService.getByLocation(this.locationId).subscribe({
+      next: (stations) => {
+        this.stations = stations; // ✅ API = tableau direct
+      },
+      error: (err) => {
+        console.error('Failed to load stations', err);
+        this.stations = [];
+      }
+    });
   }
-
 }
+

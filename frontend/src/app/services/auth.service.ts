@@ -81,4 +81,5 @@ export class AuthService {
   getProfile() {
     return this.http.get<Profile>(`${this.apiUrl}/me`, { withCredentials: true });
   }
+  
 }

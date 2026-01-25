@@ -14,38 +14,50 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hexavolt.backend.dto.LocationDetailDTO;
 import com.hexavolt.backend.dto.LocationListDTO;
 import com.hexavolt.backend.dto.StationLocationCreateDTO;
+import com.hexavolt.backend.dto.ChargingStationListDTO;
 import com.hexavolt.backend.service.StationLocationService;
+import com.hexavolt.backend.service.ChargingStationService;
 
 @RestController
 @RequestMapping("/api/locations")
 public class StationLocationController {
 
-    private final StationLocationService service;
+    private final StationLocationService locationService;
+    private final ChargingStationService chargingStationService;
 
-    public StationLocationController(StationLocationService service) {
-        this.service = service;
+    public StationLocationController(
+            StationLocationService locationService,
+            ChargingStationService chargingStationService
+    ) {
+        this.locationService = locationService;
+        this.chargingStationService = chargingStationService;
     }
 
     // 🔹 Liste des lieux de l'utilisateur
     @GetMapping
     public List<LocationListDTO> myLocations() {
-        return service.findMyLocations();
+        return locationService.findMyLocations();
     }
 
     // 🔹 Détail d’un lieu de l'utilisateur
     @GetMapping("/{id}")
     public LocationDetailDTO getMyLocation(@PathVariable Integer id) {
-        return service.findMyLocationById(id);
+        return locationService.findMyLocationById(id);
     }
 
     // 🔹 Création d’un lieu
     @PostMapping
     public ResponseEntity<Void> create(
             @RequestBody StationLocationCreateDTO dto) {
-        service.create(dto);
+        locationService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    
+    // 🔹 Liste des bornes d’un lieu
+    @GetMapping("/{id}/stations")
+    public List<ChargingStationListDTO> getStationsByLocation(
+            @PathVariable Integer id
+    ) {
+        return chargingStationService.findByLocationId(id);
+    }
 }
-

@@ -20,68 +20,67 @@ import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
-public class ChargingStationServiceImpl
-                implements ChargingStationService {
+public class ChargingStationServiceImpl implements ChargingStationService {
 
-        private final ChargingStationRepository stationRepo;
-        private final NicknameLocationRepository nicknameLocationRepo;
-        private final PowerRepository powerRepo;
+    private final ChargingStationRepository stationRepo;
+    private final NicknameLocationRepository nicknameLocationRepo;
+    private final PowerRepository powerRepo;
 
-        public ChargingStationServiceImpl(
-                        ChargingStationRepository stationRepo,
-                        NicknameLocationRepository nicknameLocationRepo,
-                        PowerRepository powerRepo) {
-                this.stationRepo = stationRepo;
-                this.nicknameLocationRepo = nicknameLocationRepo;
-                this.powerRepo = powerRepo;
-        }
+    public ChargingStationServiceImpl(
+            ChargingStationRepository stationRepo,
+            NicknameLocationRepository nicknameLocationRepo,
+            PowerRepository powerRepo) {
+        this.stationRepo = stationRepo;
+        this.nicknameLocationRepo = nicknameLocationRepo;
+        this.powerRepo = powerRepo;
+    }
 
-        @Override
-        public void create(ChargingStationCreateDTO dto) {
+    @Override
+    @Transactional
+    public void create(ChargingStationCreateDTO dto) {
 
-                User user = (User) SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getPrincipal();
+        User user = (User) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
 
-                NicknameLocation nl = nicknameLocationRepo
-                                .findByStationLocationIdAndUser(dto.getLocationId(), user)
-                                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
+        NicknameLocation nl = nicknameLocationRepo
+                .findByStationLocationIdAndUser(dto.getLocationId(), user)
+                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
 
-                Power power = powerRepo.findById(dto.getPowerId())
-                                .orElseThrow(() -> new IllegalArgumentException("Power not found"));
+        Power power = powerRepo.findById(dto.getPowerId())
+                .orElseThrow(() -> new IllegalArgumentException("Power not found"));
 
-                ChargingStation station = new ChargingStation();
-                station.setHourlyRate(dto.getHourlyRate());
-                station.setInstruction(dto.getInstruction());
-                station.setIsCustom(dto.isCustom());
-                station.setPower(power);
-                station.setLocation(nl.getStationLocation());
+        ChargingStation station = new ChargingStation();
+        station.setHourlyRate(dto.getHourlyRate());
+        station.setInstruction(dto.getInstruction());
+        station.setIsCustom(dto.isCustom());
+        station.setPower(power);
+        station.setLocation(nl.getStationLocation());
+        station.setLatitude(dto.getLatitude());
+        station.setLongitude(dto.getLongitude());
 
-                stationRepo.save(station);
-        }
+        stationRepo.save(station);
+    }
 
-        @Override
-        public List<ChargingStationListDTO> findByLocation(Integer locationId) {
+    @Override
+    public List<ChargingStationListDTO> findByLocationId(Integer locationId) {
 
-                User user = (User) SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getPrincipal();
+        User user = (User) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
 
-                // 🔒 Vérification de propriété du lieu
-                nicknameLocationRepo
-                                .findByStationLocationIdAndUser(locationId, user)
-                                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
+        nicknameLocationRepo
+                .findByStationLocationIdAndUser(locationId, user)
+                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
 
-                // 📦 Récupération des bornes du lieu
-                return stationRepo.findByLocationId(locationId).stream()
-                                .map(station -> new ChargingStationListDTO(
-                                                station.getId(),
-                                                station.getPower().getKvaPower(), // 👈 Power est une entité
-                                                station.getHourlyRate(),
-                                                station.getIsCustom()))
-                                .toList();
-        }
-
+        return stationRepo.findByLocationId(locationId).stream()
+                .map(station -> new ChargingStationListDTO(
+                        station.getId(),
+                        station.getPower().getKvaPower(),
+                        station.getHourlyRate(),
+                        station.getIsCustom()))
+                .toList();
+    }
 }

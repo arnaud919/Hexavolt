@@ -6,7 +6,9 @@ import com.hexavolt.backend.dto.ChargingStationCreateDTO;
 import com.hexavolt.backend.dto.ChargingStationListDTO;
 
 public interface ChargingStationService {
+    
     void create(ChargingStationCreateDTO dto);
 
-    List<ChargingStationListDTO> findByLocation(Integer locationId);
+    List<ChargingStationListDTO> findByLocationId(Integer locationId);
+
 }

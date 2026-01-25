@@ -1,5 +1,6 @@
 package com.hexavolt.backend.controller;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,18 +15,17 @@ import com.hexavolt.backend.service.ChargingStationService;
 @RequestMapping("/api/stations")
 public class ChargingStationController {
 
-    private final ChargingStationService service;
+    private final ChargingStationService chargingStationService;
 
-    public ChargingStationController(ChargingStationService service) {
-        this.service = service;
+    public ChargingStationController(ChargingStationService chargingStationService) {
+        this.chargingStationService = chargingStationService;
     }
 
+    // 🔹 Création d’une borne
     @PostMapping
     public ResponseEntity<Void> create(
             @RequestBody ChargingStationCreateDTO dto) {
-
-        service.create(dto);
+        chargingStationService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
-

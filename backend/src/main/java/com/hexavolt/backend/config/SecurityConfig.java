@@ -33,8 +33,10 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/auth/verify").permitAll()
             .requestMatchers("/api/auth/password/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/cities/search").permitAll()
+            
             .requestMatchers("/api/auth/me").authenticated()
             .requestMatchers("/api/locations/**").authenticated()
+            .requestMatchers(HttpMethod.POST, "/api/stations").authenticated()
             .anyRequest().authenticated() // à durcir plus tard
         )
         .httpBasic(basic -> basic.disable())

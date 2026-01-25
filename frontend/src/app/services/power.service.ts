@@ -12,6 +12,8 @@ export class PowerService {
   constructor(private http: HttpClient) { }
 
   getAll() {
-    return this.http.get<Power[]>(this.apiUrl);
+    return this.http.get<Power[]>(this.apiUrl, {
+      withCredentials: true
+    });
   }
 }
