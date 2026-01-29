@@ -1,35 +1,75 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+
+import { AuthService } from '../services/auth.service';
+import { LocationService } from '../services/location.service';
+import { ChargingStationService } from '../services/charging-station.service';
 
 @Component({
   selector: 'app-profile',
+  standalone: true,
   imports: [RouterLink, CommonModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
 export class ProfileComponent implements OnInit {
 
-  readonly profile;
 
-  private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
+  private readonly locationService = inject(LocationService);
+  private readonly stationService = inject(ChargingStationService);
 
-  constructor(private authService: AuthService) {
-    this.profile = this.authService.currentUser;
-  }
+  // 🔐 Profil utilisateur (déjà OK chez toi)
+  readonly profile = this.authService.currentUser;
+
+  // 📍 Lieux de charge
+  readonly locations = signal<any[] | null>(null);
+
+  // 🔌 Aperçu des bornes
+  readonly stationsPreview = signal<any[] | null>(null);
 
   ngOnInit(): void {
+    this.loadLocations();
+  }
 
-    // 🧪 TEST A — appel direct
-    this.http.get(
-      '/api/locations/1/stations',
-      { withCredentials: true }
-    ).subscribe({
-      next: res => console.log('TEST A OK', res),
-      error: err => console.log('TEST A ERROR', err)
+  private loadLocations(): void {
+    this.locationService.getMyLocations().subscribe({
+      next: locations => {
+        this.locations.set(locations);
+        this.loadStationsPreview(locations);
+      },
+      error: err => {
+        console.error('Erreur chargement lieux', err);
+        this.locations.set([]);
+        this.stationsPreview.set([]);
+      }
     });
   }
-}
 
+  private loadStationsPreview(locations: any[]): void {
+    if (!locations.length) {
+      this.stationsPreview.set([]);
+      return;
+    }
+
+    const firstLocation = locations[0];
+
+    if (!firstLocation.locationId) {
+      console.error('Location sans locationId', firstLocation);
+      this.stationsPreview.set([]);
+      return;
+    }
+
+    this.stationService.getByLocation(firstLocation.locationId).subscribe({
+      next: stations => {
+        this.stationsPreview.set(stations.slice(0, 3));
+      },
+      error: err => {
+        console.error('Erreur chargement bornes', err);
+        this.stationsPreview.set([]);
+      }
+    });
+  }
+
+}

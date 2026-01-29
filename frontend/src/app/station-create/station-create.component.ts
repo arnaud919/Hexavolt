@@ -63,11 +63,8 @@ export class StationCreateComponent implements OnInit {
       longitude: this.form.value.longitude,
     };
 
-    console.log('PAYLOAD ENVOYÉ', payload);
-
     this.stationService.create(payload).subscribe({
       next: () => {
-        console.log('BORNE CRÉÉE');
         this.router.navigate(['/locations', this.locationId, 'stations']);
       },
       error: err => console.error('ERREUR BACKEND', err),

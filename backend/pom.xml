@@ -19,7 +19,7 @@
   <description>Hexavolt Project</description>
 
   <properties>
-      <java.version>17</java.version>
+    <java.version>17</java.version>
   </properties>
 
   <dependencies>
@@ -160,9 +160,9 @@
     <activation>
       <file><exists>${project.basedir}/.env.maven</exists></file>
     </activation>
+
     <build>
       <plugins>
-
         <!-- Lire .env.properties tôt dans le cycle -->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -174,9 +174,8 @@
               <phase>initialize</phase>
               <goals><goal>read-project-properties</goal></goals>
               <configuration>
-                <encoding>UTF-8</encoding>
                     <files>
-                      <file>${project.basedir}/.env.properties</file>
+                      <file>${project.basedir}/.env.maven</file>
                     </files>
                     <quiet>false</quiet>
               </configuration>
@@ -220,11 +219,11 @@
     <!-- CI/Prod : lit les *variables d'environnement* du runner -->
     <profile>
       <id>env</id>
-      <activation>
+      <!-- <activation>
         <file>
           <missing>${project.basedir}/.env.properties</missing>
         </file>
-      </activation>
+      </activation> -->
       <build>
         <plugins>
           <plugin>

@@ -1,6 +1,7 @@
 package com.hexavolt.backend.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
 
 public class ChargingStationCreateDTO {
 
@@ -13,6 +14,8 @@ public class ChargingStationCreateDTO {
     private boolean isCustom;
     private Double latitude;
     private Double longitude;
+    private LocalTime startTime;
+    private LocalTime endTime;
 
     public String getName() {
         return name;
@@ -84,6 +87,22 @@ public class ChargingStationCreateDTO {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
     }
 
 }
