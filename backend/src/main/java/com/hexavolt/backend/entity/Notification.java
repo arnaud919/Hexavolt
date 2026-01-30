@@ -9,7 +9,7 @@ public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(length = 255, nullable = false)
     private String message;
@@ -21,7 +21,7 @@ public class Notification {
     private LocalDateTime timestamp;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
     @ManyToOne(optional = false)
@@ -42,11 +42,11 @@ public class Notification {
 
     // --- Getters and Setters ---
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

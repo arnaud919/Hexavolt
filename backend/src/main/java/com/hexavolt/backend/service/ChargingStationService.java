@@ -9,6 +9,6 @@ public interface ChargingStationService {
     
     void create(ChargingStationCreateDTO dto);
 
-    List<ChargingStationListDTO> findByLocationId(Integer locationId);
+    List<ChargingStationListDTO> findByLocationId(Long id);
 
 }

@@ -10,7 +10,7 @@ public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "start_datetime", nullable = false)
     private LocalDateTime startDateTime;
@@ -25,7 +25,7 @@ public class Reservation {
     private String receipt;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
     @ManyToOne(optional = false)
@@ -36,7 +36,8 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(LocalDateTime startDateTime, LocalDateTime endDateTime, BigDecimal amount, String receipt, User user, StatusReservation status) {
+    public Reservation(LocalDateTime startDateTime, LocalDateTime endDateTime, BigDecimal amount, String receipt,
+            User user, StatusReservation status) {
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.amount = amount;
@@ -46,11 +47,11 @@ public class Reservation {
     }
 
     // --- Getters and Setters ---
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

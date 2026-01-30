@@ -30,7 +30,7 @@ public record RegisterRequestDTO(
     LocalDate birthdate,
 
     @NotNull(message = "La ville est obligatoire")
-    Integer cityId,
+    Long cityId,
 
     @NotBlank(message = "L'email est obligatoire")
     @Email(message = "L'email doit être valide")

@@ -92,7 +92,7 @@ public class UserTokenServiceImpl implements UserTokenService {
 
     @Override
     @Transactional
-    public void invalidateAllResetTokens(Integer userId) {
+    public void invalidateAllResetTokens(Long userId) {
         repo.deleteByUser_IdAndType(userId, TokenType.RESET_PASSWORD);
     }
 }

@@ -82,7 +82,7 @@ public class StationLocationServiceImpl implements StationLocationService {
         }
 
         @Override
-        public LocationDetailDTO findMyLocationById(Integer locationId) {
+        public LocationDetailDTO findMyLocationById(Long locationId) {
 
                 User user = (User) SecurityContextHolder
                                 .getContext()

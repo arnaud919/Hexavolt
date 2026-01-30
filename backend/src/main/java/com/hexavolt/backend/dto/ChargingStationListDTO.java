@@ -4,13 +4,13 @@ import java.math.BigDecimal;
 
 public class ChargingStationListDTO {
 
-    private Integer id;
-    private BigDecimal  power;
+    private Long id;
+    private BigDecimal power;
     private BigDecimal hourlyRate;
     private boolean isCustom;
 
-    public ChargingStationListDTO(Integer id,
-            BigDecimal  power,
+    public ChargingStationListDTO(Long id,
+            BigDecimal power,
             BigDecimal hourlyRate,
             boolean isCustom) {
         this.id = id;
@@ -19,11 +19,11 @@ public class ChargingStationListDTO {
         this.isCustom = isCustom;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public BigDecimal  getPower() {
+    public BigDecimal getPower() {
         return power;
     }
 

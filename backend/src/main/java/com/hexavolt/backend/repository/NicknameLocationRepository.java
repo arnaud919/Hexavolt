@@ -8,9 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.hexavolt.backend.entity.NicknameLocation;
 import com.hexavolt.backend.entity.User;
 
-public interface NicknameLocationRepository extends JpaRepository<NicknameLocation, Integer> {
+public interface NicknameLocationRepository extends JpaRepository<NicknameLocation, Long> {
   // par lieu (stationLocation)
-  List<NicknameLocation> findByStationLocation_Id(Integer stationLocationId);
+  List<NicknameLocation> findByStationLocation_Id(Long stationLocationId);
 
   // par utilisateur
   List<NicknameLocation> findByUser(User user);
@@ -18,13 +18,13 @@ public interface NicknameLocationRepository extends JpaRepository<NicknameLocati
   // un enregistrement précis (utile avec ta contrainte UNIQUE (user_id,
   // station_location))
   Optional<NicknameLocation> findByStationLocationIdAndUser(
-      Integer stationLocationId,
+      Long locationId,
       User user);
 
   // contrôles d’existence (pour éviter les doublons côté service)
-  boolean existsByUser_IdAndStationLocation_Id(Integer userId, Integer stationLocationId);
+  boolean existsByUser_IdAndStationLocation_Id(Long userId, Long stationLocationId);
 
-  boolean existsByUser_IdAndNicknameIgnoreCaseAndStationLocation_Id(Integer userId,
+  boolean existsByUser_IdAndNicknameIgnoreCaseAndStationLocation_Id(Long userId,
       String nickname,
-      Integer stationLocationId);
+      Long stationLocationId);
 }

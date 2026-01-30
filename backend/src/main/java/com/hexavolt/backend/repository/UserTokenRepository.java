@@ -13,7 +13,7 @@ public interface UserTokenRepository extends JpaRepository<UserToken, Long> {
     
     Optional<UserToken> findByToken(String token);
 
-    long deleteByUser_IdAndType(Integer userId, TokenType type);
+    long deleteByUser_IdAndType(Long userId, TokenType type);
 
     boolean existsByUserAndTypeAndCreatedAtAfter(User user, UserToken.TokenType type, LocalDateTime after);
 }

@@ -10,13 +10,13 @@ import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "notification_type", uniqueConstraints = {
-    @UniqueConstraint(columnNames = "label")
+        @UniqueConstraint(columnNames = "label")
 })
 public class NotificationType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(length = 64, nullable = false)
     private String label;
@@ -31,11 +31,11 @@ public class NotificationType {
 
     // --- Getters and Setters ---
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

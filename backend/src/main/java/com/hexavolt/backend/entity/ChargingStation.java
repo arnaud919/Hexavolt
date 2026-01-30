@@ -9,7 +9,7 @@ public class ChargingStation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "hourly_rate", precision = 4, scale = 2, nullable = false)
     private BigDecimal hourlyRate;
@@ -56,11 +56,11 @@ public class ChargingStation {
         this.isCustom = isCustom;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

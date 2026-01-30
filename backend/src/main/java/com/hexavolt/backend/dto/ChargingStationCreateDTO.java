@@ -6,9 +6,9 @@ import java.time.LocalTime;
 public class ChargingStationCreateDTO {
 
     private String name;
-    private Integer powerId;
+    private Long powerId;
     private BigDecimal pricePerHour;
-    private Integer locationId;
+    private Long locationId;
     private BigDecimal hourlyRate;
     private String instruction;
     private boolean isCustom;
@@ -33,11 +33,11 @@ public class ChargingStationCreateDTO {
         this.pricePerHour = pricePerHour;
     }
 
-    public Integer getLocationId() {
+    public Long getLocationId() {
         return locationId;
     }
 
-    public void setLocationId(Integer locationId) {
+    public void setLocationId(Long locationId) {
         this.locationId = locationId;
     }
 
@@ -65,11 +65,11 @@ public class ChargingStationCreateDTO {
         this.isCustom = isCustom;
     }
 
-    public Integer getPowerId() {
+    public Long getPowerId() {
         return powerId;
     }
 
-    public void setPowerId(Integer powerId) {
+    public void setPowerId(Long powerId) {
         this.powerId = powerId;
     }
 

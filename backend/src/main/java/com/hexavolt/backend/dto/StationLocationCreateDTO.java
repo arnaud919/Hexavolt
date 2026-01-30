@@ -4,7 +4,7 @@ public class StationLocationCreateDTO {
     private String nickname;
     private String address;
     private String postalCode;
-    private Integer cityId;
+    private Long cityId;
 
     public String getNickname() {
         return nickname;
@@ -24,10 +24,10 @@ public class StationLocationCreateDTO {
     public void setPostalCode(String postalCode) {
         this.postalCode = postalCode;
     }
-    public Integer getCityId() {
+    public Long getCityId() {
         return cityId;
     }
-    public void setCityId(Integer cityId) {
+    public void setCityId(Long cityId) {
         this.cityId = cityId;
     }
 }

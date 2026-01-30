@@ -55,7 +55,7 @@ class AuthServiceImplTest {
     @Test
     void requestPasswordReset_shouldCreateToken_andSendMail_ifUserExists() {
         User user = new User();
-        user.setId(42);
+        user.setId(42L);
         user.setEmail("user@example.com");
         when(userRepo.findByEmail("user@example.com")).thenReturn(Optional.of(user));
 
@@ -66,7 +66,7 @@ class AuthServiceImplTest {
 
         service.requestPasswordReset("user@example.com");
 
-        verify(tokenService).invalidateAllResetTokens(42);
+        verify(tokenService).invalidateAllResetTokens(42L);
         verify(tokenService).createResetPasswordToken(eq(user), any(Duration.class));
 
         ArgumentCaptor<String> linkCap = ArgumentCaptor.forClass(String.class);
@@ -80,7 +80,7 @@ class AuthServiceImplTest {
     void resetPassword_shouldValidateToken_CheckPolicy_Encode_Save_Consume() {
         // given
         User user = new User();
-        user.setId(7);
+        user.setId(7L);
         user.setEmail("user@example.com");
         user.setFirstName("Jean");
         user.setLastName("Dupont");

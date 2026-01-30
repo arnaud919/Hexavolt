@@ -27,8 +27,7 @@ public class StationLocationController {
 
     public StationLocationController(
             StationLocationService locationService,
-            ChargingStationService chargingStationService
-    ) {
+            ChargingStationService chargingStationService) {
         this.locationService = locationService;
         this.chargingStationService = chargingStationService;
     }
@@ -41,7 +40,7 @@ public class StationLocationController {
 
     // 🔹 Détail d’un lieu de l'utilisateur
     @GetMapping("/{id}")
-    public LocationDetailDTO getMyLocation(@PathVariable Integer id) {
+    public LocationDetailDTO getMyLocation(@PathVariable Long id) {
         return locationService.findMyLocationById(id);
     }
 
@@ -56,8 +55,7 @@ public class StationLocationController {
     // 🔹 Liste des bornes d’un lieu
     @GetMapping("/{id}/stations")
     public List<ChargingStationListDTO> getStationsByLocation(
-            @PathVariable Integer id
-    ) {
+            @PathVariable Long id) {
         return chargingStationService.findByLocationId(id);
     }
 }

@@ -12,13 +12,13 @@ import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "nickname_location", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "station_location"})
+        @UniqueConstraint(columnNames = { "user_id", "station_location" })
 })
 public class NicknameLocation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(length = 100, nullable = false)
     private String nickname;
@@ -32,7 +32,8 @@ public class NicknameLocation {
     private User user;
 
     // --- Constructors ---
-    public NicknameLocation() {}
+    public NicknameLocation() {
+    }
 
     public NicknameLocation(String nickname, StationLocation stationLocation, User user) {
         this.nickname = nickname;
@@ -41,11 +42,11 @@ public class NicknameLocation {
     }
 
     // --- Getters and Setters ---
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

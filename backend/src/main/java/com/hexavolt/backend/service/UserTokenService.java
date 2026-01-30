@@ -15,5 +15,5 @@ public interface UserTokenService {
   boolean canResendActivation(User user, Duration ttl);
 
   void consume(UserToken token);
-  void invalidateAllResetTokens(Integer userId);
+  void invalidateAllResetTokens(Long userId);
 }

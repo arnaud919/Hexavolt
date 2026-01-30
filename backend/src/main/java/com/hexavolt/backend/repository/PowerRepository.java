@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.hexavolt.backend.entity.Power;
 
-public interface PowerRepository extends JpaRepository<Power, Integer> {
+public interface PowerRepository extends JpaRepository<Power, Long> {
   // Optional<Power> findByKw(Integer kvaPower);
 }

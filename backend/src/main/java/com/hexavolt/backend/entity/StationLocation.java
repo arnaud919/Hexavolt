@@ -15,7 +15,7 @@ public class StationLocation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(length = 255, nullable = false)
     private String address;
@@ -32,7 +32,8 @@ public class StationLocation {
     private User user;
 
     // --- Constructors ---
-    public StationLocation() {}
+    public StationLocation() {
+    }
 
     public StationLocation(String address, String postalCode, City city, User user) {
         this.address = address;
@@ -42,11 +43,11 @@ public class StationLocation {
     }
 
     // --- Getters and Setters ---
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

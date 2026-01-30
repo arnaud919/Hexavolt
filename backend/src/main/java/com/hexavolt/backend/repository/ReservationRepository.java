@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.hexavolt.backend.entity.Reservation;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Integer> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
   // @Query("""
   //   select (count(r)>0) from Reservation r

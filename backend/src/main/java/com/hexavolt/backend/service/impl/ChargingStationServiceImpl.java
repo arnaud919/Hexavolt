@@ -85,7 +85,7 @@ public class ChargingStationServiceImpl implements ChargingStationService {
         }
 
         @Override
-        public List<ChargingStationListDTO> findByLocationId(Integer locationId) {
+        public List<ChargingStationListDTO> findByLocationId(Long locationId) {
 
                 User user = (User) SecurityContextHolder
                                 .getContext()

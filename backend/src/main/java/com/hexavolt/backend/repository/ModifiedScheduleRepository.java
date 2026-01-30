@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.hexavolt.backend.entity.ModifiedSchedule;
 
-public interface ModifiedScheduleRepository extends JpaRepository<ModifiedSchedule, Integer> {
+public interface ModifiedScheduleRepository extends JpaRepository<ModifiedSchedule, Long> {
   // List<ModifiedSchedule> findByStation_IdAndDate(Integer stationId, LocalDate date);
 }
 

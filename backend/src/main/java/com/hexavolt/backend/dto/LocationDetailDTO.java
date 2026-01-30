@@ -2,13 +2,13 @@ package com.hexavolt.backend.dto;
 
 public class LocationDetailDTO {
 
-    private Integer locationId;
+    private Long locationId;
     private String nickname;
     private String address;
     private String postalCode;
     private String cityName;
 
-    public LocationDetailDTO(Integer locationId,
+    public LocationDetailDTO(Long locationId,
                              String nickname,
                              String address,
                              String postalCode,
@@ -20,7 +20,7 @@ public class LocationDetailDTO {
         this.cityName = cityName;
     }
 
-    public Integer getLocationId() { return locationId; }
+    public Long getLocationId() { return locationId; }
     public String getNickname() { return nickname; }
     public String getAddress() { return address; }
     public String getPostalCode() { return postalCode; }

@@ -11,6 +11,6 @@ public interface StationLocationService {
 
     List<LocationListDTO> findMyLocations();
 
-    LocationDetailDTO findMyLocationById(Integer locationId);
+    LocationDetailDTO findMyLocationById(Long id);
 
 }
