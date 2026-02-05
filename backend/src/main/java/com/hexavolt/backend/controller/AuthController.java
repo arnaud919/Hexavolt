@@ -20,7 +20,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,11 +27,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final UserRepository userRepo;
 
-    public AuthController(AuthService authService, UserRepository userRepo) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.userRepo = userRepo;
     }
 
     @PostMapping("/register")
@@ -63,7 +60,7 @@ public class AuthController {
 
         ResponseCookie cookie = ResponseCookie.from("access_token", token)
                 .httpOnly(true)
-                .secure(false) // ✅ HTTP en local
+                .secure(true) // ✅ HTTP en local
                 .sameSite("Lax") // ✅ INDISPENSABLE
                 .path("/")
                 .maxAge(Duration.ofHours(2))
@@ -71,18 +68,6 @@ public class AuthController {
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/reset/request")
-    public ResponseEntity<Void> requestReset(@RequestParam String email) {
-        authService.requestPasswordReset(email);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/reset/confirm")
-    public ResponseEntity<Void> resetPassword(@RequestParam String token, @RequestParam String password) {
-        authService.resetPassword(token, password);
         return ResponseEntity.ok().build();
     }
 

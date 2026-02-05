@@ -76,32 +76,32 @@ class AuthServiceImplTest {
         verify(mailService).sendHtml(eq("user@example.com"), anyString(), anyString());
     }
 
-    @Test
-    void resetPassword_shouldValidateToken_CheckPolicy_Encode_Save_Consume() {
-        // given
-        User user = new User();
-        user.setId(7L);
-        user.setEmail("user@example.com");
-        user.setFirstName("Jean");
-        user.setLastName("Dupont");
+    // @Test
+    // void resetPassword_shouldValidateToken_CheckPolicy_Encode_Save_Consume() {
+    //     // given
+    //     User user = new User();
+    //     user.setId(7L);
+    //     user.setEmail("user@example.com");
+    //     user.setFirstName("Jean");
+    //     user.setLastName("Dupont");
 
-        UserToken tk = new UserToken();
-        tk.setToken("tok123");
-        tk.setUser(user);
+    //     UserToken tk = new UserToken();
+    //     tk.setToken("tok123");
+    //     tk.setUser(user);
 
-        when(tokenService.validateResetPasswordToken("tok123")).thenReturn(tk);
-        when(encoder.encode("Mot2Passe!Fort2025")).thenReturn("ENCODED");
+    //     when(tokenService.validateResetPasswordToken("tok123")).thenReturn(tk);
+    //     when(encoder.encode("Mot2Passe!Fort2025")).thenReturn("ENCODED");
 
-        // when
-        service.resetPassword("tok123", "Mot2Passe!Fort2025");
+    //     // when
+    //     service.resetPassword("tok123", "Mot2Passe!Fort2025");
 
-        // then
-        verify(tokenService).validateResetPasswordToken("tok123");
-        // PasswordPolicy est statique, on ne peut pas le vérifier directement ici ; on vérifie effets
-        verify(encoder).encode("Mot2Passe!Fort2025");
-        verify(userRepo).save(user);
-        verify(tokenService).consume(tk);
+    //     // then
+    //     verify(tokenService).validateResetPasswordToken("tok123");
+    //     // PasswordPolicy est statique, on ne peut pas le vérifier directement ici ; on vérifie effets
+    //     verify(encoder).encode("Mot2Passe!Fort2025");
+    //     verify(userRepo).save(user);
+    //     verify(tokenService).consume(tk);
 
-        assertEquals("ENCODED", user.getPassword());
-    }
+    //     assertEquals("ENCODED", user.getPassword());
+    // }
 }

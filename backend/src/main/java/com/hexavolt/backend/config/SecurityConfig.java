@@ -2,6 +2,7 @@ package com.hexavolt.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,29 +25,38 @@ public class SecurityConfig {
   }
 
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
+  @Order(1)
+  SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
+
     http
-        .csrf(csrf -> csrf.disable()) // API stateless
+        .securityMatcher("/api/**") // 🔥 CLÉ ABSOLUE
+        .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth
+
+            // Auth publique
             .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/auth/verify/resend").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/auth/verify").permitAll()
             .requestMatchers("/api/auth/password/**").permitAll()
+
+            // Auth protégée
+            .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
+
+            // Public
             .requestMatchers(HttpMethod.GET, "/api/cities/search").permitAll()
-            
-            .requestMatchers("/api/auth/me").authenticated()
+
+            // Métier
+            .requestMatchers("/api/profile/**").authenticated()
             .requestMatchers("/api/locations/**").authenticated()
             .requestMatchers(HttpMethod.POST, "/api/stations").authenticated()
-            .anyRequest().authenticated() // à durcir plus tard
-        )
+
+            .anyRequest().authenticated())
+        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .httpBasic(basic -> basic.disable())
         .formLogin(form -> form.disable())
-        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .csrf(csrf -> csrf.disable())
         .exceptionHandling(ex -> ex
-            .authenticationEntryPoint((request, response, authException) -> {
-              response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            }))
+            .authenticationEntryPoint(
+                (request, response, authException) -> response.setStatus(HttpServletResponse.SC_UNAUTHORIZED)))
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();

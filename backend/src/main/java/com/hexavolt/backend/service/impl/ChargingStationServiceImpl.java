@@ -8,11 +8,9 @@ import org.springframework.stereotype.Service;
 import com.hexavolt.backend.dto.ChargingStationCreateDTO;
 import com.hexavolt.backend.dto.ChargingStationListDTO;
 import com.hexavolt.backend.entity.ChargingStation;
-import com.hexavolt.backend.entity.DayOfWeek;
 import com.hexavolt.backend.entity.NicknameLocation;
 import com.hexavolt.backend.entity.Power;
 import com.hexavolt.backend.entity.User;
-import com.hexavolt.backend.entity.WeeklySchedule;
 import com.hexavolt.backend.repository.ChargingStationRepository;
 import com.hexavolt.backend.repository.DayOfWeekRepository;
 import com.hexavolt.backend.repository.NicknameLocationRepository;
@@ -62,6 +60,7 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 .orElseThrow(() -> new IllegalArgumentException("Power not found"));
 
                 ChargingStation station = new ChargingStation();
+                station.setName(dto.getName());
                 station.setHourlyRate(dto.getHourlyRate());
                 station.setInstruction(dto.getInstruction());
                 station.setIsCustom(dto.isCustom());
@@ -99,6 +98,7 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 return stationRepo.findByLocationId(locationId).stream()
                                 .map(station -> new ChargingStationListDTO(
                                                 station.getId(),
+                                                station.getName(),
                                                 station.getPower().getKvaPower(),
                                                 station.getHourlyRate(),
                                                 station.getIsCustom()))

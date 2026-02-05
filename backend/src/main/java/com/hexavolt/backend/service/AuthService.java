@@ -16,8 +16,6 @@ public interface AuthService {
 
   void requestPasswordReset(String email);
 
-  void resetPassword(String token, String newPassword);
-
   void confirmPasswordReset(ResetPasswordConfirmDTO dto);
 
   ProfileDTO getProfile();

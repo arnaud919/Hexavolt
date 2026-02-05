@@ -1,0 +1,38 @@
+package com.hexavolt.backend.dto;
+import jakarta.validation.constraints.*;
+
+public class ProfileUpdateRequestDTO {
+
+    private String firstName;
+    private String lastName;
+    private String phone;
+    private String address;
+    private String postalCode;
+    private Long cityId;
+    private LocalDate birthdate;
+
+    public ProfileUpdateRequest() {}
+
+    @NotBlank
+    @Size(max = 50)
+    private String firstName;
+
+    @NotBlank
+    @Size(max = 50)
+    private String lastName;
+
+    @Pattern(regexp = "^[0-9+ ]{8,15}$")
+    private String phone;
+
+    @Size(max = 255)
+    private String address;
+
+    @Pattern(regexp = "^[0-9]{4,5}$")
+    private String postalCode;
+
+    @NotNull
+    private Long cityId;
+
+    @Past
+    private LocalDate birthdate;
+}

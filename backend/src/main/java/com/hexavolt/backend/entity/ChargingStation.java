@@ -11,6 +11,9 @@ public class ChargingStation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = true, length = 100)
+    private String name;
+
     @Column(name = "hourly_rate", precision = 4, scale = 2, nullable = false)
     private BigDecimal hourlyRate;
 
@@ -43,8 +46,10 @@ public class ChargingStation {
     public ChargingStation() {
     }
 
-    public ChargingStation(BigDecimal hourlyRate, String photoName, String videoName, Double latitude, Double longitude,
+    public ChargingStation(String name, BigDecimal hourlyRate, String photoName, String videoName, Double latitude,
+            Double longitude,
             String instruction, Power power, StationLocation location, Boolean isCustom) {
+        this.name = name;
         this.hourlyRate = hourlyRate;
         this.photoName = photoName;
         this.videoName = videoName;
@@ -62,6 +67,14 @@ public class ChargingStation {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public BigDecimal getHourlyRate() {

@@ -31,6 +31,7 @@ export class StationCreateComponent implements OnInit {
 
     this.form = this.fb.group({
       powerId: [null, Validators.required],
+      name: [''],
       hourlyRate: [null, [Validators.required, Validators.min(0.1)]],
       isCustom: [false],
       instruction: [''],
@@ -55,6 +56,7 @@ export class StationCreateComponent implements OnInit {
 
     const payload = {
       locationId: this.locationId,
+      name: this.form.value.name,
       powerId: Number(this.form.value.powerId),
       hourlyRate: Number(this.form.value.hourlyRate),
       instruction: this.form.value.instruction || undefined,

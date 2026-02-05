@@ -217,27 +217,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
-    public void resetPassword(String token, String newPassword) {
-        // 1) Valider le jeton
-        UserToken tk = tokenService.validateResetPasswordToken(token);
-        User user = tk.getUser();
-
-        // 2) Politique de mot de passe (FR) — prénom + nom
-        String fullName = ((user.getFirstName() == null ? "" : user.getFirstName()) + " " +
-                (user.getLastName() == null ? "" : user.getLastName())).trim();
-        PasswordPolicy.assertNoPersonalInfo(newPassword, user.getEmail(), fullName);
-        PasswordPolicy.assertStrongEnough(newPassword);
-
-        // 3) Mettre à jour le mot de passe
-        user.setPassword(encoder.encode(newPassword));
-        userRepo.save(user);
-
-        // 4) Consommer le jeton (usage unique)
-        tokenService.consume(tk);
-    }
-
-    @Override
     public ProfileDTO getProfile() {
 
         Authentication authentication =

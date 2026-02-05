@@ -13,17 +13,16 @@ export class LocationService {
 
   constructor(private http: HttpClient) {}
 
+  getMyLocations() {
+    return this.http.get<LocationList[]>(this.apiUrl, {
+      withCredentials: true
+    });
+  }
+  
   create(payload: LocationCreate) {
     return this.http.post(this.apiUrl, payload, {
       withCredentials: true
     });
   }
 
-  getMyLocations() {
-    return this.http.get<LocationList[]>(this.apiUrl, {
-      withCredentials: true
-    });
-  }
-
-  
 }

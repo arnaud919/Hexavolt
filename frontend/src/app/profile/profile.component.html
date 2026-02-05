@@ -5,7 +5,7 @@
     <h1>{{ p.firstName }} {{ p.lastName }}</h1>
     <p>{{ p.email }}</p>
     <p>
-      <a routerLink="modify-profile" class="text-center md:text-left underline">
+      <a routerLink="/profile/edit" class="text-center md:text-left underline">
         Modifier mon profil
       </a>
     </p>
@@ -29,7 +29,7 @@
 
     <div *ngIf="locations()?.length; else noLocations" class="grid gap-6 md:grid-cols-2">
 
-      <div *ngFor="let location of locations()?.slice(0, 3)" class="cards p-5 rounded-lg leading-8">
+      <div *ngFor="let location of locations()?.slice(0, 3)" class="cards p-5 rounded-sm leading-8">
         <p class="font-bold">
           {{ location.nickname || 'Lieu de charge' }}
         </p>
@@ -67,9 +67,12 @@
 
     <div *ngIf="stationsPreview()?.length; else noStations" class="grid gap-6 md:grid-cols-3">
 
-      <div *ngFor="let station of stationsPreview()?.slice(0, 3)" class="cards p-5 rounded-lg leading-8">
+      <div *ngFor="let station of stationsPreview()?.slice(0, 3)" class="cards p-5 rounded-sm leading-8">
         <p class="font-bold">
-          {{ station.kvaPower }} kVA
+          {{ station.name }}
+        </p>
+        <p class="font-bold">
+          {{ station.power }} kVA
         </p>
         <p class="text-sm">
           {{ station.hourlyRate }} € / heure
@@ -97,7 +100,7 @@
   <div class="mb-10">
     <h2 class="font-bold">Réservations en cours</h2>
     <hr>
-    <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
+    <div class="cards p-5 mx-2 rounded-sm leading-9 w-5/6 md:w-1/3">
       <p class="font-bold">sdsqsq</p>
       <p>qsdsqd</p>
       <p>zdsqdc</p>
@@ -110,7 +113,7 @@
   <div class="mb-10">
     <h2 class="font-bold">Demandes à traiter</h2>
     <hr>
-    <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
+    <div class="cards p-5 mx-2 rounded-sm leading-9 w-5/6 md:w-1/3">
       <p class="font-bold">sdsqsq</p>
       <p>qsdsqd</p>
       <p>zdsqdc</p>
@@ -123,7 +126,7 @@
   <div class="mb-10">
     <h2 class="font-bold">Réservations passées</h2>
     <hr>
-    <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
+    <div class="cards p-5 mx-2 rounded-sm leading-9 w-5/6 md:w-1/3">
       <p class="font-bold">sdsqsq</p>
       <p>qsdsqd</p>
       <p>zdsqdc</p>
@@ -136,7 +139,7 @@
   <div class="mb-10">
     <h2 class="font-bold">Demandes traitées</h2>
     <hr>
-    <div class="cards p-5 mx-2 rounded-lg leading-9 w-5/6 md:w-1/3">
+    <div class="cards p-5 mx-2 rounded-sm leading-9 w-5/6 md:w-1/3">
       <p class="font-bold">sdsqsq</p>
       <p>qsdsqd</p>
       <p>zdsqdc</p>

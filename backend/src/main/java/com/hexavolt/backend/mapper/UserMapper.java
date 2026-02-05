@@ -1,5 +1,6 @@
 package com.hexavolt.backend.mapper;
 
+import com.hexavolt.backend.dto.ProfileResponseDTO;
 import com.hexavolt.backend.dto.RegisterRequestDTO;
 import com.hexavolt.backend.dto.UserResponseDTO;
 import com.hexavolt.backend.entity.City;
@@ -9,7 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
 
-  /** Construit l'entité User à partir du RegisterRequestDTO + City + mot de passe déjà encodé. */
+  /**
+   * Construit l'entité User à partir du RegisterRequestDTO + City + mot de passe
+   * déjà encodé.
+   */
   public User toEntity(RegisterRequestDTO dto, City city, String encodedPassword) {
     User u = new User();
     u.setFirstName(trim(dto.firstName()));
@@ -20,8 +24,8 @@ public class UserMapper {
     u.setBirthdate(dto.birthdate());
     u.setCity(city);
     u.setEmail(trimLower(dto.email()));
-    u.setPassword(encodedPassword);       // hashé en amont
-    u.setEmailIsValid(false);             // inscription -> non validé
+    u.setPassword(encodedPassword); // hashé en amont
+    u.setEmailIsValid(false); // inscription -> non validé
     return u;
   }
 
@@ -37,17 +41,41 @@ public class UserMapper {
         user.getBirthdate(),
         user.getCity() != null ? user.getCity().getId() : null,
         user.getEmail(),
-        user.getEmailIsValid()
-    );
+        user.getEmailIsValid());
+  }
+
+  public ProfileResponseDTO toProfileResponse(User user) {
+    ProfileResponseDTO dto = new ProfileResponseDTO();
+    dto.setId(user.getId());
+    dto.setFirstName(user.getFirstName());
+    dto.setLastName(user.getLastName());
+    dto.setEmail(user.getEmail());
+    dto.setPhone(user.getPhone());
+    dto.setAddress(user.getAddress());
+    dto.setPostalCode(user.getPostalCode());
+    dto.setBirthdate(user.getBirthdate());
+
+    if (user.getCity() != null) {
+      dto.setCityId(user.getCity().getId());
+      dto.setCityName(user.getCity().getName());
+    }
+
+    return dto;
   }
 
   // ------- petites aides “propres” -------
-  private static String trim(String s) { return s == null ? null : s.trim(); }
-  private static String trimLower(String s) { return s == null ? null : s.trim().toLowerCase(); }
+  private static String trim(String s) {
+    return s == null ? null : s.trim();
+  }
+
+  private static String trimLower(String s) {
+    return s == null ? null : s.trim().toLowerCase();
+  }
+
   private static String trimToNull(String s) {
-    if (s == null) return null;
+    if (s == null)
+      return null;
     String t = s.trim();
     return t.isEmpty() ? null : t;
   }
 }
-

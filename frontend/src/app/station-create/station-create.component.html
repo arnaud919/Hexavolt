@@ -1,14 +1,35 @@
 <h1 class="text-center">Ajouter une borne</h1>
 
-<form [formGroup]="form" (ngSubmit)="submit()" class="max-w-2xl mx-auto p-6 m-10 space-y-6 flex flex-col">
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  class="max-w-2xl mx-auto p-6 m-10 space-y-6 flex flex-col"
+>
+
+  <!-- Nom de la borne -->
+  <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
+    <label for="name" class="w-full md:w-40 text-gray-700">
+      Nom de la borne
+    </label>
+    <input
+      id="name"
+      type="text"
+      formControlName="name"
+      placeholder="Ex : Borne garage maison"
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white"
+    />
+  </div>
 
   <!-- Puissance -->
   <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
     <label for="powerId" class="w-full md:w-40 text-gray-700">
       Puissance
     </label>
-    <select id="powerId" formControlName="powerId"
-      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white">
+    <select
+      id="powerId"
+      formControlName="powerId"
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white"
+    >
       <option value="">-- Choisir --</option>
       <option *ngFor="let p of powers" [value]="p.id">
         {{ p.kvaPower }} kVA
@@ -21,8 +42,13 @@
     <label for="hourlyRate" class="w-full md:w-40 text-gray-700">
       Prix par heure (€)
     </label>
-    <input id="hourlyRate" type="number" step="0.1" formControlName="hourlyRate"
-      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
+    <input
+      id="hourlyRate"
+      type="number"
+      step="0.1"
+      formControlName="hourlyRate"
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white"
+    />
   </div>
 
   <!-- Borne personnalisée -->
@@ -38,9 +64,13 @@
     <label for="instruction" class="w-full md:w-40 text-gray-700">
       Instructions
     </label>
-    <textarea id="instruction" formControlName="instruction" rows="3"
+    <textarea
+      id="instruction"
+      formControlName="instruction"
+      rows="3"
       class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-lg bg-white resize-none"
-      placeholder="Optionnel"></textarea>
+      placeholder="Optionnel"
+    ></textarea>
   </div>
 
   <h2 class="font-bold mt-6">Position de la borne</h2>

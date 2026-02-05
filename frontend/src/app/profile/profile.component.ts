@@ -15,12 +15,11 @@ import { ChargingStationService } from '../services/charging-station.service';
 })
 export class ProfileComponent implements OnInit {
 
-
   private readonly authService = inject(AuthService);
   private readonly locationService = inject(LocationService);
   private readonly stationService = inject(ChargingStationService);
 
-  // 🔐 Profil utilisateur (déjà OK chez toi)
+  // 🔐 Profil utilisateur
   readonly profile = this.authService.currentUser;
 
   // 📍 Lieux de charge

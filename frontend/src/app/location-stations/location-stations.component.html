@@ -1,32 +1,72 @@
-<h1>Bornes du lieu</h1>
+<div class="mb-12">
+  <h2 class="font-bold">Bornes du lieu</h2>
+  <hr class="my-3">
 
-<div *ngIf="stations.length === 0">
-  Aucune borne pour ce lieu.
+  <div *ngIf="stations?.length; else noStations" class="grid gap-6 md:grid-cols-3">
+
+    <div
+      *ngFor="let station of stations"
+      class="cards p-5 rounded-lg leading-8"
+    >
+      <!-- Nom -->
+      <p class="font-bold">
+        {{ station.name || 'Borne privée' }}
+      </p>
+
+      <!-- Puissance -->
+      <p class="font-bold">
+        {{ station.power }} kVA
+      </p>
+
+      <!-- Prix -->
+      <p class="text-lg">
+        {{ station.hourlyRate }} € / heure
+      </p>
+
+      <!-- Indication personnalisée -->
+      <p
+        *ngIf="station.isCustom"
+        class="text-sm"
+      >
+        Borne personnalisée
+      </p>
+
+      <!-- Photo -->
+      <img
+        *ngIf="station.photoName"
+        [src]="'/api/files/' + station.photoName"
+        alt="Photo de la borne"
+        class="mt-3 rounded-md"
+      />
+
+      <!-- Vidéo -->
+      <video
+        *ngIf="station.videoName"
+        controls
+        class="mt-3 rounded-md w-full"
+      >
+        <source
+          [src]="'/api/files/' + station.videoName"
+          type="video/mp4"
+        >
+      </video>
+
+    </div>
+
+  </div>
+
+  <ng-template #noStations>
+    <p class="text-lg text-gray-600 mt-4">
+      Aucune borne enregistrée pour ce lieu.
+    </p>
+  </ng-template>
+
+  <div class="flex justify-center mt-8">
+    <button
+      [routerLink]="['/locations', locationId, 'stations', 'new']"
+      class="button"
+    >
+      Ajouter une borne
+    </button>
+  </div>
 </div>
-
-<div *ngFor="let station of stations" class="station-card">
-
-  <!-- 🖼 Photo (optionnelle) -->
-  <img
-    *ngIf="station.photoName"
-    [src]="'/api/files/' + station.photoName"
-    alt="Photo de la borne"
-  />
-
-  <!-- 🎥 Vidéo (optionnelle) -->
-  <video
-    *ngIf="station.videoName"
-    controls
-    width="300">
-    <source [src]="'/api/files/' + station.videoName" type="video/mp4">
-  </video>
-
-  <p><strong>Puissance :</strong> {{ station.power }} kVA</p>
-  <p><strong>Prix :</strong> {{ station.hourlyRate }} € / h</p>
-  <p *ngIf="station.isCustom">Borne personnalisée</p>
-
-</div>
-
-<button [routerLink]="['/locations', locationId, 'stations', 'new']">
-  Ajouter une borne
-</button>

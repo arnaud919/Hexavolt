@@ -1,0 +1,96 @@
+<h1 class="text-center">
+  Modifier mon profil
+</h1>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="max-w-2xl mx-auto p-6 m-10 space-y-6 flex flex-col">
+
+  <!-- Email -->
+  <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
+    <label class="w-full md:w-40 text-gray-700">
+      Email
+    </label>
+    <input type="email" [value]="email" disabled
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-gray-100" />
+  </div>
+
+  <!-- Prénom -->
+  <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
+    <label for="firstName" class="w-full md:w-40 text-gray-700">
+      Prénom
+    </label>
+    <input id="firstName" type="text" formControlName="firstName"
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
+  </div>
+
+  <!-- Nom -->
+  <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
+    <label for="lastName" class="w-full md:w-40 text-gray-700">
+      Nom
+    </label>
+    <input id="lastName" type="text" formControlName="lastName"
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
+  </div>
+
+  <!-- Téléphone -->
+  <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
+    <label for="phone" class="w-full md:w-40 text-gray-700">
+      Téléphone
+    </label>
+    <input id="phone" type="text" formControlName="phone"
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
+  </div>
+
+  <!-- Adresse -->
+  <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
+    <label for="address" class="w-full md:w-40 text-gray-700">
+      Adresse
+    </label>
+    <input id="address" type="text" formControlName="address"
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
+  </div>
+
+  <!-- Code postal -->
+  <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
+    <label for="postalCode" class="w-full md:w-40 text-gray-700">
+      Code postal
+    </label>
+    <input id="postalCode" type="text" formControlName="postalCode"
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
+  </div>
+
+  <!-- Ville -->
+  <div class="flex flex-col md:flex-row md:items-start gap-2 md:gap-16 relative">
+    <label class="w-full md:w-40 text-gray-700 pt-2">
+      Ville
+    </label>
+
+    <div class="w-full flex-1">
+      <input type="text" placeholder="Rechercher une ville" (input)="onCityInput($event)"
+        class="w-full px-4 py-2 border border-gray-400 rounded-full bg-white" />
+
+      <ul *ngIf="cities.length" class="border border-gray-300 rounded-lg mt-2 bg-white max-h-48 overflow-y-auto">
+        <li *ngFor="let city of cities" (click)="selectCity(city)" class="px-4 py-2 cursor-pointer hover:bg-gray-100">
+          {{ city.name }}
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Date de naissance -->
+  <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
+    <label for="birthdate" class="w-full md:w-40 text-gray-700">
+      Date de naissance
+    </label>
+    <input id="birthdate" type="date" formControlName="birthdate"
+      class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
+  </div>
+
+  <!-- Bouton -->
+  <input type="submit" class="button" value="Enregistrer" [disabled]="form.invalid || isLoading" />
+
+</form>
+
+<!-- Erreur -->
+<p *ngIf="errorMessage" class="text-center text-red-600 mt-4">
+  {{ errorMessage }}
+</p>

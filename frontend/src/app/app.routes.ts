@@ -15,6 +15,7 @@ import { StationCreateComponent } from './station-create/station-create.componen
 import { LocationStationsComponent } from './location-stations/location-stations.component';
 import { LocationCreateComponent } from './location-create/location-create.component';
 import { LocationListComponent } from './location-list/location-list.component';
+import { EditProfileComponent } from './edit-profile/edit-profile.component';
 
 export const routes: Routes = [
     { path: '', component: IndexComponent },
@@ -32,6 +33,7 @@ export const routes: Routes = [
         loadComponent: () => import('./profile/profile.component').then(m => m.ProfileComponent),
         canActivate: [authGuard]
     },
+    { path: 'profile/edit',component: EditProfileComponent },
     { path: 'modify-profile', component: ModifyProfileComponent },
     { path: 'locations', component: LocationListComponent },
     { path: 'locations/:id/stations', component: LocationStationsComponent },
