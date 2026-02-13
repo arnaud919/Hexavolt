@@ -9,6 +9,6 @@ export class CityService {
   private baseUrl = '/api/cities';
 
     searchCities(query: string): Observable<readonly City[]> {
-    return this.http.get<readonly City[]>(`/api/cities/search?q=${encodeURIComponent(query)}`);
+    return this.http.get<readonly City[]>(`${this.baseUrl}/search?q=${encodeURIComponent(query)}`);
   }
 }

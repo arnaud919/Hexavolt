@@ -1,0 +1,46 @@
+<h1>Disponibilités de la borne</h1>
+<p>Borne ID : {{ stationId }}</p>
+
+<h2>Horaires hebdomadaires</h2>
+
+<table border="1" cellpadding="8">
+  <tr>
+    <th>Jour</th>
+    <th>Disponible</th>
+    <th>Début</th>
+    <th>Fin</th>
+  </tr>
+
+  <tr *ngFor="let day of weekDays">
+    <td>{{ day.label }}</td>
+
+    <td>
+      <input
+        type="checkbox"
+        [(ngModel)]="day.enabled"
+      />
+    </td>
+
+    <td>
+      <input
+        type="time"
+        [(ngModel)]="day.startTime"
+        [disabled]="!day.enabled"
+      />
+    </td>
+
+    <td>
+      <input
+        type="time"
+        [(ngModel)]="day.endTime"
+        [disabled]="!day.enabled"
+      />
+    </td>
+  </tr>
+</table>
+
+<br />
+
+<button (click)="saveWeeklySchedule()">
+  Enregistrer les horaire
+</button>

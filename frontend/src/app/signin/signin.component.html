@@ -11,67 +11,65 @@
       {{ errorMessage }}
     </div>
 
-    <!-- Email -->
+
     <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
       <label for="email" class="w-full md:w-40 text-gray-700">Email</label>
       <input formControlName="email" id="email" type="email"
         class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
     </div>
 
-    <!-- Nom -->
+
     <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
       <label for="lastName" class="w-full md:w-40 text-gray-700">Nom</label>
       <input formControlName="lastName" id="lastName" type="text"
         class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
     </div>
 
-    <!-- Prénom -->
+
     <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
       <label for="firstName" class="w-full md:w-40 text-gray-700">Prénom</label>
       <input formControlName="firstName" id="firstName" type="text"
         class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
     </div>
 
-    <!-- Téléphone -->
+
     <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
       <label for="phone" class="w-full md:w-40 text-gray-700">Téléphone</label>
       <input formControlName="phone" id="phone" type="tel"
         class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
     </div>
 
-    <!-- Date de naissance -->
+
     <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
       <label for="birthdate" class="w-full md:w-40 text-gray-700">Date de naissance</label>
       <input formControlName="birthdate" id="birthdate" type="date"
         class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
     </div>
 
-    <!-- Adresse -->
     <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
       <label for="address" class="w-full md:w-40 text-gray-700">Adresse</label>
       <input formControlName="address" id="address" type="text"
         class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
     </div>
 
-    <!-- Code postal -->
+
     <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
       <label for="postalCode" class="w-full md:w-40 text-gray-700">Code postal</label>
       <input formControlName="postalCode" id="postalCode" type="text"
         class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
     </div>
 
-    <!-- Ville (champ de recherche avec suggestions) -->
+
     <div class="flex flex-col md:flex-row md:items-start gap-2 md:gap-16 relative">
       <label for="city" class="w-full md:w-40 text-gray-700 pt-2">Ville</label>
 
-      <!-- ⚠️ le conteneur entier doit être dans autocomplete-container -->
+
       <div class="autocomplete-container w-full relative flex-1" #autocompleteContainer>
 
         <input type="text" id="city" [formControl]="cityQuery" #cityInputRef placeholder="Commencez à taper..."
           class="w-full px-4 py-2 border border-gray-400 rounded-full bg-white" (focus)="setCityFieldFocus(true)"
           autocomplete="off" />
 
-        <!-- Dropdown -->
         <div #dropdownRef>
           <ul *ngIf="suggestions().length > 0 && cityFieldFocused()"
             class="absolute left-0 right-0 z-10 border border-gray-300 rounded-lg bg-white shadow-md max-h-60 overflow-y-auto">
@@ -91,7 +89,6 @@
       </div>
     </div>
 
-    <!-- Mot de passe -->
     <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
       <label for="password" class="w-full md:w-40 text-gray-700">Mot de passe</label>
       <input formControlName="password" id="password" type="password"
@@ -115,19 +112,17 @@
     </div>
 
 
-    <!-- Confirmation mot de passe -->
+
     <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
       <label for="confirmPassword" class="w-full md:w-40 text-gray-700">Confirmer le mot de passe</label>
       <input formControlName="confirmPassword" id="confirmPassword" type="password"
         class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
     </div>
 
-    <!-- Message d'erreur si les mots de passe ne correspondent pas -->
     <div class="text-red-600 text-sm text-center" *ngIf="form.errors?.['passwordMismatch'] && form.touched">
       Les mots de passe ne correspondent pas.
     </div>
 
-    <!-- Submit -->
     <input type="submit" class="button" value="S'inscrire" [disabled]="form.invalid || selectedCityId === null">
 
   </form>

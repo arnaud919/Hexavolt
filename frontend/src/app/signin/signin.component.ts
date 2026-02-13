@@ -25,7 +25,7 @@ export class SigninComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly authState = inject(AuthStateService);
 
-  // Formulaire
+
   readonly form: FormGroup = this.fb.group(
     {
       email: ['', [Validators.required, Validators.email]],
@@ -41,7 +41,7 @@ export class SigninComponent implements OnInit {
     { validators: this.passwordsMatchValidator }
   );
 
-  // Champs d’autocomplétion
+
   readonly cityQuery = new FormControl('');
   readonly suggestions = signal<City[]>([]);
   readonly cityFieldFocused = signal(false);
@@ -115,11 +115,11 @@ export class SigninComponent implements OnInit {
 
     this.authService.register(data).subscribe({
       next: () => {
-        this.authState.setLastRegisteredEmail(data.email); // <- on sauvegarde l'email
+        this.authState.setLastRegisteredEmail(data.email);
         this.router.navigate(['/inscription/confirmation']);
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Erreur inconnue lors de l’inscription';
+        this.errorMessage = err.error?.message || "Erreur inconnue lors de l'inscription";
       }
     });
   }

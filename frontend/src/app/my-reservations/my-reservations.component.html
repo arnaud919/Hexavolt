@@ -1,0 +1,21 @@
+<h2>Mes réservations</h2>
+
+<div *ngFor="let r of reservations" class="mb-4 p-4 border rounded">
+  <p><strong>Borne :</strong> {{ r.chargingStationName }}</p>
+  <p><strong>Début :</strong> {{ r.startDateTime | date:'short' }}</p>
+  <p><strong>Fin :</strong> {{ r.endDateTime | date:'short' }}</p>
+  <p><strong>Statut :</strong> {{ r.status }}</p>
+
+  <p *ngIf="r.status === 'TERMINEE'">
+    <strong>Montant :</strong>
+    {{ r.amount | number:'1.2-2' }} €
+  </p>
+
+  <p *ngIf="r.status !== 'TERMINEE'" class="text-gray-500">
+    Montant en attente
+  </p>
+</div>
+
+<p *ngIf="!reservations.length">
+  Aucune réservation pour le moment.
+</p>

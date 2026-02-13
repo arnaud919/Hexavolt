@@ -81,7 +81,7 @@
           {{ station.locationName }}
         </p>
 
-        <img *ngIf="station.photoUrl" [src]="station.photoUrl" alt="Photo de la borne" class="mt-3 rounded-md">
+        <img *ngIf="station.photoUrl" [src]="station.photoUrl" alt="Photo de la borne {{ station.name }}" class="mt-3 rounded-md">
       </div>
 
     </div>

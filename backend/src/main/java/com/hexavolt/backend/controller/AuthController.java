@@ -4,9 +4,6 @@ import com.hexavolt.backend.dto.LoginRequestDTO;
 import com.hexavolt.backend.dto.ProfileDTO;
 import com.hexavolt.backend.dto.RegisterRequestDTO;
 import com.hexavolt.backend.dto.ResendActivationRequestDTO;
-import com.hexavolt.backend.dto.UserMeDTO;
-import com.hexavolt.backend.entity.User;
-import com.hexavolt.backend.repository.UserRepository;
 import com.hexavolt.backend.service.AuthService;
 
 import jakarta.servlet.http.Cookie;

@@ -33,7 +33,12 @@ export const routes: Routes = [
         loadComponent: () => import('./profile/profile.component').then(m => m.ProfileComponent),
         canActivate: [authGuard]
     },
-    { path: 'profile/edit',component: EditProfileComponent },
+    { path: 'profile/edit', component: EditProfileComponent },
+    {
+        path: 'profile/stations/:stationId/availability',
+        loadComponent: () => import('./charging-station-availability/charging-station-availability.component')
+        .then(m => m.ChargingStationAvailability)
+    },
     { path: 'modify-profile', component: ModifyProfileComponent },
     { path: 'locations', component: LocationListComponent },
     { path: 'locations/:id/stations', component: LocationStationsComponent },
