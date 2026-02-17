@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService, LoginRequest } from '../services/auth.service';
@@ -15,7 +15,6 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly http = inject(HttpClient);
 
   readonly loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -39,7 +38,7 @@ export class LoginComponent {
       next: () => {
         this.router.navigateByUrl('/profile');
       },
-      error: err => {
+      error:() => {
         this.errorMessage = 'Échec de la connexion.';
       }
     });

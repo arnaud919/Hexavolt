@@ -46,7 +46,7 @@ public class AuthController {
     @PostMapping("/verify/resend")
     public ResponseEntity<Void> resendVerification(@Valid @RequestBody ResendActivationRequestDTO req) {
         authService.resendVerificationEmail(req.email());
-        return ResponseEntity.noContent().build(); // ou ok(), mais 204 est cohérent avec verify()
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/login")

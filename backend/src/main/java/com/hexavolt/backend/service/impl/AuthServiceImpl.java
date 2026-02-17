@@ -71,40 +71,30 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void register(RegisterRequestDTO req) {
 
-        // 1) Règles de sécurité sur le mot de passe
         PasswordPolicy.assertNoPersonalInfo(
                 req.password(),
                 req.email(),
                 (req.firstName() == null ? "" : req.firstName()) + " "
                         + (req.lastName() == null ? "" : req.lastName()));
 
-        PasswordPolicy.assertStrongEnough(req.password());
-
-        // 2) Normalisation de l'email
         var emailNorm = req.email().trim().toLowerCase();
 
-        // 3) Unicité de l'email
         if (userRepo.existsByEmail(emailNorm)) {
             throw new IllegalArgumentException("Cette adresse e-mail est déjà enregistrée.");
         }
 
-        // 4) Récupération de la ville
         var city = cityRepo.findById(req.cityId())
                 .orElseThrow(() -> new IllegalArgumentException("Ville introuvable."));
 
-        // 5) Encodage du mot de passe et création de l'utilisateur
         var encodedPwd = encoder.encode(req.password());
         var user = userMapper.toEntity(req, city, encodedPwd);
-        user.setEmail(emailNorm); // s'assurer qu'on persiste l'email normalisé
+        user.setEmail(emailNorm);
         userRepo.save(user);
 
-        // 6) Génération du token d’activation (valable 24h)
         var tk = tokenService.createActivationToken(user, Duration.ofHours(24));
 
-        // 7) Construction du lien d’activation
         var link = frontendUrl + "/verify?token=" + tk.getToken();
 
-        // 8) Envoi du mail d’activation
         String html = mailTemplates.activationEmail(user, link);
         mailService.sendHtml(user.getEmail(), "Activation de votre compte Hexavolt", html);
     }
@@ -112,15 +102,13 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void verifyEmail(String token) {
-        // 1) Valider le jeton d’activation (non expiré, non utilisé, bon type)
+
         UserToken tk = tokenService.validateActivationToken(token);
 
-        // 2) Marquer l'email comme validé
         User user = tk.getUser();
         user.setEmailIsValid(true);
         userRepo.save(user);
 
-        // 3) Consommer le jeton (one-time)
         tokenService.consume(tk);
     }
 
@@ -136,7 +124,6 @@ public class AuthServiceImpl implements AuthService {
                 return;
             }
 
-            // Anti-spam : 1 renvoi toutes les 2 minutes (exemple)
             if (!tokenService.canResendActivation(user, Duration.ofMinutes(2))) {
                 return;
             }
@@ -148,7 +135,6 @@ public class AuthServiceImpl implements AuthService {
             mailService.sendHtml(user.getEmail(), "Activation de votre compte Hexavolt", html);
         });
 
-        // Réponse neutre côté controller, quoi qu’il arrive
     }
 
     @Override
@@ -206,7 +192,6 @@ public class AuthServiceImpl implements AuthService {
                 (user.getLastName() == null ? "" : user.getLastName())).trim();
 
         PasswordPolicy.assertNoPersonalInfo(dto.getNewPassword(), user.getEmail(), fullName);
-        PasswordPolicy.assertStrongEnough(dto.getNewPassword());
 
         // 3) Mise à jour + encodage
         user.setPassword(encoder.encode(dto.getNewPassword()));

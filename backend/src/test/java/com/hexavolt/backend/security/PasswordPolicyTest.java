@@ -11,16 +11,4 @@ class PasswordPolicyTest {
         assertThrows(IllegalArgumentException.class,
             () -> PasswordPolicy.assertNoPersonalInfo("abcUser123!", "User@Example.com", "Jean Dupont"));
     }
-
-    @Test
-    void shouldRejectWeakPassword() {
-        assertThrows(IllegalArgumentException.class,
-            () -> PasswordPolicy.assertStrongEnough("short1!"));
-    }
-
-    @Test
-    void shouldRejectMissingSymbol() {
-        assertThrows(IllegalArgumentException.class,
-            () -> PasswordPolicy.assertStrongEnough("MotDePasse2025")); // pas de symbole
-    }
 }

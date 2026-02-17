@@ -19,21 +19,21 @@ export class SignupConfirmationComponent {
   isSending = false;
 
   resend(): void {
-    const email = this.authState.getLastRegisteredEmail(); // récupéré depuis l'inscription
+    const email = this.authState.getLastRegisteredEmail();
     if (!email) {
-      this.errorMessage = 'Email inconnu. Veuillez vous réinscrire.';
+      this.errorMessage = "Email inconnu. Veuillez vous réinscrire.";
       return;
     }
 
     this.isSending = true;
-    this.http.post('/api/auth/verify/resend', { email }).subscribe({
+    this.http.post("/api/auth/verify/resend", { email }).subscribe({
       next: () => {
-        this.successMessage = 'Email de confirmation renvoyé.';
+        this.successMessage = "Email de confirmation renvoyé.";
         this.errorMessage = null;
         this.isSending = false;
       },
       error: () => {
-        this.errorMessage = 'Impossible de renvoyer l’email pour le moment.';
+        this.errorMessage = "Impossible de renvoyer l'email pour le moment.";
         this.successMessage = null;
         this.isSending = false;
       }

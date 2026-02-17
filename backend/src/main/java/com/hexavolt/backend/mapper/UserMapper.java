@@ -10,10 +10,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
 
-  /**
-   * Construit l'entité User à partir du RegisterRequestDTO + City + mot de passe
-   * déjà encodé.
-   */
   public User toEntity(RegisterRequestDTO dto, City city, String encodedPassword) {
     User u = new User();
     u.setFirstName(trim(dto.firstName()));
@@ -63,7 +59,6 @@ public class UserMapper {
     return dto;
   }
 
-  // ------- petites aides “propres” -------
   private static String trim(String s) {
     return s == null ? null : s.trim();
   }

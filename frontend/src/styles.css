@@ -52,7 +52,7 @@
     margin: 20px 0 50px;
   }
 
-  input[type="submit"]{
+  input[type="submit"], .submit{
     @apply bg-yellow hover:bg-yellow/50 p-3 rounded-2xl m-auto block cursor-pointer;
   }
 

@@ -25,7 +25,6 @@ export class SigninComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly authState = inject(AuthStateService);
 
-
   readonly form: FormGroup = this.fb.group(
     {
       email: ['', [Validators.required, Validators.email]],
@@ -92,10 +91,7 @@ export class SigninComponent implements OnInit {
   }
 
   onSubmit(): void {
-    console.log('Tentative de soumission');
     if (this.form.invalid || this.selectedCityId === null) {
-      console.warn('Formulaire invalide ou ville non sélectionnée');
-      console.log('selectedCityId:', this.selectedCityId);
       return;
     }
 

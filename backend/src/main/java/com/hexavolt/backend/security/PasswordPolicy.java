@@ -25,21 +25,4 @@ public final class PasswordPolicy {
             }
         }
     }
-
-    public static void assertStrongEnough(String password) {
-        if (password == null || password.length() < 12)
-            throw new IllegalArgumentException("Le mot de passe doit contenir au moins 12 caractères.");
-
-        boolean hasUpper = password.chars().anyMatch(Character::isUpperCase);
-        boolean hasLower = password.chars().anyMatch(Character::isLowerCase);
-        boolean hasDigit = password.chars().anyMatch(Character::isDigit);
-        boolean hasSymbol = password.chars().anyMatch(c -> "!@#$%^&*()-_=+[]{};:'\",.<>/?\\|`~".indexOf(c) >= 0);
-
-        if (!(hasUpper && hasLower && hasDigit && hasSymbol)) {
-            throw new IllegalArgumentException("Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial.");
-        }
-        if (password.toLowerCase().contains("password") || password.toLowerCase().contains("1234")) {
-            throw new IllegalArgumentException("Le mot de passe est trop commun.");
-        }
-    }
 }

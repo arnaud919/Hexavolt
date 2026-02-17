@@ -12,7 +12,6 @@ import { HttpClient } from '@angular/common/http';
 export class VerifyPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly http = inject(HttpClient);
-  private readonly router = inject(Router);
 
   loading = true;
   success: boolean | null = null;

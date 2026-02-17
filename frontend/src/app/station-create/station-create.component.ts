@@ -44,7 +44,6 @@ export class StationCreateComponent implements OnInit {
   }
 
   onPositionSelected(pos: { lat: number; lng: number }) {
-    console.log('POSITION REÇUE', pos);
     this.form.patchValue({
       latitude: pos.lat,
       longitude: pos.lng
@@ -52,7 +51,6 @@ export class StationCreateComponent implements OnInit {
   }
 
   submit(): void {
-    console.log('FORM VALUE', this.form.value);
 
     const payload = {
       locationId: this.locationId,

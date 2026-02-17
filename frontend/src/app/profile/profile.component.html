@@ -1,6 +1,5 @@
 <section class="lg:mx-25 mx-5">
 
-  <!-- Profil utilisateur -->
   <div *ngIf="profile() as p; else loading" class="text-center md:text-left py-15">
     <h1>{{ p.firstName }} {{ p.lastName }}</h1>
     <p>{{ p.email }}</p>
@@ -15,9 +14,6 @@
     <p class="text-center py-10">Chargement du profil…</p>
   </ng-template>
 
-  <!-- ========================= -->
-  <!-- Mes lieux de charge -->
-  <!-- ========================= -->
   <div class="mb-12">
     <div class="flex items-center justify-between">
       <h2 class="font-bold">Mes lieux de charge</h2>
@@ -58,9 +54,6 @@
     </ng-template>
   </div>
 
-  <!-- ========================= -->
-  <!-- Mes bornes de recharge -->
-  <!-- ========================= -->
   <div class="mb-12">
     <h2 class="font-bold">Mes bornes de recharge</h2>
     <hr class="my-3">
@@ -94,9 +87,6 @@
     </ng-template>
   </div>
 
-  <!-- ========================= -->
-  <!-- Réservations en cours (PLACEHOLDER) -->
-  <!-- ========================= -->
   <div class="mb-10">
     <h2 class="font-bold">Réservations en cours</h2>
     <hr>
@@ -107,9 +97,6 @@
     </div>
   </div>
 
-  <!-- ========================= -->
-  <!-- Demandes à traiter (PLACEHOLDER) -->
-  <!-- ========================= -->
   <div class="mb-10">
     <h2 class="font-bold">Demandes à traiter</h2>
     <hr>
@@ -120,9 +107,6 @@
     </div>
   </div>
 
-  <!-- ========================= -->
-  <!-- Réservations passées (PLACEHOLDER) -->
-  <!-- ========================= -->
   <div class="mb-10">
     <h2 class="font-bold">Réservations passées</h2>
     <hr>
@@ -133,9 +117,6 @@
     </div>
   </div>
 
-  <!-- ========================= -->
-  <!-- Demandes traitées (PLACEHOLDER) -->
-  <!-- ========================= -->
   <div class="mb-10">
     <h2 class="font-bold">Demandes traitées</h2>
     <hr>

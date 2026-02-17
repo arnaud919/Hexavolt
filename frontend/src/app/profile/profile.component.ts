@@ -19,13 +19,10 @@ export class ProfileComponent implements OnInit {
   private readonly locationService = inject(LocationService);
   private readonly stationService = inject(ChargingStationService);
 
-  // 🔐 Profil utilisateur
   readonly profile = this.authService.currentUser;
 
-  // 📍 Lieux de charge
   readonly locations = signal<any[] | null>(null);
 
-  // 🔌 Aperçu des bornes
   readonly stationsPreview = signal<any[] | null>(null);
 
   ngOnInit(): void {

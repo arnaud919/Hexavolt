@@ -28,7 +28,7 @@ export class LocationMapComponent implements AfterViewInit {
   ngAfterViewInit(): void {
 
     this.map = L.map(this.mapContainer.nativeElement).setView(
-      [48.8566, 2.3522], // ✅ Paris
+      [48.8566, 2.3522],
       13
     );
 

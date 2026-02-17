@@ -7,15 +7,9 @@ import { SigninComponent } from './signin/signin.component';
 import { LegalNoticeComponent } from './legal-notice/legal-notice.component';
 import { PrivacyPolicyComponent } from './privacy-policy/privacy-policy.component';
 import { ContactComponent } from './contact/contact.component';
-import { ModifyProfileComponent } from './modify-profile/modify-profile.component';
 import { SignupConfirmationComponent } from './signup-confirmation/signup-confirmation.component';
 import { VerifyPageComponent } from './verify-page/verify-page.component';
 import { authGuard } from './services/auth.guard';
-import { StationCreateComponent } from './station-create/station-create.component';
-import { LocationStationsComponent } from './location-stations/location-stations.component';
-import { LocationCreateComponent } from './location-create/location-create.component';
-import { LocationListComponent } from './location-list/location-list.component';
-import { EditProfileComponent } from './edit-profile/edit-profile.component';
 
 export const routes: Routes = [
     { path: '', component: IndexComponent },
@@ -33,15 +27,39 @@ export const routes: Routes = [
         loadComponent: () => import('./profile/profile.component').then(m => m.ProfileComponent),
         canActivate: [authGuard]
     },
-    { path: 'profile/edit', component: EditProfileComponent },
+    {
+        path: 'profile/edit',
+        loadComponent: () => import('./edit-profile/edit-profile.component').then(m => m.EditProfileComponent),
+        canActivate: [authGuard]
+    },
     {
         path: 'profile/stations/:stationId/availability',
-        loadComponent: () => import('./charging-station-availability/charging-station-availability.component')
-        .then(m => m.ChargingStationAvailability)
+        loadComponent: () => import('./charging-station-availability/charging-station-availability.component').then(m => m.ChargingStationAvailability),
+        canActivate: [authGuard]
     },
-    { path: 'modify-profile', component: ModifyProfileComponent },
-    { path: 'locations', component: LocationListComponent },
-    { path: 'locations/:id/stations', component: LocationStationsComponent },
-    { path: 'locations/:id/stations/new', component: StationCreateComponent },
-    { path: 'locations/new', component: LocationCreateComponent }
+    {
+        path: 'modify-profile',
+        loadComponent: () => import('./modify-profile/modify-profile.component').then(m => m.ModifyProfileComponent),
+        canActivate: [authGuard]
+    },
+    {
+        path: 'locations',
+        loadComponent: () => import('./location-list/location-list.component').then(m => m.LocationListComponent),
+        canActivate: [authGuard]
+    },
+    {
+        path: 'locations/:id/stations',
+        loadComponent: () => import('./location-stations/location-stations.component').then(m => m.LocationStationsComponent),
+        canActivate: [authGuard]
+    },
+    {
+        path: 'locations/:id/stations/new',
+        loadComponent: () => import('./station-create/station-create.component').then(m => m.StationCreateComponent),
+        canActivate: [authGuard]
+    },
+    {
+        path: 'locations/new',
+        loadComponent: () => import('./location-create/location-create.component').then(m => m.LocationCreateComponent),
+        canActivate: [authGuard]
+    }
 ];

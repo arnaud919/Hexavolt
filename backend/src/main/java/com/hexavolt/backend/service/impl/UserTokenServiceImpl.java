@@ -1,4 +1,3 @@
-// src/main/java/com/hexavolt/backend/service/impl/UserTokenServiceImpl.java
 package com.hexavolt.backend.service.impl;
 
 import com.hexavolt.backend.entity.User;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service

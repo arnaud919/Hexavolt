@@ -36,7 +36,7 @@ export class LocationStationsComponent {
 
     this.stationService.getByLocation(this.locationId).subscribe({
       next: (stations) => {
-        this.stations = stations; // ✅ API = tableau direct
+        this.stations = stations;
       },
       error: (err) => {
         console.error('Failed to load stations', err);

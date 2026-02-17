@@ -32,28 +32,24 @@ export class AuthService {
 
   constructor(private http: HttpClient) { }
 
-  // Inscription
   register(data: RegisterRequest): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, data);
   }
 
-  // Connexion
   login(data: LoginRequest): Observable<void> {
     return this.http
       .post<void>(`${this.apiUrl}/login`, data, { withCredentials: true })
       .pipe(
         tap(() => {
-          // 🔥 on débloque immédiatement le guard
           this.isLoggedIn.set(true);
         })
       );
   }
 
-  // Déconnexion
   logout(): void {
     this.http.post(`${this.apiUrl}/logout`, {}, { withCredentials: true }).subscribe({
       next: () => this.isLoggedIn.set(false),
-      error: () => this.isLoggedIn.set(false) // même si erreur, on nettoie l'état local
+      error: () => this.isLoggedIn.set(false)
     });
   }
 

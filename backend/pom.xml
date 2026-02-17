@@ -24,6 +24,12 @@
 
   <dependencies>
 
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
+
       <!-- Mail -->
       <dependency>
           <groupId>org.springframework.boot</groupId>
@@ -154,11 +160,11 @@
   </build>
 
   <profiles>
-    <!-- DEV local : lit .env.properties -->
+
   <profile>
     <id>dev-dotenv</id>
     <activation>
-      <file><exists>${project.basedir}/.env.maven</exists></file>
+      <file><exists>.env.maven</exists></file>
     </activation>
 
     <build>
