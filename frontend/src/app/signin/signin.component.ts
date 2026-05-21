@@ -91,7 +91,16 @@ export class SigninComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.invalid || this.selectedCityId === null) {
+    this.errorMessage = null;
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.errorMessage = 'Veuillez compléter correctement tous les champs.';
+      return;
+    }
+
+    if (this.selectedCityId === null) {
+      this.errorMessage = 'Veuillez sélectionner une ville dans la liste.';
       return;
     }
 

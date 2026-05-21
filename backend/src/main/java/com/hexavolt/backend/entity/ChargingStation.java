@@ -43,12 +43,16 @@ public class ChargingStation {
     @Column(name = "is_custom", nullable = false)
     private Boolean isCustom;
 
+    @ManyToOne
+    @JoinColumn(name = "status")
+    private StatusChargingStation status;
+
     public ChargingStation() {
     }
 
     public ChargingStation(String name, BigDecimal hourlyRate, String photoName, String videoName, Double latitude,
             Double longitude,
-            String instruction, Power power, StationLocation location, Boolean isCustom) {
+            String instruction, Power power, StationLocation location, Boolean isCustom, StatusChargingStation status) {
         this.name = name;
         this.hourlyRate = hourlyRate;
         this.photoName = photoName;
@@ -59,6 +63,7 @@ public class ChargingStation {
         this.power = power;
         this.location = location;
         this.isCustom = isCustom;
+        this.status = status;
     }
 
     public Long getId() {
@@ -147,5 +152,13 @@ public class ChargingStation {
 
     public void setIsCustom(Boolean isCustom) {
         this.isCustom = isCustom;
+    }
+
+    public StatusChargingStation getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusChargingStation status) {
+        this.status = status;
     }
 }
