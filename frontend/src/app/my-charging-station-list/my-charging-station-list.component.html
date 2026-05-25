@@ -1,0 +1,49 @@
+<section class="lg:mx-25 mx-5 py-10">
+
+  <h1>Mes bornes de recharge</h1>
+
+  <div
+    *ngIf="chargingStations().length; else noStations"
+    class="grid gap-6 md:grid-cols-3 mt-6"
+  >
+
+    <article
+      *ngFor="let chargingStation of chargingStations()"
+      class="cards p-5 rounded-sm leading-8"
+    >
+
+      <p class="font-bold">
+        {{ chargingStation.name }}
+      </p>
+
+      <p>
+        {{ chargingStation.power }} kVA
+      </p>
+
+      <p>
+        {{ chargingStation.hourlyRate }} € / heure
+      </p>
+
+      <a
+        [routerLink]="[
+          '/profil/bornes',
+          chargingStation.id
+        ]"
+        class="underline text-sm"
+      >
+        Voir le détail
+      </a>
+
+    </article>
+
+  </div>
+
+  <ng-template #noStations>
+
+    <p class="text-sm text-gray-600 mt-4">
+      Aucune borne enregistrée pour le moment.
+    </p>
+
+  </ng-template>
+
+</section>

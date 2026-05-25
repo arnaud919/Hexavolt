@@ -11,4 +11,6 @@ public interface ChargingStationService {
 
     List<ChargingStationListDTO> findByLocationId(Long id);
 
+    List<ChargingStationListDTO> findMyChargingStations();
+
 }

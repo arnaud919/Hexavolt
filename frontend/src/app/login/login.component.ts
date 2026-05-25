@@ -36,7 +36,7 @@ export class LoginComponent {
 
     this.authService.login(loginData).subscribe({
       next: () => {
-        this.router.navigateByUrl('/profile');
+        this.router.navigateByUrl('/profil');
       },
       error:() => {
         this.errorMessage = 'Échec de la connexion.';

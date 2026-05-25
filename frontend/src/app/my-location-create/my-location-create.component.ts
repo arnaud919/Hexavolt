@@ -7,10 +7,10 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-location-create',
   imports: [ReactiveFormsModule, CommonModule],
-  templateUrl: './location-create.component.html',
-  styleUrl: './location-create.component.css'
+  templateUrl: './my-location-create.component.html',
+  styleUrl: './my-location-create.component.css'
 })
-export class LocationCreateComponent implements OnInit {
+export class MyLocationCreateComponent implements OnInit {
   form!: FormGroup;
 
   constructor(

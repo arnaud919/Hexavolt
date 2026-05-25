@@ -7,10 +7,10 @@ import { WeekDayAvailability } from '../models/week-day-availability';
 @Component({
   selector: 'app-charging-station-availability',
   imports: [CommonModule, FormsModule],
-  templateUrl: './charging-station-availability.component.html',
-  styleUrl: './charging-station-availability.component.css'
+  templateUrl: './my-charging-station-availability.component.html',
+  styleUrl: './my-charging-station-availability.component.css'
 })
-export class ChargingStationAvailability {
+export class MyChargingStationAvailabilityComponent {
 
   stationId!: number;
 

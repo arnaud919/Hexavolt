@@ -4,7 +4,7 @@
     <h1>{{ p.firstName }} {{ p.lastName }}</h1>
     <p>{{ p.email }}</p>
     <p>
-      <a routerLink="/profile/edit" class="text-center md:text-left underline">
+      <a routerLink="/profil/modification" class="text-center md:text-left underline">
         Modifier mon profil
       </a>
     </p>
@@ -17,7 +17,7 @@
   <div class="mb-12">
     <div class="flex items-center justify-between">
       <h2 class="font-bold">Mes lieux de charge</h2>
-      <a routerLink="profil/lieu/new" class="underline text-sm">
+      <a [routerLink]="['/profil/lieux/nouveau']" class="underline text-sm">
         Ajouter un lieu de charge
       </a>
     </div>
@@ -34,11 +34,11 @@
         </p>
 
         <div class="mt-4 flex justify-between items-center">
-          <a [routerLink]="['/locations', location.locationId, 'stations']" class="underline text-sm">
+          <a [routerLink]="['/profil/lieux', location.locationId, 'bornes']" class="underline text-sm">
             Voir les bornes
           </a>
 
-          <a [routerLink]="['/locations', location.locationId, 'stations', 'new']" class="underline text-sm">
+          <a [routerLink]="['/profil/lieux', location.locationId, 'bornes', 'nouvelle']" class="underline text-sm">
             Ajouter une borne
           </a>
         </div>
@@ -70,13 +70,17 @@
         <p class="text-sm">
           {{ station.hourlyRate }} € / heure
         </p>
-        <p class="text-sm text-gray-600">
-          {{ station.locationName }}
-        </p>
 
-        <img *ngIf="station.photoUrl" [src]="station.photoUrl" alt="Photo de la borne {{ station.name }}" class="mt-3 rounded-md">
+        <img *ngIf="station.photoName" [src]="station.photoName" alt="Photo de la borne {{ station.name }}"
+          class="mt-3 rounded-md">
       </div>
 
+    </div>
+
+    <div *ngIf="stationsPreview()?.length" class="flex justify-end mt-4">
+      <a routerLink="/profil/bornes" class="underline text-sm">
+        Voir toutes mes bornes
+      </a>
     </div>
 
 

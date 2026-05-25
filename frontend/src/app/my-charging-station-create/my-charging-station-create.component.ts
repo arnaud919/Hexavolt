@@ -10,10 +10,10 @@ import { LocationMapComponent } from "../location-map/location-map.component";
 @Component({
   selector: 'app-station-create',
   imports: [ReactiveFormsModule, CommonModule, LocationMapComponent],
-  templateUrl: './station-create.component.html',
-  styleUrl: './station-create.component.css'
+  templateUrl: './my-charging-station-create.component.html',
+  styleUrl: './my-charging-station-create.component.css'
 })
-export class StationCreateComponent implements OnInit {
+export class MyChargingStationCreateComponent implements OnInit {
   form!: FormGroup;
   powers: Power[] = [];
   locationId!: number;

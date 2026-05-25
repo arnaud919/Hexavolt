@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { LocationService } from '../services/location.service';
 import { ChargingStationService } from '../services/charging-station.service';
+import { ChargingStation } from '../models/charging-station';
 
 @Component({
   selector: 'app-profile',
@@ -22,50 +23,33 @@ export class ProfileComponent implements OnInit {
   readonly profile = this.authService.currentUser;
 
   readonly locations = signal<any[] | null>(null);
-
-  readonly stationsPreview = signal<any[] | null>(null);
+  readonly stationsPreview = signal<ChargingStation[] | null>(null);
 
   ngOnInit(): void {
     this.loadLocations();
+    this.loadStationsPreview();
   }
 
   private loadLocations(): void {
     this.locationService.getMyLocations().subscribe({
       next: locations => {
         this.locations.set(locations);
-        this.loadStationsPreview(locations);
       },
       error: err => {
         console.error('Erreur chargement lieux', err);
         this.locations.set([]);
-        this.stationsPreview.set([]);
       }
     });
   }
 
-  private loadStationsPreview(locations: any[]): void {
-    if (!locations.length) {
+private loadStationsPreview(): void {
+  this.stationService.getMyStations().subscribe({
+    next: chargingStations => {
+      this.stationsPreview.set(chargingStations.slice(0, 3));
+    },
+    error: err => {
       this.stationsPreview.set([]);
-      return;
     }
-
-    const firstLocation = locations[0];
-
-    if (!firstLocation.locationId) {
-      console.error('Location sans locationId', firstLocation);
-      this.stationsPreview.set([]);
-      return;
-    }
-
-    this.stationService.getByLocation(firstLocation.locationId).subscribe({
-      next: stations => {
-        this.stationsPreview.set(stations.slice(0, 3));
-      },
-      error: err => {
-        console.error('Erreur chargement bornes', err);
-        this.stationsPreview.set([]);
-      }
-    });
-  }
-
+  });
+}
 }

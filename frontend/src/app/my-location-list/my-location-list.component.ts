@@ -7,10 +7,10 @@ import { RouterModule } from '@angular/router';
 @Component({
   selector: 'app-location-list',
   imports: [CommonModule,RouterModule],
-  templateUrl: './location-list.component.html',
-  styleUrl: './location-list.component.css'
+  templateUrl: './my-location-list.component.html',
+  styleUrl: './my-location-list.component.css'
 })
-export class LocationListComponent {
+export class MyLocationListComponent {
 locations: LocationList[] = [];
 
   constructor(private locationService: LocationService) {}

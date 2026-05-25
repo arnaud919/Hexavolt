@@ -27,8 +27,6 @@ public class ChargingStationServiceImpl implements ChargingStationService {
         private final ChargingStationRepository stationRepo;
         private final NicknameLocationRepository nicknameLocationRepo;
         private final PowerRepository powerRepo;
-        private final DayOfWeekRepository dayOfWeekRepo;
-        private final WeeklyScheduleRepository weeklyScheduleRepo;
 
         public ChargingStationServiceImpl(
                         ChargingStationRepository stationRepo,
@@ -39,8 +37,6 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 this.stationRepo = stationRepo;
                 this.nicknameLocationRepo = nicknameLocationRepo;
                 this.powerRepo = powerRepo;
-                this.dayOfWeekRepo = dayOfWeekRepo;
-                this.weeklyScheduleRepo = weeklyScheduleRepo;
         }
 
         @Override
@@ -74,12 +70,12 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 // List<DayOfWeek> days = dayOfWeekRepo.findAll();
 
                 // for (DayOfWeek day : days) {
-                //         WeeklySchedule ws = new WeeklySchedule();
-                //         ws.setChargingStation(station);
-                //         ws.setDayOfWeek(day);
-                //         ws.setStartTime(dto.getStartTime());
-                //         ws.setEndTime(dto.getEndTime());
-                //         weeklyScheduleRepo.save(ws);
+                // WeeklySchedule ws = new WeeklySchedule();
+                // ws.setChargingStation(station);
+                // ws.setDayOfWeek(day);
+                // ws.setStartTime(dto.getStartTime());
+                // ws.setEndTime(dto.getEndTime());
+                // weeklyScheduleRepo.save(ws);
                 // }
         }
 
@@ -96,6 +92,25 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 .orElseThrow(() -> new IllegalArgumentException("Location not found"));
 
                 return stationRepo.findByLocationId(locationId).stream()
+                                .map(station -> new ChargingStationListDTO(
+                                                station.getId(),
+                                                station.getName(),
+                                                station.getPower().getKvaPower(),
+                                                station.getHourlyRate(),
+                                                station.getIsCustom()))
+                                .toList();
+        }
+
+        @Override
+        public List<ChargingStationListDTO> findMyChargingStations() {
+                
+                User user = (User) SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getPrincipal();
+                List<ChargingStation> stations = stationRepo.findByLocationUser(user);
+
+                return stations.stream()
                                 .map(station -> new ChargingStationListDTO(
                                                 station.getId(),
                                                 station.getName(),

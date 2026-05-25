@@ -18,6 +18,13 @@ export class ChargingStationService {
     );
   }
 
+  getMyStations() {
+    return this.http.get<ChargingStation[]>(
+      `${this.apiUrl}/stations/me`,
+      { withCredentials: true }
+    );
+  }
+
   create(payload: {
     locationId: number;
     powerId: number;

@@ -7,10 +7,10 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-location-stations',
   imports: [RouterLink, CommonModule],
-  templateUrl: './location-stations.component.html',
-  styleUrl: './location-stations.component.css'
+  templateUrl: './my-location-stations.component.html',
+  styleUrl: './my-location-stations.component.css'
 })
-export class LocationStationsComponent {
+export class MyLocationStationsComponent {
   stations: ChargingStation[] = [];
   locationId!: number;
 

@@ -41,42 +41,42 @@ export const routes: Routes = [
     },
     {
         path: 'profil/bornes',
-        loadComponent: () => import('./charging-station-list/charging-station-list.component').then(m => m.ChargingStationListComponent),
+        loadComponent: () => import('./my-charging-station-list/my-charging-station-list.component').then(m => m.MyChargingStationListComponent),
         canActivate: [authGuard]
     },
     {
         path: 'profil/bornes/:borneId',
-        loadComponent: () => import('./charging-station-detail/charging-station-detail.component').then(m => m.ChargingStationDetailComponent),
+        loadComponent: () => import('./my-charging-station-detail/my-charging-station-detail.component').then(m => m.MyChargingStationDetailComponent),
         canActivate: [authGuard]
     },
     {
         path: 'profil/bornes/:borneId/disponibilites',
-        loadComponent: () => import('./charging-station-availability/charging-station-availability.component').then(m => m.ChargingStationAvailability),
+        loadComponent: () => import('./my-charging-station-availability/my-charging-station-availability.component').then(m => m.MyChargingStationAvailabilityComponent),
         canActivate: [authGuard]
     },
     {
         path: 'profil/lieux',
-        loadComponent: () => import('./location-list/location-list.component').then(m => m.LocationListComponent),
+        loadComponent: () => import('./my-location-list/my-location-list.component').then(m => m.MyLocationListComponent),
         canActivate: [authGuard]
     },
     {
         path: 'profil/lieux/nouveau',
-        loadComponent: () => import('./location-create/location-create.component').then(m => m.LocationCreateComponent),
+        loadComponent: () => import('./my-location-create/my-location-create.component').then(m => m.MyLocationCreateComponent),
         canActivate: [authGuard]
     },
     {
         path: 'profil/lieux/:id',
-        loadComponent: () => import('./location-detail/location-detail.component').then(m => m.LocationDetailComponent),
+        loadComponent: () => import('./my-location-detail/my-location-detail.component').then(m => m.MyLocationDetailComponent),
         canActivate: [authGuard]
     },
     {
         path: 'profil/lieux/:id/bornes',
-        loadComponent: () => import('./location-stations/location-stations.component').then(m => m.LocationStationsComponent),
+        loadComponent: () => import('./my-location-stations/my-location-stations.component').then(m => m.MyLocationStationsComponent),
         canActivate: [authGuard]
     },
     {
         path: 'profil/lieux/:id/bornes/nouvelle',
-        loadComponent: () => import('./station-create/station-create.component').then(m => m.StationCreateComponent),
+        loadComponent: () => import('./my-charging-station-create/my-charging-station-create.component').then(m => m.MyChargingStationCreateComponent),
         canActivate: [authGuard]
     },
     {
