@@ -36,8 +36,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        System.out.println("JWT FILTER HIT: " + request.getMethod() + " " + request.getRequestURI());
-
         // 🔽 Récupération du token depuis les cookies
         String token = null;
 
@@ -77,8 +75,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     authentication.setDetails(
                             new WebAuthenticationDetailsSource().buildDetails(request));
 
-                    System.out.println("JWT OK FOR: " + email);
-
                     SecurityContextHolder.getContext()
                             .setAuthentication(authentication);
                 });
@@ -88,9 +84,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             // 🔽 JWT invalide → on nettoie le contexte
             SecurityContextHolder.clearContext();
         }
-
-        System.out.println("AUTH IN CONTEXT = " +
-                SecurityContextHolder.getContext().getAuthentication());
 
         filterChain.doFilter(request, response);
     }

@@ -16,6 +16,15 @@ public class ChargingStationCreateDTO {
     private Double longitude;
     private LocalTime startTime;
     private LocalTime endTime;
+    private Long statusId;
+
+    public Long getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
+    }
 
     public String getName() {
         return name;

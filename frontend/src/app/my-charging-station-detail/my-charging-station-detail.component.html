@@ -1,1 +1,41 @@
-<p>my-charging-station-detail works!</p>
+<section class="lg:mx-25 mx-5 py-10">
+
+  <a routerLink="/profil/bornes" class="underline text-sm">
+    Retour à mes bornes
+  </a>
+
+  <div *ngIf="chargingStation() as station" class="cards p-6 rounded-sm leading-8 mt-6">
+
+    <h1>{{ station.name || 'Borne de recharge' }}</h1>
+
+    <img *ngIf="station.photoName" [src]="'/api/public/stations/' + station.id + '/' + station.photoName" alt="Photo de la borne"
+      class="mt-6 rounded-md max-w-full" />
+
+    <video *ngIf="station.videoName" controls class="mt-6 rounded-md max-w-full">
+      <source [src]="station.videoName" type="video/mp4">
+    </video>
+
+    <p><strong>Puissance :</strong> {{ station.power }} kVA</p>
+    <p><strong>Tarif :</strong> {{ station.hourlyRate }} € / heure</p>
+    <p><strong>Statut :</strong> {{ station.statusName || 'Non défini' }}</p>
+
+    <p><strong>Adresse :</strong> {{ station.locationAddress }} – {{ station.cityName }}</p>
+
+    <p *ngIf="station.instruction">
+      <strong>Instructions :</strong> {{ station.instruction }}
+    </p>
+
+    <p>
+      <strong>Coordonnées :</strong>
+      {{ station.latitude }}, {{ station.longitude }}
+    </p>
+
+    <div class="mt-6 flex gap-4">
+      <a [routerLink]="['/profil/bornes', station.id, 'disponibilites']" class="underline text-sm">
+        Gérer les disponibilités
+      </a>
+    </div>
+
+  </div>
+
+</section>

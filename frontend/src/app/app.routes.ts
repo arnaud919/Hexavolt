@@ -25,7 +25,7 @@ export const routes: Routes = [
     { path: 'bornes/:id', component: StationPublicDetailComponent },
     { path: 'chercher-une-borne', component: FindStationComponent},
     {
-        path: 'reservations/nouvelle/:borneId',
+        path: 'reservations/nouvelle/:id',
         loadComponent: () => import('./rent-station/rent-station.component').then(m => m.RentStationComponent),
         canActivate: [authGuard]
     },
@@ -45,12 +45,12 @@ export const routes: Routes = [
         canActivate: [authGuard]
     },
     {
-        path: 'profil/bornes/:borneId',
+        path: 'profil/bornes/:id',
         loadComponent: () => import('./my-charging-station-detail/my-charging-station-detail.component').then(m => m.MyChargingStationDetailComponent),
         canActivate: [authGuard]
     },
     {
-        path: 'profil/bornes/:borneId/disponibilites',
+        path: 'profil/bornes/:id/disponibilites',
         loadComponent: () => import('./my-charging-station-availability/my-charging-station-availability.component').then(m => m.MyChargingStationAvailabilityComponent),
         canActivate: [authGuard]
     },

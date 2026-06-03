@@ -17,6 +17,8 @@ export class MyChargingStationCreateComponent implements OnInit {
   form!: FormGroup;
   powers: Power[] = [];
   locationId!: number;
+  selectedPhoto: File | null = null;
+  selectedVideo: File | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -50,7 +52,21 @@ export class MyChargingStationCreateComponent implements OnInit {
     });
   }
 
+  onPhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedPhoto = input.files?.[0] ?? null;
+  }
+
+  onVideoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedVideo = input.files?.[0] ?? null;
+  }
+
   submit(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     const payload = {
       locationId: this.locationId,
@@ -60,14 +76,36 @@ export class MyChargingStationCreateComponent implements OnInit {
       instruction: this.form.value.instruction || undefined,
       isCustom: !!this.form.value.isCustom,
       latitude: this.form.value.latitude,
-      longitude: this.form.value.longitude,
+      longitude: this.form.value.longitude
     };
 
-    this.stationService.create(payload).subscribe({
+    const formData = new FormData();
+
+    formData.append(
+      'data',
+      new Blob(
+        [JSON.stringify(payload)],
+        { type: 'application/json' }
+      )
+    );
+
+    if (this.selectedPhoto) {
+      formData.append('photo', this.selectedPhoto);
+    }
+
+    if (this.selectedVideo) {
+      formData.append('video', this.selectedVideo);
+    }
+
+    this.stationService.create(formData).subscribe({
       next: () => {
-        this.router.navigate(['/locations', this.locationId, 'stations']);
+        this.router.navigate([
+          '/profil/lieux',
+          this.locationId,
+          'bornes'
+        ]);
       },
-      error: err => console.error('ERREUR BACKEND', err),
+      error: err => console.error('ERREUR BACKEND', err)
     });
   }
 }

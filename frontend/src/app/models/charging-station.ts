@@ -6,6 +6,6 @@ export interface ChargingStation {
   isCustom: boolean;
 
   // phase 2 (optionnel)
-  photoName?: string | null;
-  videoName?: string | null;
+  photoUrl?: string | null;
+  videoUrl?: string | null;
 }

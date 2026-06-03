@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ChargingStation } from '../models/charging-station';
 import { HttpClient } from '@angular/common/http';
+import { ChargingStationDetail } from '../models/charging-station-detail';
 
 @Injectable({
   providedIn: 'root'
@@ -25,17 +26,19 @@ export class ChargingStationService {
     );
   }
 
-  create(payload: {
-    locationId: number;
-    powerId: number;
-    hourlyRate: number;
-    instruction?: string;
-    isCustom: boolean;
-  }) {
+  create(formData: FormData) {
     return this.http.post(
       `${this.apiUrl}/stations`,
-      payload,
+      formData,
       { withCredentials: true }
     );
   }
+
+  getMyChargingStationById(id: number) {
+    return this.http.get<ChargingStationDetail>(
+      `${this.apiUrl}/stations/${id}`,
+      { withCredentials: true }
+    );
+  }
+  
 }
