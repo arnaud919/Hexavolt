@@ -22,11 +22,11 @@
         Borne personnalisée
       </p>
 
-      <img *ngIf="station.photoName" [src]="'/api/files/' + station.photoName" alt="Photo de la borne {{station.name}}"
+      <img *ngIf="station.photoUrl" [src]="'/api/files/' + station.photoUrl" alt="Photo de la borne {{station.name}}"
         class="mt-3 rounded-md" />
 
-      <video *ngIf="station.videoName" controls class="mt-3 rounded-md w-full">
-        <source [src]="'/api/files/' + station.videoName" type="video/mp4">
+      <video *ngIf="station.videoUrl" controls class="mt-3 rounded-md w-full">
+        <source [src]="'/api/files/' + station.videoUrl" type="video/mp4">
       </video>
 
     </div>

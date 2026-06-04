@@ -161,8 +161,17 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 .getAuthentication()
                                 .getPrincipal();
 
-                ChargingStation station = stationRepo.findByIdAndLocationUser(id, user)
+                ChargingStation station = stationRepo
+                                .findByIdAndLocationUser(id, user)
                                 .orElseThrow(() -> new IllegalArgumentException("Charging station not found"));
+
+                String photoUrl = station.getPhotoName() != null
+                                ? "/api/public/stations/" + station.getId() + "/photo"
+                                : null;
+
+                String videoUrl = station.getVideoName() != null
+                                ? "/api/public/stations/" + station.getId() + "/video"
+                                : null;
 
                 return new ChargingStationDetailDTO(
                                 station.getId(),
@@ -176,7 +185,7 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 station.getStatus() != null ? station.getStatus().getName() : null,
                                 station.getLocation().getAddress(),
                                 station.getLocation().getCity().getName(),
-                                station.getPhotoName(),
-                                station.getVideoName());
+                                photoUrl,
+                                videoUrl);
         }
 }

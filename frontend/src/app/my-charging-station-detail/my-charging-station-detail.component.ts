@@ -20,7 +20,10 @@ export class MyChargingStationDetailComponent {
     const id = Number(this.route.snapshot.paramMap.get('id'));
 
     this.chargingStationService.getMyChargingStationById(id).subscribe({
-      next: chargingStation => this.chargingStation.set(chargingStation),
+      next: chargingStation => {
+        console.log('Détail borne :', chargingStation);
+        this.chargingStation.set(chargingStation)
+      },
       error: err => console.error('Erreur chargement borne', err)
     });
   }

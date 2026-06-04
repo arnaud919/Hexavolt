@@ -10,6 +10,6 @@ export interface ChargingStationDetail {
   statusName: string | null;
   locationAddress: string;
   cityName: string;
-  photoName: string | null;
-  videoName: string | null;
+  photoUrl?: string | null;
+  videoUrl?: string | null;
 }

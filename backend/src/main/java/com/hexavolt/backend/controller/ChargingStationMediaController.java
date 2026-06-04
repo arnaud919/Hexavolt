@@ -1,10 +1,12 @@
 package com.hexavolt.backend.controller;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,12 +21,8 @@ import com.hexavolt.backend.repository.ChargingStationRepository;
 public class ChargingStationMediaController {
 
     private final ChargingStationRepository stationRepo;
-
-    private static final Path PHOTO_DIR =
-            Paths.get("uploads/charging-stations/photos");
-
-    private static final Path VIDEO_DIR =
-            Paths.get("uploads/charging-stations/videos");
+    private static final Path PHOTO_DIR = Paths.get("uploads/charging-stations/photos");
+    private static final Path VIDEO_DIR = Paths.get("uploads/charging-stations/videos");
 
     public ChargingStationMediaController(ChargingStationRepository stationRepo) {
         this.stationRepo = stationRepo;
@@ -39,9 +37,7 @@ public class ChargingStationMediaController {
             return ResponseEntity.notFound().build();
         }
 
-        Path path = PHOTO_DIR
-                .resolve(station.getPhotoName())
-                .normalize();
+        Path path = PHOTO_DIR.resolve(station.getPhotoName()).normalize();
 
         Resource resource = new UrlResource(path.toUri());
 
@@ -49,7 +45,16 @@ public class ChargingStationMediaController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(resource);
+        String contentType = Files.probeContentType(path);
+
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .contentLength(Files.size(path))
+                .body(resource);
     }
 
     @GetMapping("/{id}/video")

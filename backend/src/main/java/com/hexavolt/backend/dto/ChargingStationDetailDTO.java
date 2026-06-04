@@ -15,8 +15,8 @@ public class ChargingStationDetailDTO {
     private String statusName;
     private String locationAddress;
     private String cityName;
-    private String photoName;
-    private String videoName;
+    private String photoUrl;
+    private String videoUrl;
 
     public ChargingStationDetailDTO(
             Long id,
@@ -30,8 +30,8 @@ public class ChargingStationDetailDTO {
             String statusName,
             String locationAddress,
             String cityName,
-            String photoName,
-            String videoName
+            String photoUrl,
+            String videoUrl
     ) {
         this.id = id;
         this.name = name;
@@ -44,8 +44,8 @@ public class ChargingStationDetailDTO {
         this.statusName = statusName;
         this.locationAddress = locationAddress;
         this.cityName = cityName;
-        this.photoName = photoName;
-        this.videoName = videoName;
+        this.photoUrl = photoUrl;
+        this.videoUrl = videoUrl;
     }
 
     public Long getId() {
@@ -136,20 +136,20 @@ public class ChargingStationDetailDTO {
         this.cityName = cityName;
     }
 
-    public String getPhotoName() {
-        return photoName;
+    public String getPhotoUrl() {
+        return photoUrl;
     }
 
-    public void setPhotoName(String photoName) {
-        this.photoName = photoName;
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 
-    public String getVideoName() {
-        return videoName;
+    public String getVideoUrl() {
+        return videoUrl;
     }
 
-    public void setVideoName(String videoName) {
-        this.videoName = videoName;
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
     }
 
     // getters
