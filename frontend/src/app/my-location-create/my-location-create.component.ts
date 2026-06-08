@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LocationService } from '../services/location.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ProfileLayoutComponent } from '../layout/profile-layout/profile-layout.component';
 
 @Component({
   selector: 'app-location-create',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, ProfileLayoutComponent],
   templateUrl: './my-location-create.component.html',
   styleUrl: './my-location-create.component.css'
 })

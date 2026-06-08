@@ -6,10 +6,11 @@ import { ChargingStationService } from '../services/charging-station.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LocationMapComponent } from "../location-map/location-map.component";
+import { ProfileLayoutComponent } from '../layout/profile-layout/profile-layout.component';
 
 @Component({
   selector: 'app-station-create',
-  imports: [ReactiveFormsModule, CommonModule, LocationMapComponent],
+  imports: [ReactiveFormsModule, CommonModule, LocationMapComponent, ProfileLayoutComponent],
   templateUrl: './my-charging-station-create.component.html',
   styleUrl: './my-charging-station-create.component.css'
 })

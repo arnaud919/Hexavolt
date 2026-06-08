@@ -3,10 +3,11 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ChargingStationService } from '../services/charging-station.service';
 import { ChargingStationDetail } from '../models/charging-station-detail';
 import { CommonModule } from '@angular/common';
+import { ProfileLayoutComponent } from '../layout/profile-layout/profile-layout.component';
 
 @Component({
   selector: 'app-my-charging-station-detail',
-  imports: [RouterLink, CommonModule],
+  imports: [RouterLink, CommonModule, ProfileLayoutComponent],
   templateUrl: './my-charging-station-detail.component.html',
   styleUrl: './my-charging-station-detail.component.css'
 })

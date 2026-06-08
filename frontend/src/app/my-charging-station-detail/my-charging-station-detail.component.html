@@ -1,28 +1,13 @@
-<section class="mx-5 py-10">
+<app-profile-layout>
 
-  <a routerLink="/profil/bornes" class="underline text-sm">
-    Retour à mes bornes
-  </a>
-
-  <div
-    *ngIf="chargingStation() as station"
-    class="cards p-6 rounded-sm leading-8 mt-6 max-w-4xl mx-auto"
-  >
+  <div *ngIf="chargingStation() as station" class="cards p-6 rounded-sm leading-8 mt-6 max-w-4xl mx-auto">
 
     <h1>{{ station.name || 'Borne de recharge' }}</h1>
 
-    <img
-      *ngIf="station.photoUrl"
-      [src]="station.photoUrl"
-      alt="Photo de la borne"
-      class="mt-6 rounded-md w-full h-80 object-cover"
-    />
+    <img *ngIf="station.photoUrl" [src]="station.photoUrl" alt="Photo de la borne"
+      class="mt-6 rounded-md w-full h-80 object-cover" />
 
-    <video
-      *ngIf="station.videoUrl"
-      controls
-      class="mt-6 rounded-md w-full"
-    >
+    <video *ngIf="station.videoUrl" controls class="mt-6 rounded-md w-full">
       <source [src]="station.videoUrl" type="video/mp4">
     </video>
 
@@ -61,14 +46,11 @@
     </div>
 
     <div class="mt-6 flex gap-4">
-      <a
-        [routerLink]="['/profil/bornes', station.id, 'disponibilites']"
-        class="underline text-sm"
-      >
+      <a [routerLink]="['/profil/bornes', station.id, 'disponibilites']" class="underline text-sm">
         Gérer les disponibilités
       </a>
     </div>
 
   </div>
 
-</section>
+</app-profile-layout>

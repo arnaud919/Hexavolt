@@ -1,20 +1,18 @@
+<app-profile-layout>
+
 <h1 class="text-center">Mes lieux de charge</h1>
 
 <div class="text-center mt-4">
-  <a routerLink="profil/lieux/nouveau" class="underline">
+  <a [routerLink]="['/profil/lieux/nouveau']" class="underline">
     Ajouter un lieu de charge
   </a>
 </div>
 
-<div
-  *ngIf="locations.length === 0"
-  class="text-center mt-10 text-gray-600">
+<div *ngIf="locations.length === 0" class="text-center mt-10 text-gray-600">
   Aucun lieu de charge pour le moment.
 </div>
 
-<div
-  *ngFor="let loc of locations"
-  class="max-w-2xl mx-auto p-6 m-6 border border-gray-300 rounded-2xl bg-white">
+<div *ngFor="let loc of locations" class="max-w-2xl mx-auto p-6 m-6 border border-gray-300 rounded-2xl bg-white">
 
   <h2 class="text-lg font-semibold mb-2">
     {{ loc.nickname }}
@@ -28,10 +26,9 @@
   </p>
 
   <div class="mt-4 text-right">
-    <button
-      class="button"
-      [routerLink]="['/locations', loc.locationId, 'stations']">
+    <button class="button" [routerLink]="['/profil', 'lieux', loc.locationId, 'bornes']">
       Voir les bornes
     </button>
   </div>
 </div>
+</app-profile-layout>

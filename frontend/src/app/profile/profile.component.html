@@ -54,6 +54,12 @@
     </ng-template>
   </div>
 
+  <div *ngIf="locations()?.length" class="flex justify-end mt-4">
+    <a routerLink="/profil/lieux" class="underline text-sm">
+      Voir tous mes lieux de charge
+    </a>
+  </div>
+
   <div class="mb-12">
     <h2 class="font-bold">Mes bornes de recharge</h2>
     <hr class="my-3">
