@@ -1,34 +1,59 @@
 <app-profile-layout>
 
-<h1 class="text-center">Mes lieux de charge</h1>
+  <h1 class="text-center">Mes lieux de charge</h1>
 
-<div class="text-center mt-4">
-  <a [routerLink]="['/profil/lieux/nouveau']" class="underline">
-    Ajouter un lieu de charge
-  </a>
-</div>
-
-<div *ngIf="locations.length === 0" class="text-center mt-10 text-gray-600">
-  Aucun lieu de charge pour le moment.
-</div>
-
-<div *ngFor="let loc of locations" class="max-w-2xl mx-auto p-6 m-6 border border-gray-300 rounded-2xl bg-white">
-
-  <h2 class="text-lg font-semibold mb-2">
-    {{ loc.nickname }}
-  </h2>
-
-  <p class="text-gray-700">
-    {{ loc.address }}
-  </p>
-  <p class="text-gray-700">
-    {{ loc.postalCode }} {{ loc.cityName }}
-  </p>
-
-  <div class="mt-4 text-right">
-    <button class="button" [routerLink]="['/profil', 'lieux', loc.locationId, 'bornes']">
-      Voir les bornes
-    </button>
+  <div class="flex justify-end mt-6">
+    <a [routerLink]="['/profil/lieux/nouveau']" class="underline text-sm">
+      Ajouter un lieu de charge
+    </a>
   </div>
-</div>
+
+  <div *ngIf="locations.length === 0" class="text-center mt-10 text-gray-600">
+    Aucun lieu de charge pour le moment.
+  </div>
+
+  <div
+    *ngIf="locations.length > 0"
+    class="grid gap-6 md:grid-cols-3 mt-6 auto-rows-fr"
+  >
+
+    <article
+      *ngFor="let loc of locations"
+      class="cards p-5 rounded-sm leading-8 flex flex-col"
+    >
+
+      <div>
+        <h2 class="font-bold">
+          {{ loc.nickname || 'Lieu de charge' }}
+        </h2>
+
+        <p class="text-sm text-gray-700">
+          {{ loc.address }}
+        </p>
+
+        <p class="text-sm text-gray-700">
+          {{ loc.postalCode }} {{ loc.cityName }}
+        </p>
+      </div>
+
+      <div class="mt-auto pt-4 flex justify-between items-center">
+        <a
+          [routerLink]="['/profil', 'lieux', loc.locationId]"
+          class="underline text-sm"
+        >
+          Voir le détail
+        </a>
+
+        <a
+          [routerLink]="['/profil', 'lieux', loc.locationId, 'bornes']"
+          class="underline text-sm"
+        >
+          Voir les bornes
+        </a>
+      </div>
+
+    </article>
+
+  </div>
+
 </app-profile-layout>

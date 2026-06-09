@@ -21,4 +21,6 @@ public interface ChargingStationService {
 
     ChargingStationDetailDTO findMyChargingStationById(Long id);
 
+    void deleteMyChargingStation(Long id);
+
 }

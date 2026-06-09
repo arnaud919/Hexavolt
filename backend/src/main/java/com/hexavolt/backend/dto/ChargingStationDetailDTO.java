@@ -17,6 +17,7 @@ public class ChargingStationDetailDTO {
     private String cityName;
     private String photoUrl;
     private String videoUrl;
+    private String locationName;
 
     public ChargingStationDetailDTO(
             Long id,
@@ -31,8 +32,8 @@ public class ChargingStationDetailDTO {
             String locationAddress,
             String cityName,
             String photoUrl,
-            String videoUrl
-    ) {
+            String videoUrl,
+            String locationName) {
         this.id = id;
         this.name = name;
         this.power = power;
@@ -46,6 +47,7 @@ public class ChargingStationDetailDTO {
         this.cityName = cityName;
         this.photoUrl = photoUrl;
         this.videoUrl = videoUrl;
+        this.locationName = locationName;
     }
 
     public Long getId() {
@@ -100,6 +102,10 @@ public class ChargingStationDetailDTO {
         return longitude;
     }
 
+    public String getLocationName() {
+        return locationName;
+    }
+
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
@@ -152,5 +158,7 @@ public class ChargingStationDetailDTO {
         this.videoUrl = videoUrl;
     }
 
-    // getters
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
+    }
 }

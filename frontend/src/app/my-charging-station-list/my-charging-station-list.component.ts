@@ -32,4 +32,21 @@ export class MyChargingStationListComponent implements OnInit {
       }
     });
   }
+
+  deleteChargingStation(id: number): void {
+    if (!confirm('Voulez-vous vraiment supprimer cette borne ?')) {
+      return;
+    }
+
+    this.chargingStationService.delete(id).subscribe({
+      next: () => {
+        this.chargingStations.update(chargingStations =>
+          chargingStations.filter(chargingStation => chargingStation.id !== id)
+        );
+      },
+      error: err => {
+        console.error('Erreur suppression borne', err);
+      }
+    });
+  }
 }

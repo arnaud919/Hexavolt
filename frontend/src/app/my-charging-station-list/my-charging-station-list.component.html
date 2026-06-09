@@ -4,26 +4,39 @@
 
   <div *ngIf="chargingStations().length; else noStations" class="grid gap-6 md:grid-cols-3 mt-6">
 
-    <article *ngFor="let chargingStation of chargingStations()" class="cards p-5 rounded-sm leading-8">
+    <article *ngFor="let chargingStation of chargingStations()" class="cards p-5 rounded-sm flex flex-col">
 
-      <p class="font-bold">
-        {{ chargingStation.name }}
-      </p>
+      <div>
 
-      <p>
-        {{ chargingStation.power }} kVA
-      </p>
+        <p class="font-bold">
+          {{ chargingStation.name }}
+        </p>
 
-      <p>
-        {{ chargingStation.hourlyRate }} € / heure
-      </p>
+        <p>
+          {{ chargingStation.power }} kVA
+        </p>
 
-      <a [routerLink]="[
-          '/profil/bornes',
-          chargingStation.id
+        <p>
+          {{ chargingStation.hourlyRate }} € / heure
+        </p>
+
+      </div>
+
+      <div class="mt-auto pt-4 flex justify-between items-center">
+
+        <a [routerLink]="[
+        '/profil/bornes',
+        chargingStation.id
         ]" class="underline text-sm">
-        Voir le détail
-      </a>
+          Voir le détail
+        </a>
+
+        <button type="button" class="underline text-sm text-red-600"
+          (click)="deleteChargingStation(chargingStation.id)">
+          Supprimer
+        </button>
+
+      </div>
 
     </article>
 

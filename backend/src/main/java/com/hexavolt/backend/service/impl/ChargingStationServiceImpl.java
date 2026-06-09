@@ -165,6 +165,10 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 .findByIdAndLocationUser(id, user)
                                 .orElseThrow(() -> new IllegalArgumentException("Charging station not found"));
 
+                NicknameLocation nicknameLocation = nicknameLocationRepo
+                                .findByStationLocationIdAndUser(station.getLocation().getId(), user)
+                                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
+
                 String photoUrl = station.getPhotoName() != null
                                 ? "/api/public/stations/" + station.getId() + "/photo"
                                 : null;
@@ -186,6 +190,21 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 station.getLocation().getAddress(),
                                 station.getLocation().getCity().getName(),
                                 photoUrl,
-                                videoUrl);
+                                videoUrl,
+                                nicknameLocation.getNickname());
+        }
+
+        @Override
+        public void deleteMyChargingStation(Long id) {
+
+                User user = (User) SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getPrincipal();
+
+                ChargingStation station = stationRepo.findByIdAndLocationUser(id, user)
+                                .orElseThrow(() -> new IllegalArgumentException("Charging station not found"));
+
+                stationRepo.delete(station);
         }
 }

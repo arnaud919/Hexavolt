@@ -40,5 +40,12 @@ export class ChargingStationService {
       { withCredentials: true }
     );
   }
-  
+
+  delete(id: number) {
+    return this.http.delete<void>(
+      `${this.apiUrl}/stations/${id}`,
+      { withCredentials: true }
+    );
+  }
+
 }

@@ -12,4 +12,5 @@ export interface ChargingStationDetail {
   cityName: string;
   photoUrl?: string | null;
   videoUrl?: string | null;
+  locationName: string |null;
 }
