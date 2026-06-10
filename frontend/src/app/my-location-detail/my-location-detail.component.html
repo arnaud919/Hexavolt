@@ -1,3 +1,50 @@
-<app-profile-layout [backLabel]="'Retour à mes lieux'" [backLink]="['/profil/lieux']">
-    <p>location-detail works!</p>
+<app-profile-layout
+  [backLabel]="'Retour à mes lieux'"
+  [backLink]="['/profil', 'lieux']"
+>
+
+  <h1 class="text-center">Détail du lieu de charge</h1>
+
+  <div
+    *ngIf="location() as loc"
+    class="cards p-6 rounded-sm leading-8 mt-6 max-w-4xl mx-auto"
+  >
+
+    <h2 class="font-bold">
+      {{ loc.nickname || 'Lieu de charge' }}
+    </h2>
+
+    <p>
+      <strong>Adresse :</strong>
+      {{ loc.address }}
+    </p>
+
+    <p>
+      <strong>Code postal :</strong>
+      {{ loc.postalCode }}
+    </p>
+
+    <p>
+      <strong>Ville :</strong>
+      {{ loc.cityName }}
+    </p>
+
+    <div class="mt-6 flex justify-between items-center">
+      <a
+        [routerLink]="['/profil', 'lieux', loc.locationId, 'bornes']"
+        class="underline text-sm"
+      >
+        Voir les bornes de ce lieu
+      </a>
+
+      <a
+        [routerLink]="['/profil', 'lieux', loc.locationId, 'bornes', 'nouvelle']"
+        class="underline text-sm"
+      >
+        Ajouter une borne
+      </a>
+    </div>
+
+  </div>
+
 </app-profile-layout>
