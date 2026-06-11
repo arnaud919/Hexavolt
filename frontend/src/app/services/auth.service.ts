@@ -36,13 +36,11 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/register`, data);
   }
 
-  login(data: LoginRequest): Observable<void> {
+  login(data: LoginRequest): Observable<Profile | null> {
     return this.http
       .post<void>(`${this.apiUrl}/login`, data, { withCredentials: true })
       .pipe(
-        tap(() => {
-          this.isLoggedIn.set(true);
-        })
+        switchMap(() => this.checkAuth())
       );
   }
 
