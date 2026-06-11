@@ -80,10 +80,10 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 Power power = powerRepo.findById(powerId)
                                 .orElseThrow(() -> new IllegalArgumentException("Power not found"));
 
-                StatusChargingStation activeStatus = statusChargingStationRepo.findByName("ACTIVE")
-                                .orElseThrow(() -> new IllegalStateException("Status ACTIVE not found"));
+                StatusChargingStation status = statusChargingStationRepo.findById(dto.getStatusId())
+                                .orElseThrow(() -> new IllegalArgumentException("Status not found"));
 
-                station.setStatus(activeStatus);
+                station.setStatus(status);
 
                 station.setName(dto.getName());
                 station.setHourlyRate(dto.getHourlyRate());
@@ -93,7 +93,7 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 station.setLocation(nl.getStationLocation());
                 station.setLatitude(dto.getLatitude());
                 station.setLongitude(dto.getLongitude());
-                station.setStatus(activeStatus);
+                station.setStatus(status);
 
                 if (photo != null && !photo.isEmpty()) {
                         String storedPhotoName = fileStorageService.storeChargingStationPhoto(photo);

@@ -53,8 +53,8 @@ export class AuthService {
     });
   }
 
-  checkAuth(): void {
-    this.http
+  checkAuth() {
+    return this.http
       .get<Profile>(`${this.apiUrl}/me`, { withCredentials: true })
       .pipe(
         tap(profile => {
@@ -65,17 +65,17 @@ export class AuthService {
           if (err.status === 401) {
             this.currentUser.set(null);
             this.isLoggedIn.set(false);
-            return of(null);
+          } else {
+            console.error(err);
           }
-          console.error(err);
+
           return of(null);
         })
-      )
-      .subscribe();
+      );
   }
 
   getProfile() {
     return this.http.get<Profile>(`${this.apiUrl}/me`, { withCredentials: true });
   }
-  
+
 }

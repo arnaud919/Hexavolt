@@ -7,6 +7,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LocationMapComponent } from "../location-map/location-map.component";
 import { ProfileLayoutComponent } from '../layout/profile-layout/profile-layout.component';
+import { StatusChargingStation } from '../models/status-charging-station';
+import { StatusChargingStationService } from '../services/status-charging-station.service';
 
 @Component({
   selector: 'app-station-create',
@@ -20,13 +22,15 @@ export class MyChargingStationCreateComponent implements OnInit {
   locationId!: number;
   selectedPhoto: File | null = null;
   selectedVideo: File | null = null;
+  statuses: StatusChargingStation[] = [];
 
   constructor(
     private fb: FormBuilder,
     private powerService: PowerService,
     private stationService: ChargingStationService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private statusService: StatusChargingStationService,
   ) { }
 
   ngOnInit(): void {
@@ -40,10 +44,23 @@ export class MyChargingStationCreateComponent implements OnInit {
       instruction: [''],
       latitude: [null, Validators.required],
       longitude: [null, Validators.required],
+      statusId: [null, Validators.required],
     });
 
     this.powerService.getAll()
       .subscribe(powers => this.powers = powers);
+
+    this.statusService.getAll().subscribe(statuses => {
+      this.statuses = statuses;
+
+      const status = statuses.find(status => status.name === 'ACTIVE');
+
+      if (status) {
+        this.form.patchValue({
+          statusId: status.id
+        });
+      }
+    });
   }
 
   onPositionSelected(pos: { lat: number; lng: number }) {
@@ -77,7 +94,8 @@ export class MyChargingStationCreateComponent implements OnInit {
       instruction: this.form.value.instruction || undefined,
       isCustom: !!this.form.value.isCustom,
       latitude: this.form.value.latitude,
-      longitude: this.form.value.longitude
+      longitude: this.form.value.longitude,
+      statusId: Number(this.form.value.statusId),
     };
 
     const formData = new FormData();

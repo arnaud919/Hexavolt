@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { StatusChargingStationServiceService } from './status-charging-station.service.service';
+import { StatusChargingStationService } from './status-charging-station.service';
 
 describe('StatusChargingStationServiceService', () => {
-  let service: StatusChargingStationServiceService;
+  let service: StatusChargingStationService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(StatusChargingStationServiceService);
+    service = TestBed.inject(StatusChargingStationService);
   });
 
   it('should be created', () => {
