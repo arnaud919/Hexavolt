@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
 import { LocationMapComponent } from "../location-map/location-map.component";
 import { ProfileLayoutComponent } from '../layout/profile-layout/profile-layout.component';
 import { StatusChargingStation } from '../models/status-charging-station';
-import { StatusChargingStationService } from '../services/status-charging-station.service.service';
+import { StatusChargingStationService } from '../services/status-charging-station.service';
 
 @Component({
   selector: 'app-station-create',
