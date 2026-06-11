@@ -1,0 +1,20 @@
+.hexavolt-marker {
+  width: 42px;
+  height: 42px;
+  background: #f2c84b;
+  border: 4px solid white;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hexavolt-marker-hole {
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+}

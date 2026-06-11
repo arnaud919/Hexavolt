@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { StatusChargingStationService } from './status-charging-station.service';
+import { StatusChargingStationService } from './status-charging-station.service.service';
 
 describe('StatusChargingStationServiceService', () => {
   let service: StatusChargingStationService;

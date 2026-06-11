@@ -68,9 +68,15 @@ export class SigninComponent implements OnInit {
   }
 
   selectCity(city: City): void {
-    this.cityQuery.setValue(city.name);
+
     this.selectedCityId = city.id;
-    setTimeout(() => this.setCityFieldFocus(false), 0);
+
+    this.cityQuery.setValue(city.name, {
+      emitEvent: false
+    });
+
+    this.suggestions.set([]);
+    this.setCityFieldFocus(false);
   }
 
   private passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
