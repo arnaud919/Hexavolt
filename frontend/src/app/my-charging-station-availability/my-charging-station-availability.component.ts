@@ -1,34 +1,60 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { WeekDayAvailability } from '../models/week-day-availability';
+
+import { WeeklyScheduleService } from '../services/weekly-schedule.service';
+import { ProfileLayoutComponent } from '../layout/profile-layout/profile-layout.component';
+import { TIME_SLOTS } from '../models/time-slots';
+import { DEFAULT_WEEK_DAYS } from '../models/default-week-days';
 
 @Component({
-  selector: 'app-charging-station-availability',
-  imports: [CommonModule, FormsModule],
+  selector: 'app-my-charging-station-availability',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ProfileLayoutComponent],
   templateUrl: './my-charging-station-availability.component.html',
   styleUrl: './my-charging-station-availability.component.css'
 })
-export class MyChargingStationAvailabilityComponent {
+export class MyChargingStationAvailabilityComponent implements OnInit {
 
+  readonly timeSlots = TIME_SLOTS;
+  weekDays = structuredClone(DEFAULT_WEEK_DAYS);
   stationId!: number;
 
-  weekDays: WeekDayAvailability[] = [
-    { id: 1, label: 'Lundi',    enabled: false, startTime: '', endTime: '' },
-    { id: 2, label: 'Mardi',    enabled: false, startTime: '', endTime: '' },
-    { id: 3, label: 'Mercredi', enabled: false, startTime: '', endTime: '' },
-    { id: 4, label: 'Jeudi',    enabled: false, startTime: '', endTime: '' },
-    { id: 5, label: 'Vendredi', enabled: false, startTime: '', endTime: '' },
-    { id: 6, label: 'Samedi',   enabled: false, startTime: '', endTime: '' },
-    { id: 7, label: 'Dimanche', enabled: false, startTime: '', endTime: '' }
-  ];
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly weeklyScheduleService: WeeklyScheduleService
+  ) { }
 
-  constructor(route: ActivatedRoute) {
-    this.stationId = Number(route.snapshot.paramMap.get('stationId'));
+  ngOnInit(): void {
+    this.stationId = Number(this.route.snapshot.paramMap.get('id'));
   }
 
   saveWeeklySchedule(): void {
-    console.log('Horaires hebdomadaires', this.weekDays);
+    const invalidDay = this.weekDays.find(day =>
+      day.enabled && day.startTime >= day.endTime
+    );
+
+    if (invalidDay) {
+      alert(`Pour ${invalidDay.label}, l'heure de début doit être avant l'heure de fin.`);
+      return;
+    }
+
+    const payload = this.weekDays
+      .filter(day => day.enabled)
+      .map(day => ({
+        dayOfWeekId: day.id,
+        startTime: day.startTime,
+        endTime: day.endTime
+      }));
+
+    console.log('Payload horaires envoyé :', payload);
+
+    this.weeklyScheduleService
+      .updateWeeklySchedule(this.stationId, payload)
+      .subscribe({
+        next: () => console.log('Horaires enregistrés'),
+        error: err => console.error('Erreur enregistrement horaires', err)
+      });
   }
 }

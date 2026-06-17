@@ -10,11 +10,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.hexavolt.backend.dto.ChargingStationCreateDTO;
 import com.hexavolt.backend.dto.ChargingStationDetailDTO;
 import com.hexavolt.backend.dto.ChargingStationListDTO;
+import com.hexavolt.backend.dto.WeeklyScheduleDTO;
 import com.hexavolt.backend.entity.ChargingStation;
+import com.hexavolt.backend.entity.DayOfWeek;
 import com.hexavolt.backend.entity.NicknameLocation;
 import com.hexavolt.backend.entity.Power;
 import com.hexavolt.backend.entity.StatusChargingStation;
 import com.hexavolt.backend.entity.User;
+import com.hexavolt.backend.entity.WeeklySchedule;
 import com.hexavolt.backend.mapper.ChargingStationMapper;
 import com.hexavolt.backend.repository.ChargingStationRepository;
 import com.hexavolt.backend.repository.DayOfWeekRepository;
@@ -34,6 +37,8 @@ public class ChargingStationServiceImpl implements ChargingStationService {
         private final ChargingStationRepository stationRepo;
         private final NicknameLocationRepository nicknameLocationRepo;
         private final PowerRepository powerRepo;
+        private final DayOfWeekRepository dayOfWeekRepo;
+        private final WeeklyScheduleRepository weeklyScheduleRepo;
         private final FileStorageService fileStorageService;
         private final StatusChargingStationRepository statusChargingStationRepo;
 
@@ -48,6 +53,8 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 this.stationRepo = stationRepo;
                 this.nicknameLocationRepo = nicknameLocationRepo;
                 this.powerRepo = powerRepo;
+                this.dayOfWeekRepo = dayOfWeekRepo;
+                this.weeklyScheduleRepo = weeklyScheduleRepo;
                 this.fileStorageService = fileStorageService;
                 this.statusChargingStationRepo = statusChargingStationRepo;
         }
@@ -206,5 +213,49 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 .orElseThrow(() -> new IllegalArgumentException("Charging station not found"));
 
                 stationRepo.delete(station);
+        }
+
+        @Override
+        public void updateWeeklySchedule(
+                        Long stationId,
+                        List<WeeklyScheduleDTO> schedules) {
+
+                User user = (User) SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getPrincipal();
+
+                ChargingStation station = stationRepo
+                                .findByIdAndLocationUser(stationId, user)
+                                .orElseThrow(() -> new IllegalArgumentException("Charging station not found"));
+
+                weeklyScheduleRepo.deleteByChargingStationId(stationId);
+
+                for (WeeklyScheduleDTO dto : schedules) {
+
+                        if (dto.getStartTime() == null || dto.getEndTime() == null) {
+                                throw new IllegalArgumentException(
+                                                "Les horaires de début et de fin sont obligatoires.");
+                        }
+
+                        if (!dto.getStartTime().isBefore(dto.getEndTime())) {
+                                throw new IllegalArgumentException("L'heure de début doit être avant l'heure de fin.");
+                        }
+
+                        DayOfWeek dayOfWeek = dayOfWeekRepo
+                                        .findById(dto.getDayOfWeekId().shortValue())
+                                        .orElseThrow(() -> new IllegalArgumentException("Day not found"));
+
+                        WeeklySchedule weeklySchedule = new WeeklySchedule();
+
+                        weeklySchedule.setChargingStation(station);
+                        weeklySchedule.setDayOfWeek(dayOfWeek);
+                        weeklySchedule.setStartTime(dto.getStartTime());
+                        weeklySchedule.setEndTime(dto.getEndTime());
+
+                        weeklyScheduleRepo.save(weeklySchedule);
+
+                        System.out.println("Sauvé : " + weeklySchedule.getStartTime());
+                }
         }
 }

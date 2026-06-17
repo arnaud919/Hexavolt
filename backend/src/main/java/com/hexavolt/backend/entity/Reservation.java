@@ -32,6 +32,9 @@ public class Reservation {
     @JoinColumn(name = "status_reservation", referencedColumnName = "id")
     private StatusReservation status;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     // --- Constructors ---
     public Reservation() {
     }
@@ -101,5 +104,13 @@ public class Reservation {
 
     public void setStatus(StatusReservation status) {
         this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

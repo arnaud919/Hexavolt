@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.hexavolt.backend.dto.ChargingStationCreateDTO;
 import com.hexavolt.backend.dto.ChargingStationDetailDTO;
 import com.hexavolt.backend.dto.ChargingStationListDTO;
+import com.hexavolt.backend.dto.WeeklyScheduleDTO;
 import com.hexavolt.backend.service.ChargingStationService;
 
 @RestController
@@ -53,6 +56,14 @@ public class ChargingStationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMyChargingStation(@PathVariable Long id) {
         chargingStationService.deleteMyChargingStation(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/weekly-schedules")
+    public ResponseEntity<Void> updateWeeklySchedule(
+            @PathVariable Long id,
+            @RequestBody List<WeeklyScheduleDTO> schedules) {
+        chargingStationService.updateWeeklySchedule(id, schedules);
         return ResponseEntity.noContent().build();
     }
 }
