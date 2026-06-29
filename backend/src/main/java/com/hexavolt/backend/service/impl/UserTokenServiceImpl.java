@@ -3,13 +3,13 @@ package com.hexavolt.backend.service.impl;
 import com.hexavolt.backend.entity.User;
 import com.hexavolt.backend.entity.UserToken;
 import com.hexavolt.backend.entity.UserToken.TokenType;
+import com.hexavolt.backend.exception.BusinessException;
 import com.hexavolt.backend.repository.UserTokenRepository;
 import com.hexavolt.backend.service.TimeService;
 import com.hexavolt.backend.service.UserTokenService;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -28,22 +28,33 @@ public class UserTokenServiceImpl implements UserTokenService {
 
     @Override
     public UserToken createActivationToken(User user, Duration ttl) {
-        return create(user, UserToken.TokenType.ACTIVATION, ttl);
+        return create(user, TokenType.ACTIVATION, ttl);
     }
 
     @Override
     public UserToken createResetPasswordToken(User user, Duration ttl) {
-        return create(user, UserToken.TokenType.RESET_PASSWORD, ttl);
+        return create(user, TokenType.RESET_PASSWORD, ttl);
     }
 
-    private UserToken create(User user, UserToken.TokenType type, Duration ttl) {
-        var t = new UserToken();
-        t.setUser(user);
-        t.setType(type);
-        t.setToken(UUID.randomUUID().toString());
-        t.setCreatedAt(time.now());
-        t.setExpiresAt(time.now().plusSeconds(ttl.toSeconds()));
-        return repo.save(t);
+    private UserToken create(User user, TokenType type, Duration ttl) {
+        if (user == null) {
+            throw new BusinessException("Utilisateur obligatoire pour créer un jeton.");
+        }
+
+        if (ttl == null || ttl.isZero() || ttl.isNegative()) {
+            throw new BusinessException("La durée de validité du jeton est invalide.");
+        }
+
+        LocalDateTime now = time.now();
+
+        UserToken token = new UserToken();
+        token.setUser(user);
+        token.setType(type);
+        token.setToken(UUID.randomUUID().toString());
+        token.setCreatedAt(now);
+        token.setExpiresAt(now.plusSeconds(ttl.toSeconds()));
+
+        return repo.save(token);
     }
 
     @Override
@@ -60,37 +71,66 @@ public class UserTokenServiceImpl implements UserTokenService {
 
     @Override
     public boolean canResendActivation(User user, Duration cooldown) {
-        LocalDateTime after = LocalDateTime.now().minus(cooldown);
+        if (user == null) {
+            throw new BusinessException("Utilisateur obligatoire.");
+        }
+
+        if (cooldown == null || cooldown.isNegative()) {
+            throw new BusinessException("Le délai de renvoi est invalide.");
+        }
+
+        LocalDateTime after = time.now().minus(cooldown);
+
         boolean recentExists = repo.existsByUserAndTypeAndCreatedAtAfter(
-                user, UserToken.TokenType.ACTIVATION, after);
+                user,
+                TokenType.ACTIVATION,
+                after
+        );
+
         return !recentExists;
     }
 
     private UserToken validate(String rawToken, TokenType expectedType) {
-        UserToken tk = repo.findByToken(rawToken)
-                .orElseThrow(() -> new IllegalArgumentException("Jeton invalide."));
-        if (tk.getType() != expectedType) {
-            throw new IllegalArgumentException("Type de jeton invalide.");
+        if (rawToken == null || rawToken.isBlank()) {
+            throw new BusinessException("Jeton obligatoire.");
         }
-        if (tk.getUsedAt() != null) {
-            throw new IllegalArgumentException("Le jeton a déjà été utilisé.");
+
+        UserToken token = repo.findByToken(rawToken)
+                .orElseThrow(() -> new BusinessException("Jeton invalide."));
+
+        if (token.getType() != expectedType) {
+            throw new BusinessException("Type de jeton invalide.");
         }
-        if (tk.getExpiresAt() == null || LocalDateTime.now().isAfter(tk.getExpiresAt())) {
-            throw new IllegalArgumentException("Le jeton a expiré.");
+
+        if (token.getUsedAt() != null) {
+            throw new BusinessException("Le jeton a déjà été utilisé.");
         }
-        return tk;
+
+        if (token.getExpiresAt() == null || time.now().isAfter(token.getExpiresAt())) {
+            throw new BusinessException("Le jeton a expiré.");
+        }
+
+        return token;
     }
 
     @Override
     @Transactional
     public void consume(UserToken token) {
-        token.setUsedAt(LocalDateTime.now());
+        if (token == null) {
+            throw new BusinessException("Jeton obligatoire.");
+        }
+
+        token.setUsedAt(time.now());
         repo.save(token);
     }
 
     @Override
     @Transactional
     public void invalidateAllResetTokens(Long userId) {
+        if (userId == null) {
+            throw new BusinessException("L'identifiant utilisateur est obligatoire.");
+        }
+
         repo.deleteByUser_IdAndType(userId, TokenType.RESET_PASSWORD);
     }
 }

@@ -1,4 +1,3 @@
-// src/main/java/com/hexavolt/backend/service/impl/AuthServiceImpl.java
 package com.hexavolt.backend.service.impl;
 
 import com.hexavolt.backend.dto.LoginRequestDTO;
@@ -7,6 +6,8 @@ import com.hexavolt.backend.dto.RegisterRequestDTO;
 import com.hexavolt.backend.dto.ResetPasswordConfirmDTO;
 import com.hexavolt.backend.entity.User;
 import com.hexavolt.backend.entity.UserToken;
+import com.hexavolt.backend.exception.BusinessException;
+import com.hexavolt.backend.exception.ResourceNotFoundException;
 import com.hexavolt.backend.mapper.UserMapper;
 import com.hexavolt.backend.repository.CityRepository;
 import com.hexavolt.backend.repository.UserRepository;
@@ -41,10 +42,11 @@ public class AuthServiceImpl implements AuthService {
     private final MailService mailService;
     private final MailTemplateService mailTemplates;
 
-    String baseUrl;
-    String frontendUrl;
+    private final String baseUrl;
+    private final String frontendUrl;
 
-    public AuthServiceImpl(UserRepository userRepo,
+    public AuthServiceImpl(
+            UserRepository userRepo,
             CityRepository cityRepo,
             PasswordEncoder encoder,
             UserMapper userMapper,
@@ -53,8 +55,8 @@ public class AuthServiceImpl implements AuthService {
             MailService mailService,
             MailTemplateService mailTemplates,
             @Value("${app.base-url}") String baseUrl,
-            @Value("${app.frontend-url}") String frontendUrl) {
-
+            @Value("${app.frontend-url}") String frontendUrl
+    ) {
         this.userRepo = userRepo;
         this.cityRepo = cityRepo;
         this.encoder = encoder;
@@ -70,30 +72,29 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void register(RegisterRequestDTO req) {
+        String emailNorm = normalizeEmail(req.email());
 
         PasswordPolicy.assertNoPersonalInfo(
                 req.password(),
-                req.email(),
-                (req.firstName() == null ? "" : req.firstName()) + " "
-                        + (req.lastName() == null ? "" : req.lastName()));
-
-        var emailNorm = req.email().trim().toLowerCase();
+                emailNorm,
+                buildFullName(req.firstName(), req.lastName())
+        );
 
         if (userRepo.existsByEmail(emailNorm)) {
-            throw new IllegalArgumentException("Cette adresse e-mail est déjà enregistrée.");
+            throw new BusinessException("Cette adresse e-mail est déjà enregistrée.");
         }
 
         var city = cityRepo.findById(req.cityId())
-                .orElseThrow(() -> new IllegalArgumentException("Ville introuvable."));
+                .orElseThrow(() -> new ResourceNotFoundException("Ville introuvable."));
 
         var encodedPwd = encoder.encode(req.password());
         var user = userMapper.toEntity(req, city, encodedPwd);
         user.setEmail(emailNorm);
+
         userRepo.save(user);
 
-        var tk = tokenService.createActivationToken(user, Duration.ofHours(24));
-
-        var link = frontendUrl + "/verify?token=" + tk.getToken();
+        var token = tokenService.createActivationToken(user, Duration.ofHours(24));
+        var link = frontendUrl + "/verify?token=" + token.getToken();
 
         String html = mailTemplates.activationEmail(user, link);
         mailService.sendHtml(user.getEmail(), "Activation de votre compte Hexavolt", html);
@@ -102,24 +103,21 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void verifyEmail(String token) {
+        UserToken userToken = tokenService.validateActivationToken(token);
 
-        UserToken tk = tokenService.validateActivationToken(token);
-
-        User user = tk.getUser();
+        User user = userToken.getUser();
         user.setEmailIsValid(true);
-        userRepo.save(user);
 
-        tokenService.consume(tk);
+        userRepo.save(user);
+        tokenService.consume(userToken);
     }
 
     @Override
     @Transactional
     public void resendVerificationEmail(String email) {
-
-        var emailNorm = email.trim().toLowerCase();
+        String emailNorm = normalizeEmail(email);
 
         userRepo.findByEmail(emailNorm).ifPresent(user -> {
-
             if (Boolean.TRUE.equals(user.getEmailIsValid())) {
                 return;
             }
@@ -128,26 +126,27 @@ public class AuthServiceImpl implements AuthService {
                 return;
             }
 
-            var tk = tokenService.createActivationToken(user, Duration.ofHours(24));
-            var link = frontendUrl + "/verify?token=" + tk.getToken();
+            var token = tokenService.createActivationToken(user, Duration.ofHours(24));
+            var link = frontendUrl + "/verify?token=" + token.getToken();
 
             String html = mailTemplates.activationEmail(user, link);
             mailService.sendHtml(user.getEmail(), "Activation de votre compte Hexavolt", html);
         });
-
     }
 
     @Override
     public String login(LoginRequestDTO req) {
-        var email = req.email().trim().toLowerCase();
-        var user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+        String email = normalizeEmail(req.email());
+
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new BadCredentialsException("Identifiants invalides."));
 
         if (!Boolean.TRUE.equals(user.getEmailIsValid())) {
-            throw new BadCredentialsException("Invalid credentials");
+            throw new BadCredentialsException("Identifiants invalides.");
         }
+
         if (!encoder.matches(req.password(), user.getPassword())) {
-            throw new BadCredentialsException("Invalid credentials");
+            throw new BadCredentialsException("Identifiants invalides.");
         }
 
         return jwtService.generateToken(user);
@@ -156,64 +155,69 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void requestPasswordReset(String email) {
-        // Normaliser l'email (anti NPE et éviter la casse)
-        String emailNorm = (email == null) ? "" : email.trim().toLowerCase();
+        String emailNorm = normalizeEmail(email);
 
         Optional<User> userOpt = userRepo.findByEmail(emailNorm);
+
         if (userOpt.isPresent()) {
             User user = userOpt.get();
 
-            // Invalider d’anciens tokens de reset
             tokenService.invalidateAllResetTokens(user.getId());
 
-            // Créer un nouveau token (2h de validité)
-            UserToken tk = tokenService.createResetPasswordToken(user, Duration.ofHours(2));
+            UserToken token = tokenService.createResetPasswordToken(user, Duration.ofHours(2));
+            String link = baseUrl + "/reset-password?token=" + token.getToken();
 
-            // Lien front (ou API) pour réinitialiser
-            String link = baseUrl + "/reset-password?token=" + tk.getToken();
-
-            // Envoi du mail
             String html = mailTemplates.resetPasswordEmail(user, link);
             mailService.sendHtml(user.getEmail(), "Réinitialisation de votre mot de passe", html);
         }
-        // Côté contrôleur : toujours 200 pour ne pas révéler si l'email existe.
     }
 
     @Override
     @Transactional
     public void confirmPasswordReset(ResetPasswordConfirmDTO dto) {
-        // 1) Valider le jeton RESET_PASSWORD
-        UserToken tk = tokenService.validateResetPasswordToken(dto.getToken());
-        User user = tk.getUser();
+        UserToken token = tokenService.validateResetPasswordToken(dto.getToken());
+        User user = token.getUser();
 
-        // 2) Politique mot de passe
-        String fullName = ((user.getFirstName() == null ? "" : user.getFirstName()) +
-                " " +
-                (user.getLastName() == null ? "" : user.getLastName())).trim();
+        String fullName = buildFullName(user.getFirstName(), user.getLastName());
 
-        PasswordPolicy.assertNoPersonalInfo(dto.getNewPassword(), user.getEmail(), fullName);
+        PasswordPolicy.assertNoPersonalInfo(
+                dto.getNewPassword(),
+                user.getEmail(),
+                fullName
+        );
 
-        // 3) Mise à jour + encodage
         user.setPassword(encoder.encode(dto.getNewPassword()));
         userRepo.save(user);
 
-        // 4) Consommer le jeton (usage unique)
-        tokenService.consume(tk);
+        tokenService.consume(token);
     }
 
     @Override
     public ProfileDTO getProfile() {
-
-        Authentication authentication =
-            SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
 
         User user = (User) authentication.getPrincipal();
 
         return new ProfileDTO(
-            user.getId(),
-            user.getFirstName(),
-            user.getLastName(),
-            user.getEmail()
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail()
         );
+    }
+
+    private String normalizeEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new BusinessException("Une adresse e-mail est requise.");
+        }
+
+        return email.trim().toLowerCase();
+    }
+
+    private String buildFullName(String firstName, String lastName) {
+        return ((firstName == null ? "" : firstName) + " " +
+                (lastName == null ? "" : lastName)).trim();
     }
 }

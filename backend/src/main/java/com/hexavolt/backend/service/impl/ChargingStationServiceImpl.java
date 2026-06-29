@@ -2,7 +2,6 @@ package com.hexavolt.backend.service.impl;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -19,6 +18,8 @@ import com.hexavolt.backend.entity.Power;
 import com.hexavolt.backend.entity.StatusChargingStation;
 import com.hexavolt.backend.entity.User;
 import com.hexavolt.backend.entity.WeeklySchedule;
+import com.hexavolt.backend.exception.BusinessException;
+import com.hexavolt.backend.exception.ResourceNotFoundException;
 import com.hexavolt.backend.mapper.ChargingStationMapper;
 import com.hexavolt.backend.repository.ChargingStationRepository;
 import com.hexavolt.backend.repository.DayOfWeekRepository;
@@ -66,77 +67,55 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                         ChargingStationCreateDTO dto,
                         MultipartFile photo,
                         MultipartFile video) {
+
+                if (dto == null) {
+                        throw new BusinessException("Les informations de la borne sont obligatoires.");
+                }
+
+                User user = getCurrentUser();
+
+                Long locationId = requireId(dto.getLocationId(), "L'emplacement est obligatoire.");
+                Long powerId = requireId(dto.getPowerId(), "La puissance est obligatoire.");
+                Long statusId = requireId(dto.getStatusId(), "Le statut est obligatoire.");
+
+                NicknameLocation nicknameLocation = findUserLocation(locationId, user);
+                Power power = findPower(powerId);
+                StatusChargingStation status = findStatus(statusId);
+
                 ChargingStation station = new ChargingStation();
-
-                User user = (User) SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getPrincipal();
-
-                Long locationId = Objects.requireNonNull(
-                                dto.getLocationId(),
-                                "Location id is required");
-
-                NicknameLocation nl = nicknameLocationRepo
-                                .findByStationLocationIdAndUser(locationId, user)
-                                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
-
-                Long powerId = Objects.requireNonNull(
-                                dto.getPowerId(),
-                                "Power id is required");
-
-                Power power = powerRepo.findById(powerId)
-                                .orElseThrow(() -> new IllegalArgumentException("Power not found"));
-
-                StatusChargingStation status = statusChargingStationRepo.findById(dto.getStatusId())
-                                .orElseThrow(() -> new IllegalArgumentException("Status not found"));
-
-                station.setStatus(status);
 
                 station.setName(dto.getName());
                 station.setHourlyRate(dto.getHourlyRate());
                 station.setInstruction(dto.getInstruction());
                 station.setIsCustom(dto.isCustom());
                 station.setPower(power);
-                station.setLocation(nl.getStationLocation());
+                station.setLocation(nicknameLocation.getStationLocation());
                 station.setLatitude(dto.getLatitude());
                 station.setLongitude(dto.getLongitude());
                 station.setStatus(status);
 
                 if (photo != null && !photo.isEmpty()) {
                         String storedPhotoName = fileStorageService.storeChargingStationPhoto(photo);
-                        System.out.println("PHOTO STORED NAME : " + storedPhotoName);
                         station.setPhotoName(storedPhotoName);
                 }
 
                 if (video != null && !video.isEmpty()) {
-                        station.setVideoName(fileStorageService.storeChargingStationVideo(video));
+                        String storedVideoName = fileStorageService.storeChargingStationVideo(video);
+                        station.setVideoName(storedVideoName);
                 }
-
-                System.out.println("PHOTO NULL ? " + (photo == null));
-                System.out.println("PHOTO EMPTY ? " + (photo != null && photo.isEmpty()));
-                System.out.println("PHOTO ORIGINAL NAME : " + (photo != null ? photo.getOriginalFilename() : "null"));
-
-                System.out.println("VIDEO NULL ? " + (video == null));
-                System.out.println("VIDEO EMPTY ? " + (video != null && video.isEmpty()));
-                System.out.println("VIDEO ORIGINAL NAME : " + (video != null ? video.getOriginalFilename() : "null"));
 
                 stationRepo.save(station);
         }
 
         @Override
         public List<ChargingStationListDTO> findByLocationId(Long locationId) {
+                User user = getCurrentUser();
 
-                User user = (User) SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getPrincipal();
+                Long validLocationId = requireId(locationId, "L'emplacement est obligatoire.");
 
-                nicknameLocationRepo
-                                .findByStationLocationIdAndUser(locationId, user)
-                                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
+                findUserLocation(validLocationId, user);
 
-                return stationRepo.findByLocationId(locationId).stream()
+                return stationRepo.findByLocationId(validLocationId).stream()
                                 .map(station -> new ChargingStationListDTO(
                                                 station.getId(),
                                                 station.getName(),
@@ -148,11 +127,7 @@ public class ChargingStationServiceImpl implements ChargingStationService {
 
         @Override
         public List<ChargingStationListDTO> findMyChargingStations() {
-
-                User user = (User) SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getPrincipal();
+                User user = getCurrentUser();
 
                 List<ChargingStation> stations = stationRepo.findByLocationUser(user);
 
@@ -163,19 +138,15 @@ public class ChargingStationServiceImpl implements ChargingStationService {
 
         @Override
         public ChargingStationDetailDTO findMyChargingStationById(Long id) {
+                User user = getCurrentUser();
 
-                User user = (User) SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getPrincipal();
+                Long stationId = requireId(id, "L'identifiant de la borne est obligatoire.");
 
-                ChargingStation station = stationRepo
-                                .findByIdAndLocationUser(id, user)
-                                .orElseThrow(() -> new IllegalArgumentException("Charging station not found"));
+                ChargingStation station = findOwnedStation(stationId, user);
 
-                NicknameLocation nicknameLocation = nicknameLocationRepo
-                                .findByStationLocationIdAndUser(station.getLocation().getId(), user)
-                                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
+                NicknameLocation nicknameLocation = findUserLocation(
+                                station.getLocation().getId(),
+                                user);
 
                 String photoUrl = station.getPhotoName() != null
                                 ? "/api/public/stations/" + station.getId() + "/photo"
@@ -212,30 +183,18 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 photoUrl,
                                 videoUrl,
                                 nicknameLocation.getNickname(),
-                                weeklySchedules
-                        );
+                                weeklySchedules);
         }
 
         @Override
         public void deleteMyChargingStation(Long id) {
+                User user = getCurrentUser();
 
-                User user = (User) SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getPrincipal();
+                Long stationId = requireId(id, "L'identifiant de la borne est obligatoire.");
 
-                ChargingStation station = stationRepo.findByIdAndLocationUser(id, user)
-                                .orElseThrow(() -> new IllegalArgumentException("Charging station not found"));
+                ChargingStation station = findOwnedStation(stationId, user);
 
                 stationRepo.delete(station);
-        }
-
-        private void validateHalfHour(LocalTime time) {
-                int minute = time.getMinute();
-
-                if (minute != 0 && minute != 30) {
-                        throw new IllegalArgumentException("Les horaires doivent être par tranche de 30 minutes.");
-                }
         }
 
         @Override
@@ -243,43 +202,24 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                         Long stationId,
                         List<WeeklyScheduleDTO> schedules) {
 
-                User user = (User) SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getPrincipal();
+                User user = getCurrentUser();
 
-                ChargingStation station = stationRepo
-                                .findByIdAndLocationUser(stationId, user)
-                                .orElseThrow(() -> new IllegalArgumentException("Charging station not found"));
+                Long validStationId = requireId(stationId, "L'identifiant de la borne est obligatoire.");
 
-                weeklyScheduleRepo.deleteByChargingStationId(stationId);
+                ChargingStation station = findOwnedStation(validStationId, user);
+
+                if (schedules == null) {
+                        throw new BusinessException("La liste des horaires est obligatoire.");
+                }
+
+                weeklyScheduleRepo.deleteByChargingStationId(validStationId);
 
                 for (WeeklyScheduleDTO dto : schedules) {
-
-                        if (dto.getStartTime() == null || dto.getEndTime() == null) {
-                                throw new IllegalArgumentException(
-                                                "Les horaires de début et de fin sont obligatoires.");
-                        }
-
-                        if (!dto.getStartTime().isBefore(dto.getEndTime())) {
-                                throw new IllegalArgumentException("L'heure de début doit être avant l'heure de fin.");
-                        }
-
-                        if (dto.getStartTime() == null || dto.getEndTime() == null) {
-                                throw new IllegalArgumentException(
-                                                "Les horaires de début et de fin sont obligatoires.");
-                        }
-
-                        validateHalfHour(dto.getStartTime());
-                        validateHalfHour(dto.getEndTime());
-
-                        if (!dto.getStartTime().isBefore(dto.getEndTime())) {
-                                throw new IllegalArgumentException("L'heure de début doit être avant l'heure de fin.");
-                        }
+                        validateSchedule(dto);
 
                         DayOfWeek dayOfWeek = dayOfWeekRepo
                                         .findById(dto.getDayOfWeekId().shortValue())
-                                        .orElseThrow(() -> new IllegalArgumentException("Day not found"));
+                                        .orElseThrow(() -> new ResourceNotFoundException("Jour de la semaine introuvable."));
 
                         WeeklySchedule weeklySchedule = new WeeklySchedule();
 
@@ -289,8 +229,74 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                         weeklySchedule.setEndTime(dto.getEndTime());
 
                         weeklyScheduleRepo.save(weeklySchedule);
+                }
+        }
 
-                        System.out.println("Sauvé : " + weeklySchedule.getStartTime());
+        private User getCurrentUser() {
+                return (User) SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getPrincipal();
+        }
+
+        private Long requireId(Long id, String message) {
+                if (id == null) {
+                        throw new BusinessException(message);
+                }
+
+                return id;
+        }
+
+        private NicknameLocation findUserLocation(Long locationId, User user) {
+                return nicknameLocationRepo
+                                .findByStationLocationIdAndUser(locationId, user)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Emplacement introuvable ou inaccessible."));
+        }
+
+        private Power findPower(Long powerId) {
+                return powerRepo.findById(powerId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Puissance introuvable."));
+        }
+
+        private StatusChargingStation findStatus(Long statusId) {
+                return statusChargingStationRepo.findById(statusId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Statut de borne introuvable."));
+        }
+
+        private ChargingStation findOwnedStation(Long stationId, User user) {
+                return stationRepo
+                                .findByIdAndLocationUser(stationId, user)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Borne introuvable ou inaccessible."));
+        }
+
+        private void validateSchedule(WeeklyScheduleDTO dto) {
+                if (dto == null) {
+                        throw new BusinessException("Un créneau horaire est invalide.");
+                }
+
+                if (dto.getDayOfWeekId() == null) {
+                        throw new BusinessException("Le jour de la semaine est obligatoire.");
+                }
+
+                if (dto.getStartTime() == null || dto.getEndTime() == null) {
+                        throw new BusinessException("Les horaires de début et de fin sont obligatoires.");
+                }
+
+                validateHalfHour(dto.getStartTime());
+                validateHalfHour(dto.getEndTime());
+
+                if (!dto.getStartTime().isBefore(dto.getEndTime())) {
+                        throw new BusinessException("L'heure de début doit être avant l'heure de fin.");
+                }
+        }
+
+        private void validateHalfHour(LocalTime time) {
+                int minute = time.getMinute();
+
+                if (minute != 0 && minute != 30) {
+                        throw new BusinessException("Les horaires doivent être par tranche de 30 minutes.");
                 }
         }
 }

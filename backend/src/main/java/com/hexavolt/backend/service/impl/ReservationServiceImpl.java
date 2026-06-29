@@ -15,6 +15,9 @@ import com.hexavolt.backend.entity.ChargingStationReservation;
 import com.hexavolt.backend.entity.Reservation;
 import com.hexavolt.backend.entity.StatusReservation;
 import com.hexavolt.backend.entity.User;
+import com.hexavolt.backend.exception.BusinessException;
+import com.hexavolt.backend.exception.ForbiddenActionException;
+import com.hexavolt.backend.exception.ResourceNotFoundException;
 import com.hexavolt.backend.mapper.ReservationMapper;
 import com.hexavolt.backend.repository.ChargingStationRepository;
 import com.hexavolt.backend.repository.ChargingStationReservationRepository;
@@ -29,6 +32,12 @@ import jakarta.transaction.Transactional;
 @Service
 @Transactional
 public class ReservationServiceImpl implements ReservationService {
+
+        private static final String STATUS_PENDING = "EN_ATTENTE";
+        private static final String STATUS_CONFIRMED = "CONFIRMEE";
+        private static final String STATUS_CANCELLED = "ANNULEE";
+        private static final String STATUS_FINISHED = "TERMINEE";
+        private static final String STATUS_ABSENCE = "ABSENCE";
 
         private final ReservationRepository reservationRepository;
         private final ChargingStationRepository chargingStationRepository;
@@ -60,35 +69,21 @@ public class ReservationServiceImpl implements ReservationService {
                         ReservationCreateRequestDTO request,
                         User connectedUser) {
 
-                // 1️⃣ Validation des dates
-                if (request.getStartDateTime().isAfter(request.getEndDateTime())
-                                || request.getStartDateTime().isEqual(request.getEndDateTime())) {
-                        throw new IllegalArgumentException(
-                                        "La date de début doit être antérieure à la date de fin");
-                }
+                validateReservationRequest(request);
 
-                if (request.getStartDateTime().isBefore(LocalDateTime.now())) {
-                        throw new IllegalArgumentException(
-                                        "La date de début doit être dans le futur");
-                }
-
-                // 2️⃣ Récupération de la borne
                 ChargingStation chargingStation = chargingStationRepository
                                 .findById(request.getChargingStationId())
-                                .orElseThrow(() -> new IllegalArgumentException("Borne introuvable"));
+                                .orElseThrow(() -> new ResourceNotFoundException("Borne introuvable."));
 
-                // 3️⃣ Vérification de la mise à disposition (horaires complets)
                 boolean available = availabilityService.isAvailable(
                                 chargingStation,
                                 request.getStartDateTime(),
                                 request.getEndDateTime());
 
                 if (!available) {
-                        throw new IllegalStateException(
-                                        "La borne n'est pas disponible sur ce créneau");
+                        throw new BusinessException("La borne n'est pas disponible sur ce créneau.");
                 }
 
-                // 4️⃣ Vérification des conflits horaires (réservations CONFIRMEE)
                 long conflicts = chargingStationReservationRepository
                                 .countConfirmedReservationConflict(
                                                 chargingStation.getId(),
@@ -96,17 +91,11 @@ public class ReservationServiceImpl implements ReservationService {
                                                 request.getEndDateTime());
 
                 if (conflicts > 0) {
-                        throw new IllegalStateException(
-                                        "Ce créneau est déjà réservé pour cette borne");
+                        throw new BusinessException("Ce créneau est déjà réservé pour cette borne.");
                 }
 
-                // 5️⃣ Récupération du statut EN_ATTENTE
-                StatusReservation statusEnAttente = statusReservationRepository
-                                .findByName("EN_ATTENTE")
-                                .orElseThrow(() -> new IllegalStateException(
-                                                "Statut EN_ATTENTE introuvable"));
+                StatusReservation statusEnAttente = findStatusByName(STATUS_PENDING);
 
-                // 6️⃣ Création de la réservation
                 Reservation reservation = new Reservation();
                 reservation.setStartDateTime(request.getStartDateTime());
                 reservation.setEndDateTime(request.getEndDateTime());
@@ -117,17 +106,16 @@ public class ReservationServiceImpl implements ReservationService {
 
                 reservationRepository.save(reservation);
 
-                // 7️⃣ Association borne ↔ réservation
                 ChargingStationReservation csr = new ChargingStationReservation();
                 csr.setChargingStation(chargingStation);
                 csr.setReservation(reservation);
 
                 chargingStationReservationRepository.save(csr);
 
-                // 8️⃣ Mapping vers DTO de sortie
                 return reservationMapper.toResponseDTO(reservation, chargingStation);
         }
 
+        @Override
         public List<MyReservationResponseDTO> getMyReservations(User connectedUser) {
                 return chargingStationReservationRepository
                                 .findByReservationUserIdOrderByReservationStartDateTimeDesc(connectedUser.getId())
@@ -136,141 +124,154 @@ public class ReservationServiceImpl implements ReservationService {
                                 .toList();
         }
 
+        @Override
         @Transactional
         public void confirmReservation(Long reservationId, User connectedUser) {
-
-                ChargingStationReservation csr = chargingStationReservationRepository.findByReservationId(reservationId)
-                                .orElseThrow(() -> new IllegalArgumentException("Réservation introuvable"));
+                ChargingStationReservation csr = findChargingStationReservation(reservationId);
 
                 ChargingStation station = csr.getChargingStation();
                 Reservation reservation = csr.getReservation();
 
-                // 🔐 1) Vérifier que l'utilisateur connecté est le propriétaire du lieu
-                User owner = station.getLocation().getUser();
+                ensureOwner(station, connectedUser);
+                ensureStatus(reservation, STATUS_PENDING, "La réservation n'est pas en attente.");
 
-                if (!owner.getId().equals(connectedUser.getId())) {
-                        throw new IllegalStateException("Action non autorisée");
-                }
-
-                // 🕒 2) Vérifier le statut
-                if (!"EN_ATTENTE".equals(reservation.getStatus().getName())) {
-                        throw new IllegalStateException("La réservation n'est pas en attente");
-                }
-
-                // ⚠️ 3) Vérifier les conflits horaires (réservations CONFIRMEE uniquement)
                 long conflicts = chargingStationReservationRepository.countConfirmedReservationConflict(
                                 station.getId(),
                                 reservation.getStartDateTime(),
                                 reservation.getEndDateTime());
 
                 if (conflicts > 0) {
-                        throw new IllegalStateException("Conflit horaire détecté");
+                        throw new BusinessException("Conflit horaire détecté.");
                 }
 
-                // ✅ 4) Passer à CONFIRMEE
-                StatusReservation confirmed = statusReservationRepository.findByName("CONFIRMEE")
-                                .orElseThrow(() -> new IllegalStateException("Statut CONFIRMEE introuvable"));
+                StatusReservation confirmed = findStatusByName(STATUS_CONFIRMED);
 
                 reservation.setStatus(confirmed);
         }
 
+        @Override
         @Transactional
         public void rejectReservation(Long reservationId, User connectedUser) {
-
-                ChargingStationReservation csr = chargingStationReservationRepository.findByReservationId(reservationId)
-                                .orElseThrow(() -> new IllegalArgumentException("Réservation introuvable"));
+                ChargingStationReservation csr = findChargingStationReservation(reservationId);
 
                 ChargingStation station = csr.getChargingStation();
                 Reservation reservation = csr.getReservation();
 
-                User owner = station.getLocation().getUser();
+                ensureOwner(station, connectedUser);
+                ensureStatus(reservation, STATUS_PENDING, "La réservation n'est pas en attente.");
 
-                if (!owner.getId().equals(connectedUser.getId())) {
-                        throw new IllegalStateException("Action non autorisée");
-                }
-
-                if (!"EN_ATTENTE".equals(reservation.getStatus().getName())) {
-                        throw new IllegalStateException("La réservation n'est pas en attente");
-                }
-
-                StatusReservation cancelled = statusReservationRepository.findByName("ANNULEE")
-                                .orElseThrow(() -> new IllegalStateException("Statut ANNULEE introuvable"));
+                StatusReservation cancelled = findStatusByName(STATUS_CANCELLED);
 
                 reservation.setStatus(cancelled);
         }
 
+        @Override
         public List<OwnerReservationResponseDTO> getReservationsToProcess(User owner) {
-
                 return chargingStationReservationRepository
                                 .findByChargingStationLocationUserIdAndReservationStatusNameOrderByReservationStartDateTimeAsc(
                                                 owner.getId(),
-                                                "EN_ATTENTE")
+                                                STATUS_PENDING)
                                 .stream()
                                 .map(reservationMapper::toOwnerReservationDTO)
                                 .toList();
         }
 
+        @Override
         @Transactional
         public void completeReservation(Long reservationId, User connectedUser) {
-
-                ChargingStationReservation csr = chargingStationReservationRepository.findByReservationId(reservationId)
-                                .orElseThrow(() -> new IllegalArgumentException("Réservation introuvable"));
+                ChargingStationReservation csr = findChargingStationReservation(reservationId);
 
                 ChargingStation station = csr.getChargingStation();
                 Reservation reservation = csr.getReservation();
 
-                // 🔐 Propriétaire réel
-                User owner = station.getLocation().getUser();
-                if (!owner.getId().equals(connectedUser.getId())) {
-                        throw new IllegalStateException("Action non autorisée");
-                }
+                ensureOwner(station, connectedUser);
+                ensureStatus(reservation, STATUS_CONFIRMED, "La réservation n'est pas confirmée.");
+                ensureReservationEnded(reservation);
 
-                // 🕒 Statut
-                if (!"CONFIRMEE".equals(reservation.getStatus().getName())) {
-                        throw new IllegalStateException("La réservation n'est pas confirmée");
-                }
-
-                // ⏱️ Fin atteinte
-                if (reservation.getEndDateTime().isAfter(LocalDateTime.now())) {
-                        throw new IllegalStateException("La réservation n'est pas encore terminée");
-                }
-
-                StatusReservation finished = statusReservationRepository.findByName("TERMINEE")
-                                .orElseThrow(() -> new IllegalStateException("Statut TERMINEE introuvable"));
+                StatusReservation finished = findStatusByName(STATUS_FINISHED);
 
                 BigDecimal amount = pricingService.calculateAmount(reservation);
 
                 reservation.setAmount(amount);
                 reservation.setStatus(finished);
-
         }
 
+        @Override
         @Transactional
         public void markReservationAsAbsent(Long reservationId, User connectedUser) {
-
-                ChargingStationReservation csr = chargingStationReservationRepository.findByReservationId(reservationId)
-                                .orElseThrow(() -> new IllegalArgumentException("Réservation introuvable"));
+                ChargingStationReservation csr = findChargingStationReservation(reservationId);
 
                 ChargingStation station = csr.getChargingStation();
                 Reservation reservation = csr.getReservation();
 
-                User owner = station.getLocation().getUser();
-                if (!owner.getId().equals(connectedUser.getId())) {
-                        throw new IllegalStateException("Action non autorisée");
-                }
+                ensureOwner(station, connectedUser);
+                ensureStatus(reservation, STATUS_CONFIRMED, "La réservation n'est pas confirmée.");
+                ensureReservationEnded(reservation);
 
-                if (!"CONFIRMEE".equals(reservation.getStatus().getName())) {
-                        throw new IllegalStateException("La réservation n'est pas confirmée");
-                }
-
-                if (reservation.getEndDateTime().isAfter(LocalDateTime.now())) {
-                        throw new IllegalStateException("La réservation n'est pas encore terminée");
-                }
-
-                StatusReservation absence = statusReservationRepository.findByName("ABSENCE")
-                                .orElseThrow(() -> new IllegalStateException("Statut ABSENCE introuvable"));
+                StatusReservation absence = findStatusByName(STATUS_ABSENCE);
 
                 reservation.setStatus(absence);
         }
 
+        private void validateReservationRequest(ReservationCreateRequestDTO request) {
+                if (request == null) {
+                        throw new BusinessException("Les informations de réservation sont obligatoires.");
+                }
+
+                if (request.getChargingStationId() == null) {
+                        throw new BusinessException("La borne est obligatoire.");
+                }
+
+                if (request.getStartDateTime() == null || request.getEndDateTime() == null) {
+                        throw new BusinessException("Les dates de début et de fin sont obligatoires.");
+                }
+
+                if (!request.getStartDateTime().isBefore(request.getEndDateTime())) {
+                        throw new BusinessException("La date de début doit être antérieure à la date de fin.");
+                }
+
+                if (request.getStartDateTime().isBefore(LocalDateTime.now())) {
+                        throw new BusinessException("La date de début doit être dans le futur.");
+                }
+        }
+
+        private ChargingStationReservation findChargingStationReservation(Long reservationId) {
+                if (reservationId == null) {
+                        throw new BusinessException("L'identifiant de réservation est obligatoire.");
+                }
+
+                return chargingStationReservationRepository.findByReservationId(reservationId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Réservation introuvable."));
+        }
+
+        private StatusReservation findStatusByName(String statusName) {
+                return statusReservationRepository.findByName(statusName)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Statut de réservation introuvable : " + statusName + "."));
+        }
+
+        private void ensureOwner(ChargingStation station, User connectedUser) {
+                User owner = station.getLocation().getUser();
+
+                if (!owner.getId().equals(connectedUser.getId())) {
+                        throw new ForbiddenActionException("Action non autorisée.");
+                }
+        }
+
+        private void ensureStatus(
+                        Reservation reservation,
+                        String expectedStatus,
+                        String errorMessage) {
+
+                if (reservation.getStatus() == null
+                                || !expectedStatus.equals(reservation.getStatus().getName())) {
+                        throw new BusinessException(errorMessage);
+                }
+        }
+
+        private void ensureReservationEnded(Reservation reservation) {
+                if (reservation.getEndDateTime().isAfter(LocalDateTime.now())) {
+                        throw new BusinessException("La réservation n'est pas encore terminée.");
+                }
+        }
 }

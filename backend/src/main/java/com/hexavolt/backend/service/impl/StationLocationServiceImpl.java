@@ -12,6 +12,8 @@ import com.hexavolt.backend.entity.City;
 import com.hexavolt.backend.entity.NicknameLocation;
 import com.hexavolt.backend.entity.StationLocation;
 import com.hexavolt.backend.entity.User;
+import com.hexavolt.backend.exception.BusinessException;
+import com.hexavolt.backend.exception.ResourceNotFoundException;
 import com.hexavolt.backend.repository.CityRepository;
 import com.hexavolt.backend.repository.NicknameLocationRepository;
 import com.hexavolt.backend.repository.StationLocationRepository;
@@ -38,14 +40,16 @@ public class StationLocationServiceImpl implements StationLocationService {
 
         @Override
         public void create(StationLocationCreateDTO dto) {
+                if (dto == null) {
+                        throw new BusinessException("Les informations de l'emplacement sont obligatoires.");
+                }
 
-                User user = (User) SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getPrincipal();
+                User user = getCurrentUser();
 
-                City city = cityRepo.findById(dto.getCityId())
-                                .orElseThrow(() -> new IllegalArgumentException("City not found"));
+                Long cityId = requireId(dto.getCityId(), "La ville est obligatoire.");
+
+                City city = cityRepo.findById(cityId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Ville introuvable."));
 
                 StationLocation location = new StationLocation();
                 location.setAddress(dto.getAddress());
@@ -65,11 +69,7 @@ public class StationLocationServiceImpl implements StationLocationService {
 
         @Override
         public List<LocationListDTO> findMyLocations() {
-
-                User user = (User) SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getPrincipal();
+                User user = getCurrentUser();
 
                 return nicknameLocationRepo.findByUser(user).stream()
                                 .map(nl -> new LocationListDTO(
@@ -83,24 +83,39 @@ public class StationLocationServiceImpl implements StationLocationService {
 
         @Override
         public LocationDetailDTO findMyLocationById(Long locationId) {
+                User user = getCurrentUser();
 
-                User user = (User) SecurityContextHolder
+                Long validLocationId = requireId(
+                                locationId,
+                                "L'identifiant de l'emplacement est obligatoire.");
+
+                NicknameLocation nicknameLocation = nicknameLocationRepo
+                                .findByStationLocationIdAndUser(validLocationId, user)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Emplacement introuvable ou inaccessible."));
+
+                StationLocation location = nicknameLocation.getStationLocation();
+
+                return new LocationDetailDTO(
+                                location.getId(),
+                                nicknameLocation.getNickname(),
+                                location.getAddress(),
+                                location.getPostalCode(),
+                                location.getCity().getName());
+        }
+
+        private User getCurrentUser() {
+                return (User) SecurityContextHolder
                                 .getContext()
                                 .getAuthentication()
                                 .getPrincipal();
-
-                NicknameLocation nl = nicknameLocationRepo
-                                .findByStationLocationIdAndUser(locationId, user)
-                                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
-
-                StationLocation loc = nl.getStationLocation();
-
-                return new LocationDetailDTO(
-                                loc.getId(),
-                                nl.getNickname(),
-                                loc.getAddress(),
-                                loc.getPostalCode(),
-                                loc.getCity().getName());
         }
 
+        private Long requireId(Long id, String message) {
+                if (id == null) {
+                        throw new BusinessException(message);
+                }
+
+                return id;
+        }
 }
