@@ -1,6 +1,7 @@
 package com.hexavolt.backend.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class ChargingStationDetailDTO {
 
@@ -18,6 +19,7 @@ public class ChargingStationDetailDTO {
     private String photoUrl;
     private String videoUrl;
     private String locationName;
+    private List<WeeklyScheduleDTO> weeklySchedules;
 
     public ChargingStationDetailDTO(
             Long id,
@@ -33,7 +35,8 @@ public class ChargingStationDetailDTO {
             String cityName,
             String photoUrl,
             String videoUrl,
-            String locationName) {
+            String locationName,
+            List<WeeklyScheduleDTO> weeklySchedules) {
         this.id = id;
         this.name = name;
         this.power = power;
@@ -48,6 +51,7 @@ public class ChargingStationDetailDTO {
         this.photoUrl = photoUrl;
         this.videoUrl = videoUrl;
         this.locationName = locationName;
+        this.weeklySchedules = weeklySchedules;
     }
 
     public Long getId() {
@@ -160,5 +164,9 @@ public class ChargingStationDetailDTO {
 
     public void setLocationName(String locationName) {
         this.locationName = locationName;
+    }
+
+    public List<WeeklyScheduleDTO> getWeeklySchedules() {
+        return weeklySchedules;
     }
 }

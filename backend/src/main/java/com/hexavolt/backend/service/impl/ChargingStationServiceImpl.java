@@ -1,5 +1,6 @@
 package com.hexavolt.backend.service.impl;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -184,6 +185,18 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 ? "/api/public/stations/" + station.getId() + "/video"
                                 : null;
 
+                List<WeeklyScheduleDTO> weeklySchedules = weeklyScheduleRepo
+                                .findByChargingStationId(station.getId())
+                                .stream()
+                                .map(schedule -> {
+                                        WeeklyScheduleDTO dto = new WeeklyScheduleDTO();
+                                        dto.setDayOfWeekId(schedule.getDayOfWeek().getId().longValue());
+                                        dto.setStartTime(schedule.getStartTime());
+                                        dto.setEndTime(schedule.getEndTime());
+                                        return dto;
+                                })
+                                .toList();
+
                 return new ChargingStationDetailDTO(
                                 station.getId(),
                                 station.getName(),
@@ -198,7 +211,9 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 station.getLocation().getCity().getName(),
                                 photoUrl,
                                 videoUrl,
-                                nicknameLocation.getNickname());
+                                nicknameLocation.getNickname(),
+                                weeklySchedules
+                        );
         }
 
         @Override
@@ -213,6 +228,14 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 .orElseThrow(() -> new IllegalArgumentException("Charging station not found"));
 
                 stationRepo.delete(station);
+        }
+
+        private void validateHalfHour(LocalTime time) {
+                int minute = time.getMinute();
+
+                if (minute != 0 && minute != 30) {
+                        throw new IllegalArgumentException("Les horaires doivent être par tranche de 30 minutes.");
+                }
         }
 
         @Override
@@ -237,6 +260,18 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 throw new IllegalArgumentException(
                                                 "Les horaires de début et de fin sont obligatoires.");
                         }
+
+                        if (!dto.getStartTime().isBefore(dto.getEndTime())) {
+                                throw new IllegalArgumentException("L'heure de début doit être avant l'heure de fin.");
+                        }
+
+                        if (dto.getStartTime() == null || dto.getEndTime() == null) {
+                                throw new IllegalArgumentException(
+                                                "Les horaires de début et de fin sont obligatoires.");
+                        }
+
+                        validateHalfHour(dto.getStartTime());
+                        validateHalfHour(dto.getEndTime());
 
                         if (!dto.getStartTime().isBefore(dto.getEndTime())) {
                                 throw new IllegalArgumentException("L'heure de début doit être avant l'heure de fin.");

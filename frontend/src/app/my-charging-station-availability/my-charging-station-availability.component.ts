@@ -20,6 +20,8 @@ export class MyChargingStationAvailabilityComponent implements OnInit {
   readonly timeSlots = TIME_SLOTS;
   weekDays = structuredClone(DEFAULT_WEEK_DAYS);
   stationId!: number;
+  successMessage = '';
+  errorMessage = '';
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -31,12 +33,15 @@ export class MyChargingStationAvailabilityComponent implements OnInit {
   }
 
   saveWeeklySchedule(): void {
+    this.successMessage = '';
+    this.errorMessage = '';
+
     const invalidDay = this.weekDays.find(day =>
       day.enabled && day.startTime >= day.endTime
     );
 
     if (invalidDay) {
-      alert(`Pour ${invalidDay.label}, l'heure de début doit être avant l'heure de fin.`);
+      this.errorMessage = `Pour ${invalidDay.label}, l'heure de début doit être avant l'heure de fin.`;
       return;
     }
 
@@ -53,8 +58,12 @@ export class MyChargingStationAvailabilityComponent implements OnInit {
     this.weeklyScheduleService
       .updateWeeklySchedule(this.stationId, payload)
       .subscribe({
-        next: () => console.log('Horaires enregistrés'),
-        error: err => console.error('Erreur enregistrement horaires', err)
+        next: () => {
+          this.successMessage = 'Les horaires ont bien été enregistrés.';
+        },
+        error: () => {
+          this.errorMessage = "Une erreur est survenue lors de l'enregistrement des horaires.";
+        }
       });
   }
 }

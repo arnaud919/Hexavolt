@@ -4,6 +4,7 @@ import { ChargingStationService } from '../services/charging-station.service';
 import { ChargingStationDetail } from '../models/charging-station-detail';
 import { CommonModule } from '@angular/common';
 import { ProfileLayoutComponent } from '../layout/profile-layout/profile-layout.component';
+import { DEFAULT_WEEK_DAYS } from '../models/default-week-days';
 
 @Component({
   selector: 'app-my-charging-station-detail',
@@ -16,6 +17,9 @@ export class MyChargingStationDetailComponent {
   private readonly chargingStationService = inject(ChargingStationService);
 
   readonly chargingStation = signal<ChargingStationDetail | null>(null);
+  readonly dayLabels = new Map(
+    DEFAULT_WEEK_DAYS.map(day => [day.id, day.label])
+  );
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));

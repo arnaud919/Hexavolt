@@ -1,45 +1,65 @@
-<app-profile-layout>
-  <h1>Disponibilités de la borne</h1>
-  <p>Borne ID : {{ stationId }}</p>
+<app-profile-layout [backLabel]="'Retour à la borne'" [backLink]="['/profil', 'bornes', stationId]">
 
-  <h2>Horaires hebdomadaires</h2>
+  <h1 class="text-center">Disponibilités de la borne</h1>
 
-  <table border="1" cellpadding="8">
-    <tr>
-      <th>Jour</th>
-      <th>Disponible</th>
-      <th>Début</th>
-      <th>Fin</th>
-    </tr>
+  <div class="cards p-6 rounded-sm leading-8 mt-6 max-w-4xl mx-auto">
 
-    <tr *ngFor="let day of weekDays">
-      <td>{{ day.label }}</td>
+    <div class="mb-6">
+      <h2 class="font-bold">Horaires hebdomadaires</h2>
+      <p class="text-sm text-gray-700">
+        Sélectionnez les jours d’ouverture de la borne, puis indiquez les horaires disponibles.
+      </p>
+    </div>
 
-      <td>
-        <input type="checkbox" [(ngModel)]="day.enabled" />
-      </td>
+    <div class="space-y-4">
+      <div *ngFor="let day of weekDays"
+        class="grid gap-4 md:grid-cols-[1fr_auto_1fr_1fr] items-center border-b border-gray-300 pb-4">
 
-      <td>
-        <select [(ngModel)]="day.startTime" [disabled]="!day.enabled">
+        <p class="font-bold">
+          {{ day.label }}
+        </p>
+
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox" [(ngModel)]="day.enabled" class="h-4 w-4" />
+          Disponible
+        </label>
+
+        <select [(ngModel)]="day.startTime" [disabled]="!day.enabled"
+          class="px-4 py-2 border border-gray-400 rounded-full bg-white disabled:opacity-50">
           <option *ngFor="let slot of timeSlots" [value]="slot">
             {{ slot }}
           </option>
         </select>
-      </td>
 
-      <td>
-        <select [(ngModel)]="day.endTime" [disabled]="!day.enabled">
+        <select [(ngModel)]="day.endTime" [disabled]="!day.enabled"
+          class="px-4 py-2 border border-gray-400 rounded-full bg-white disabled:opacity-50">
           <option *ngFor="let slot of timeSlots" [value]="slot">
             {{ slot }}
           </option>
         </select>
-      </td>
-    </tr>
-  </table>
 
-  <br />
+      </div>
+    </div>
+  </div>
 
-  <button (click)="saveWeeklySchedule()">
-    Enregistrer les horaire
-  </button>
+  <p *ngIf="successMessage" class="text-center text-green-700 mt-6">
+    {{ successMessage }}
+  </p>
+
+  <p *ngIf="errorMessage" class="text-center text-red-600 mt-6">
+    {{ errorMessage }}
+  </p>
+
+  <div class="mt-6 flex justify-center max-w-4xl mx-auto">
+    <div class="mt-8 flex justify-center">
+      <button type="button" class="bg-yellow hover:bg-yellow/50 px-6 py-3 rounded-sm transition-colors"
+        (click)="saveWeeklySchedule()">
+        Enregistrer les horaires
+      </button>
+    </div>
+
+  </div>
+
+
+
 </app-profile-layout>

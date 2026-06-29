@@ -12,5 +12,10 @@ export interface ChargingStationDetail {
   cityName: string;
   photoUrl?: string | null;
   videoUrl?: string | null;
-  locationName: string |null;
+  locationName: string | null;
+  weeklySchedules: {
+    dayOfWeekId: number;
+    startTime: string;
+    endTime: string;
+  }[];
 }
