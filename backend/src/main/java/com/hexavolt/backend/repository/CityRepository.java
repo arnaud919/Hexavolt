@@ -8,6 +8,5 @@ import com.hexavolt.backend.entity.City;
 
 public interface CityRepository extends JpaRepository<City, Long> {
     
-    // Optional<City> findByNameIgnoreCase(String name);
     List<City> findTop20ByNameStartingWithIgnoreCaseOrderByNameAsc(String prefix);
 }

@@ -31,15 +31,40 @@
         class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
     </div>
 
-    <!-- Ville (temporaire en input simple) -->
-    <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-16">
-      <label for="cityId" class="w-full md:w-40 text-gray-700">
+    <!-- Ville -->
+    <div class="flex flex-col md:flex-row md:items-start gap-2 md:gap-16">
+      <label for="citySearch" class="w-full md:w-40 text-gray-700 pt-2">
         Ville
       </label>
-      <input id="cityId" type="number" formControlName="cityId"
-        class="w-full flex-1 px-4 py-2 border border-gray-400 rounded-full bg-white" />
-    </div>
 
+      <div class="w-full flex-1 relative">
+        <input id="citySearch" type="text" [formControl]="citySearch" placeholder="Rechercher une ville"
+          class="w-full px-4 py-2 border border-gray-400 rounded-full bg-white" autocomplete="off" />
+
+        @if (cities.length > 0) {
+        <ul
+          class="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+          @for (city of cities; track city.id) {
+          <li class="px-4 py-2 cursor-pointer hover:bg-gray-100" (click)="selectCity(city)">
+            {{ city.name }}
+          </li>
+          }
+        </ul>
+        }
+
+        @if (citySearchError) {
+        <p class="text-sm text-red-600 mt-1">
+          {{ citySearchError }}
+        </p>
+        }
+
+        @if (form.get('cityId')?.invalid && form.get('cityId')?.touched) {
+        <p class="text-sm text-red-600 mt-1">
+          Vous devez sélectionner une ville dans la liste.
+        </p>
+        }
+      </div>
+    </div>
     <!-- Bouton -->
     <input type="submit" class="button" value="Enregistrer le lieu" [disabled]="form.invalid">
   </form>
