@@ -37,3 +37,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### medias ###
+uploads/charging-stations/photos
+!uploads/charging-stations/photos/.gitkeep
+uploads/charging-stations/videos
+!uploads/charging-stations/videos/.gitkeep

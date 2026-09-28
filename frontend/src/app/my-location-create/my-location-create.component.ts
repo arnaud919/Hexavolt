@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
@@ -19,6 +20,7 @@ import { ProfileLayoutComponent } from '../layout/profile-layout/profile-layout.
 import { LocationService } from '../services/location.service';
 import { CityService } from '../services/city';
 import { City } from '../models/city';
+import { ApiError } from '../models/api-error';
 
 @Component({
   selector: 'app-location-create',
@@ -31,7 +33,10 @@ export class MyLocationCreateComponent implements OnInit {
 
   citySearch = new FormControl('');
   cities: readonly City[] = [];
+
   citySearchError: string | null = null;
+  submitError: string | null = null;
+  fieldErrors: Record<string, string> = {};
 
   constructor(
     private fb: FormBuilder,
@@ -57,15 +62,20 @@ export class MyLocationCreateComponent implements OnInit {
       return;
     }
 
-    this.locationService.create(this.form.value)
-      .subscribe({
-        next: () => {
-          this.router.navigate(['/profil/lieux']);
-        },
-        error: error => {
-          console.error('Erreur lors de la création du lieu', error);
-        }
-      });
+    this.submitError = null;
+    this.fieldErrors = {};
+
+    this.locationService.create(this.form.value).subscribe({
+      next: () => {
+        this.router.navigate(['/profil/lieux']);
+      },
+      error: (error: HttpErrorResponse) => {
+        const apiError = error.error as ApiError | undefined;
+
+        this.submitError = apiError?.message ?? 'Impossible de créer le lieu.';
+        this.fieldErrors = apiError?.fieldErrors ?? {};
+      }
+    });
   }
 
   selectCity(city: City): void {
@@ -76,6 +86,12 @@ export class MyLocationCreateComponent implements OnInit {
     this.citySearch.setValue(city.name, { emitEvent: false });
     this.cities = [];
     this.citySearchError = null;
+
+    delete this.fieldErrors['cityId'];
+  }
+
+  getFieldError(fieldName: string): string | null {
+    return this.fieldErrors[fieldName] ?? null;
   }
 
   private listenCitySearch(): void {
@@ -90,10 +106,11 @@ export class MyLocationCreateComponent implements OnInit {
         });
 
         this.citySearchError = null;
+        delete this.fieldErrors['cityId'];
 
         if (search.length < 2) {
           this.cities = [];
-          return of([]);
+          return of<readonly City[]>([]);
         }
 
         return this.cityService.searchCities(search);
@@ -101,14 +118,12 @@ export class MyLocationCreateComponent implements OnInit {
     ).subscribe({
       next: cities => {
         this.cities = cities;
-        console.log('Villes reçues :', cities);
 
         if (cities.length === 0 && (this.citySearch.value?.trim().length ?? 0) >= 2) {
           this.citySearchError = 'Aucune ville trouvée.';
         }
       },
-      error: error => {
-        console.error('Erreur lors de la recherche des villes', error);
+      error: () => {
         this.cities = [];
         this.citySearchError = 'Impossible de rechercher les villes.';
       }

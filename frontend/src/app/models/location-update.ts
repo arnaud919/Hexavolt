@@ -1,8 +1,6 @@
-export interface LocationDetail {
-  locationId: number;
+export interface LocationUpdate {
   nickname: string;
   address: string;
   postalCode: string;
   cityId: number;
-  cityName: string;
 }

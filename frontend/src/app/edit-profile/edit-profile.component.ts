@@ -8,11 +8,13 @@ import { CityService } from '../services/city';
 import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { ProfileDetails } from '../models/profile-details';
 import { ProfileUpdateRequest } from '../models/profile-update-request';
+import { ProfileLayoutComponent } from '../layout/profile-layout/profile-layout.component';
 
 @Component({
   selector: 'app-edit-profile',
   imports: [CommonModule,
     ReactiveFormsModule,
+    ProfileLayoutComponent
   ],
   templateUrl: './edit-profile.component.html',
   styleUrl: './edit-profile.component.css'

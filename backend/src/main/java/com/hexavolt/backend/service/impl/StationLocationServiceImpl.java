@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.hexavolt.backend.dto.LocationDetailDTO;
 import com.hexavolt.backend.dto.LocationListDTO;
 import com.hexavolt.backend.dto.StationLocationCreateDTO;
+import com.hexavolt.backend.dto.StationLocationUpdateDTO;
 import com.hexavolt.backend.entity.City;
 import com.hexavolt.backend.entity.NicknameLocation;
 import com.hexavolt.backend.entity.StationLocation;
@@ -94,14 +95,7 @@ public class StationLocationServiceImpl implements StationLocationService {
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Emplacement introuvable ou inaccessible."));
 
-                StationLocation location = nicknameLocation.getStationLocation();
-
-                return new LocationDetailDTO(
-                                location.getId(),
-                                nicknameLocation.getNickname(),
-                                location.getAddress(),
-                                location.getPostalCode(),
-                                location.getCity().getName());
+                return toDetailDTO(nicknameLocation);
         }
 
         private User getCurrentUser() {
@@ -118,4 +112,54 @@ public class StationLocationServiceImpl implements StationLocationService {
 
                 return id;
         }
+
+        @Override
+        @Transactional
+        public LocationDetailDTO updateMyLocation(Long locationId, StationLocationUpdateDTO dto) {
+
+                User user = getCurrentUser();
+
+                requireId(locationId, "L'identifiant de l'emplacement est obligatoire.");
+
+                if (dto == null) {
+                        throw new BusinessException("Les informations de l'emplacement sont obligatoires.");
+                }
+
+                requireId(dto.getCityId(), "La ville est obligatoire.");
+
+                NicknameLocation nicknameLocation = nicknameLocationRepo
+                                .findByStationLocationIdAndUser(locationId, user)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Emplacement introuvable ou inaccessible."));
+
+                City city = cityRepo.findById(dto.getCityId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Ville introuvable."));
+
+                StationLocation location = nicknameLocation.getStationLocation();
+
+                location.setAddress(dto.getAddress());
+                location.setPostalCode(dto.getPostalCode());
+                location.setCity(city);
+
+                nicknameLocation.setNickname(dto.getNickname());
+
+                stationLocationRepo.save(location);
+                nicknameLocationRepo.save(nicknameLocation);
+
+                return toDetailDTO(nicknameLocation);
+        }
+
+        private LocationDetailDTO toDetailDTO(NicknameLocation nicknameLocation) {
+                StationLocation location = nicknameLocation.getStationLocation();
+                City city = location.getCity();
+
+                return new LocationDetailDTO(
+                                location.getId(),
+                                nicknameLocation.getNickname(),
+                                location.getAddress(),
+                                location.getPostalCode(),
+                                city.getId(),
+                                city.getName());
+        }
+
 }

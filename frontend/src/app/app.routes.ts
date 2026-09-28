@@ -88,6 +88,12 @@ export const routes: Routes = [
             .then(m => m.MyLocationDetailComponent)
       },
       {
+        path: 'lieux/:id/modification',
+        loadComponent: () =>
+          import('./my-location-edit/my-location-edit.component')
+            .then(m => m.MyLocationEditComponent)
+      },
+      {
         path: 'lieux/:id/bornes',
         loadComponent: () =>
           import('./my-location-stations/my-location-stations.component')

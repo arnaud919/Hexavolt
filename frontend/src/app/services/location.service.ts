@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { LocationList } from '../models/location-list';
 import { LocationCreate } from '../models/location-create';
 import { LocationDetail } from '../models/location-detail';
+import { LocationUpdate } from '../models/location-update';
 
 
 @Injectable({
@@ -29,6 +30,14 @@ export class LocationService {
   getMyLocationById(id: number) {
     return this.http.get<LocationDetail>(
       `/api/locations/${id}`,
+      { withCredentials: true }
+    );
+  }
+
+    update(id: number, payload: LocationUpdate) {
+    return this.http.put<LocationDetail>(
+      `${this.apiUrl}/${id}`,
+      payload,
       { withCredentials: true }
     );
   }
