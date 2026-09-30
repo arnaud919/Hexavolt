@@ -38,6 +38,7 @@ const hexavoltIcon = L.divIcon({
 
 @Component({
   selector: 'app-location-map',
+  standalone: true,
   template: `
     <div #mapContainer class="h-80 rounded-lg"></div>
   `

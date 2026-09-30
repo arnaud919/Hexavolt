@@ -16,10 +16,14 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.validation.Valid;
+
 import com.hexavolt.backend.dto.ChargingStationCreateDTO;
 import com.hexavolt.backend.dto.ChargingStationDetailDTO;
+import com.hexavolt.backend.dto.ChargingStationEditDTO;
 import com.hexavolt.backend.dto.ChargingStationListDTO;
 import com.hexavolt.backend.dto.WeeklyScheduleDTO;
+import com.hexavolt.backend.dto.ChargingStationUpdateDTO;
 import com.hexavolt.backend.service.ChargingStationService;
 
 @RestController
@@ -65,5 +69,18 @@ public class ChargingStationController {
             @RequestBody List<WeeklyScheduleDTO> schedules) {
         chargingStationService.updateWeeklySchedule(id, schedules);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateMyChargingStation(
+            @PathVariable Long id,
+            @Valid @RequestBody ChargingStationUpdateDTO dto) {
+        chargingStationService.updateMyChargingStation(id, dto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/edit")
+    public ChargingStationEditDTO getMyChargingStationForEdit(@PathVariable Long id) {
+        return chargingStationService.findMyChargingStationForEdit(id);
     }
 }

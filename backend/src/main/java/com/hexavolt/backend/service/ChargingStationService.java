@@ -7,7 +7,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.hexavolt.backend.dto.ChargingStationCreateDTO;
 import com.hexavolt.backend.dto.ChargingStationDetailDTO;
 import com.hexavolt.backend.dto.ChargingStationListDTO;
+import com.hexavolt.backend.dto.ChargingStationUpdateDTO;
 import com.hexavolt.backend.dto.WeeklyScheduleDTO;
+import com.hexavolt.backend.dto.ChargingStationEditDTO;
 
 public interface ChargingStationService {
 
@@ -25,5 +27,9 @@ public interface ChargingStationService {
     void deleteMyChargingStation(Long id);
 
     void updateWeeklySchedule(Long stationId, List<WeeklyScheduleDTO> schedules);
+
+    void updateMyChargingStation(Long id, ChargingStationUpdateDTO dto);
+
+    ChargingStationEditDTO findMyChargingStationForEdit(Long id);
 
 }

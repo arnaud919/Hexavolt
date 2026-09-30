@@ -9,7 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.hexavolt.backend.dto.ChargingStationCreateDTO;
 import com.hexavolt.backend.dto.ChargingStationDetailDTO;
+import com.hexavolt.backend.dto.ChargingStationEditDTO;
 import com.hexavolt.backend.dto.ChargingStationListDTO;
+import com.hexavolt.backend.dto.ChargingStationUpdateDTO;
 import com.hexavolt.backend.dto.WeeklyScheduleDTO;
 import com.hexavolt.backend.entity.ChargingStation;
 import com.hexavolt.backend.entity.DayOfWeek;
@@ -29,6 +31,7 @@ import com.hexavolt.backend.repository.StatusChargingStationRepository;
 import com.hexavolt.backend.repository.WeeklyScheduleRepository;
 import com.hexavolt.backend.service.ChargingStationService;
 import com.hexavolt.backend.service.FileStorageService;
+
 
 import jakarta.transaction.Transactional;
 
@@ -219,7 +222,8 @@ public class ChargingStationServiceImpl implements ChargingStationService {
 
                         DayOfWeek dayOfWeek = dayOfWeekRepo
                                         .findById(dto.getDayOfWeekId().shortValue())
-                                        .orElseThrow(() -> new ResourceNotFoundException("Jour de la semaine introuvable."));
+                                        .orElseThrow(() -> new ResourceNotFoundException(
+                                                        "Jour de la semaine introuvable."));
 
                         WeeklySchedule weeklySchedule = new WeeklySchedule();
 
@@ -298,5 +302,53 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 if (minute != 0 && minute != 30) {
                         throw new BusinessException("Les horaires doivent être par tranche de 30 minutes.");
                 }
+        }
+
+        @Override
+        public void updateMyChargingStation(Long id, ChargingStationUpdateDTO dto) {
+                if (dto == null) {
+                        throw new BusinessException("Les informations de la borne sont obligatoires.");
+                }
+
+                User user = getCurrentUser();
+
+                Long stationId = requireId(id, "L'identifiant de la borne est obligatoire.");
+                Long powerId = requireId(dto.getPowerId(), "La puissance est obligatoire.");
+                Long statusId = requireId(dto.getStatusId(), "Le statut est obligatoire.");
+
+                ChargingStation station = findOwnedStation(stationId, user);
+                Power power = findPower(powerId);
+                StatusChargingStation status = findStatus(statusId);
+
+                station.setName(dto.getName());
+                station.setHourlyRate(dto.getHourlyRate());
+                station.setInstruction(dto.getInstruction());
+                station.setIsCustom(dto.isCustom());
+                station.setLatitude(dto.getLatitude());
+                station.setLongitude(dto.getLongitude());
+                station.setPower(power);
+                station.setStatus(status);
+
+                stationRepo.save(station);
+        }
+
+        @Override
+        public ChargingStationEditDTO findMyChargingStationForEdit(Long id) {
+                User user = getCurrentUser();
+
+                Long stationId = requireId(id, "L'identifiant de la borne est obligatoire.");
+
+                ChargingStation station = findOwnedStation(stationId, user);
+
+                return new ChargingStationEditDTO(
+                                station.getId(),
+                                station.getName(),
+                                station.getPower().getId(),
+                                station.getHourlyRate(),
+                                station.getInstruction(),
+                                station.getIsCustom(),
+                                station.getLatitude(),
+                                station.getLongitude(),
+                                station.getStatus() != null ? station.getStatus().getId() : null);
         }
 }

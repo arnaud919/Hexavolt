@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { ChargingStation } from '../models/charging-station';
 import { HttpClient } from '@angular/common/http';
 import { ChargingStationDetail } from '../models/charging-station-detail';
+import { ChargingStationEdit } from '../models/charging-station-edit';
+import { ChargingStationUpdate } from '../models/charging-station-update';
 
 @Injectable({
   providedIn: 'root'
@@ -46,6 +48,18 @@ export class ChargingStationService {
       `${this.apiUrl}/stations/${id}`,
       { withCredentials: true }
     );
+  }
+
+  getForEdit(id: number) {
+    return this.http.get<ChargingStationEdit>(`/api/stations/${id}/edit`, {
+      withCredentials: true,
+    });
+  }
+
+  update(id: number, payload: ChargingStationUpdate) {
+    return this.http.put<void>(`/api/stations/${id}`, payload, {
+      withCredentials: true,
+    });
   }
 
 }

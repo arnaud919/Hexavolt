@@ -48,8 +48,8 @@ export const routes: Routes = [
       {
         path: 'modification',
         loadComponent: () =>
-          import('./edit-profile/edit-profile.component')
-            .then(m => m.EditProfileComponent)
+          import('./profile-edit/profile-edit.component')
+            .then(m => m.ProfileEditComponent)
       },
       {
         path: 'bornes',
@@ -68,6 +68,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./my-charging-station-availability/my-charging-station-availability.component')
             .then(m => m.MyChargingStationAvailabilityComponent)
+      },
+            {
+        path: 'bornes/:id/modification',
+        loadComponent: () =>
+          import('./my-charging-station-edit/my-charging-station-edit.component')
+            .then(m => m.MyChargingStationEditComponent)
       },
       {
         path: 'lieux',

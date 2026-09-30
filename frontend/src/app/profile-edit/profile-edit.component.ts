@@ -11,15 +11,15 @@ import { ProfileUpdateRequest } from '../models/profile-update-request';
 import { ProfileLayoutComponent } from '../layout/profile-layout/profile-layout.component';
 
 @Component({
-  selector: 'app-edit-profile',
+  selector: 'app-profile-edit',
   imports: [CommonModule,
     ReactiveFormsModule,
     ProfileLayoutComponent
   ],
-  templateUrl: './edit-profile.component.html',
-  styleUrl: './edit-profile.component.css'
+  templateUrl: './profile-edit.component.html',
+  styleUrl: './profile-edit.component.css'
 })
-export class EditProfileComponent implements OnInit {
+export class ProfileEditComponent implements OnInit {
   // UI state
   isLoading = false;
   errorMessage = '';

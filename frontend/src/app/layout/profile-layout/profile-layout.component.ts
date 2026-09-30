@@ -1,9 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-profile-layout',
-  imports: [RouterLink],
+  standalone: true,
+  imports: [RouterLink, CommonModule],
   templateUrl: './profile-layout.component.html',
   styleUrl: './profile-layout.component.css'
 })
