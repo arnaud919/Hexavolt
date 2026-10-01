@@ -4,7 +4,11 @@ import {
   Output,
   AfterViewInit,
   ViewChild,
-  ElementRef
+  ElementRef,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  OnDestroy
 } from '@angular/core';
 import * as L from 'leaflet';
 
@@ -43,19 +47,24 @@ const hexavoltIcon = L.divIcon({
     <div #mapContainer class="h-80 rounded-lg"></div>
   `
 })
-export class LocationMapComponent implements AfterViewInit {
+export class LocationMapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   @ViewChild('mapContainer', { static: true })
   mapContainer!: ElementRef<HTMLDivElement>;
 
+  @Input()
+  latitude: number | null = null;
+
+  @Input()
+  longitude: number | null = null;
+
   @Output()
   positionSelected = new EventEmitter<{ lat: number; lng: number }>();
 
-  private map!: L.Map;
+  private map?: L.Map;
   private marker?: L.Marker;
 
   ngAfterViewInit(): void {
-
     this.map = L.map(this.mapContainer.nativeElement).setView(
       [48.8566, 2.3522],
       13
@@ -65,18 +74,62 @@ export class LocationMapComponent implements AfterViewInit {
       attribution: '&copy; OpenStreetMap'
     }).addTo(this.map);
 
+    this.showCurrentPosition();
+
     this.map.on('click', (e: L.LeafletMouseEvent) => {
-      const { lat, lng } = e.latlng;
+      this.setMarker(e.latlng);
 
-      if (this.marker) {
-        this.marker.setLatLng(e.latlng);
-      } else {
-        this.marker = L.marker(e.latlng, {
-          icon: hexavoltIcon
-        }).addTo(this.map);
-      }
-
-      this.positionSelected.emit({ lat, lng });
+      this.positionSelected.emit({
+        lat: e.latlng.lat,
+        lng: e.latlng.lng
+      });
     });
+
+    setTimeout(() => {
+      this.map?.invalidateSize();
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['latitude'] || changes['longitude']) {
+      this.showCurrentPosition();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.map?.remove();
+  }
+
+  private showCurrentPosition(): void {
+    if (!this.map) {
+      return;
+    }
+
+    if (this.latitude === null || this.longitude === null) {
+      return;
+    }
+
+    const lat = Number(this.latitude);
+    const lng = Number(this.longitude);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return;
+    }
+
+    const latLng = L.latLng(lat, lng);
+
+    this.setMarker(latLng);
+    this.map.setView(latLng, 16);
+  }
+
+  private setMarker(latLng: L.LatLng): void {
+    if (this.marker) {
+      this.marker.setLatLng(latLng);
+      return;
+    }
+
+    this.marker = L.marker(latLng, {
+      icon: hexavoltIcon
+    }).addTo(this.map!);
   }
 }

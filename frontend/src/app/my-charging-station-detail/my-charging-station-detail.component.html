@@ -75,9 +75,13 @@
 
     </div>
 
-    <div class="mt-6 flex gap-4">
+    <div class="mt-6 flex justify-between gap-4">
       <a [routerLink]="['/profil/bornes', station.id, 'disponibilites']" class="underline text-sm">
         Gérer les disponibilités
+      </a>
+
+      <a [routerLink]="['/profil/bornes', station.id, 'modification']" class="underline text-sm">
+        Modifier la borne
       </a>
     </div>
 

@@ -104,7 +104,11 @@
           Emplacement actuel :
         </p>
 
-        <app-location-map class="mb-2" (positionSelected)="onMapPositionSelected($event)"></app-location-map>
+        <app-location-map 
+          [latitude]="form.get('latitude')?.value" 
+          [longitude]="form.get('longitude')?.value"
+          (positionSelected)="onMapPositionSelected($event)">
+        </app-location-map>
 
         <p class="text-sm">
           Latitude :
