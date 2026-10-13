@@ -11,18 +11,19 @@ import com.hexavolt.backend.dto.ChargingStationCreateDTO;
 import com.hexavolt.backend.dto.ChargingStationDetailDTO;
 import com.hexavolt.backend.dto.ChargingStationEditDTO;
 import com.hexavolt.backend.dto.ChargingStationListDTO;
+import com.hexavolt.backend.dto.ChargingStationSearchDTO;
 import com.hexavolt.backend.dto.ChargingStationUpdateDTO;
 import com.hexavolt.backend.dto.WeeklyScheduleDTO;
 import com.hexavolt.backend.entity.ChargingStation;
 import com.hexavolt.backend.entity.DayOfWeek;
 import com.hexavolt.backend.entity.NicknameLocation;
 import com.hexavolt.backend.entity.Power;
+import com.hexavolt.backend.entity.StationLocation;
 import com.hexavolt.backend.entity.StatusChargingStation;
 import com.hexavolt.backend.entity.User;
 import com.hexavolt.backend.entity.WeeklySchedule;
 import com.hexavolt.backend.exception.BusinessException;
 import com.hexavolt.backend.exception.ResourceNotFoundException;
-import com.hexavolt.backend.mapper.ChargingStationMapper;
 import com.hexavolt.backend.repository.ChargingStationRepository;
 import com.hexavolt.backend.repository.DayOfWeekRepository;
 import com.hexavolt.backend.repository.NicknameLocationRepository;
@@ -32,6 +33,7 @@ import com.hexavolt.backend.repository.WeeklyScheduleRepository;
 import com.hexavolt.backend.service.ChargingStationService;
 import com.hexavolt.backend.service.FileStorageService;
 
+import com.hexavolt.backend.mapper.ChargingStationMapper;
 
 import jakarta.transaction.Transactional;
 
@@ -46,6 +48,7 @@ public class ChargingStationServiceImpl implements ChargingStationService {
         private final WeeklyScheduleRepository weeklyScheduleRepo;
         private final FileStorageService fileStorageService;
         private final StatusChargingStationRepository statusChargingStationRepo;
+        private final ChargingStationMapper chargingStationMapper;
 
         public ChargingStationServiceImpl(
                         ChargingStationRepository stationRepo,
@@ -54,7 +57,8 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                         DayOfWeekRepository dayOfWeekRepo,
                         WeeklyScheduleRepository weeklyScheduleRepo,
                         FileStorageService fileStorageService,
-                        StatusChargingStationRepository statusChargingStationRepo) {
+                        StatusChargingStationRepository statusChargingStationRepo,
+                        ChargingStationMapper chargingStationMapper) {
                 this.stationRepo = stationRepo;
                 this.nicknameLocationRepo = nicknameLocationRepo;
                 this.powerRepo = powerRepo;
@@ -62,7 +66,10 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 this.weeklyScheduleRepo = weeklyScheduleRepo;
                 this.fileStorageService = fileStorageService;
                 this.statusChargingStationRepo = statusChargingStationRepo;
+                this.chargingStationMapper = chargingStationMapper;
         }
+
+        private static final double MAX_DISTANCE_FROM_LOCATION_METERS = 300.0;
 
         @Override
         @Transactional
@@ -84,6 +91,11 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 NicknameLocation nicknameLocation = findUserLocation(locationId, user);
                 Power power = findPower(powerId);
                 StatusChargingStation status = findStatus(statusId);
+
+                validateStationCloseToLocation(
+                                nicknameLocation.getStationLocation(),
+                                dto.getLatitude(),
+                                dto.getLongitude());
 
                 ChargingStation station = new ChargingStation();
 
@@ -320,6 +332,11 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 Power power = findPower(powerId);
                 StatusChargingStation status = findStatus(statusId);
 
+                validateStationCloseToLocation(
+                                station.getLocation(),
+                                dto.getLatitude(),
+                                dto.getLongitude());
+
                 station.setName(dto.getName());
                 station.setHourlyRate(dto.getHourlyRate());
                 station.setInstruction(dto.getInstruction());
@@ -350,5 +367,78 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 station.getLatitude(),
                                 station.getLongitude(),
                                 station.getStatus() != null ? station.getStatus().getId() : null);
+        }
+
+        @Override
+        public List<ChargingStationSearchDTO> searchActiveStations() {
+                return stationRepo.findActiveStationsForSearch()
+                                .stream()
+                                .map(chargingStationMapper::toSearchDTO)
+                                .toList();
+        }
+
+        private void validateStationCloseToLocation(
+                        StationLocation location,
+                        Double stationLatitude,
+                        Double stationLongitude) {
+                if (stationLatitude == null || stationLongitude == null) {
+                        throw new BusinessException("La position de la borne est obligatoire.");
+                }
+
+                if (location.getLatitude() == null || location.getLongitude() == null) {
+                        throw new BusinessException("La position du lieu est obligatoire.");
+                }
+
+                double distance = calculateDistanceInMeters(
+                                location.getLatitude(),
+                                location.getLongitude(),
+                                stationLatitude,
+                                stationLongitude);
+
+                if (distance > MAX_DISTANCE_FROM_LOCATION_METERS) {
+                        throw new BusinessException(
+                                        "La borne doit être placée à proximité de l'adresse du lieu.");
+                }
+        }
+
+        private double calculateDistanceInMeters(
+                        double latitude1,
+                        double longitude1,
+                        double latitude2,
+                        double longitude2) {
+                final double earthRadiusMeters = 6371000;
+
+                double lat1Rad = Math.toRadians(latitude1);
+                double lat2Rad = Math.toRadians(latitude2);
+
+                double deltaLat = Math.toRadians(latitude2 - latitude1);
+                double deltaLon = Math.toRadians(longitude2 - longitude1);
+
+                double a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2)
+                                + Math.cos(lat1Rad) * Math.cos(lat2Rad)
+                                                * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+
+                double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+                return earthRadiusMeters * c;
+        }
+
+        private void moveAttachedStationsWithLocation(
+                        Long locationId,
+                        Double oldLatitude,
+                        Double oldLongitude,
+                        Double newLatitude,
+                        Double newLongitude) {
+                List<ChargingStation> stations = stationRepo.findByLocationId(locationId);
+
+                double latitudeDelta = newLatitude - oldLatitude;
+                double longitudeDelta = newLongitude - oldLongitude;
+
+                for (ChargingStation station : stations) {
+                        if (station.getLatitude() != null && station.getLongitude() != null) {
+                                station.setLatitude(station.getLatitude() + latitudeDelta);
+                                station.setLongitude(station.getLongitude() + longitudeDelta);
+                        }
+                }
         }
 }

@@ -13,12 +13,12 @@ import { ProfileLayoutComponent } from '../layout/profile-layout/profile-layout.
 @Component({
   selector: 'app-my-charging-station-edit',
   standalone: true,
-  imports: [ProfileLayoutComponent, ReactiveFormsModule, CommonModule,  LocationMapComponent],
+  imports: [ProfileLayoutComponent, ReactiveFormsModule, CommonModule, LocationMapComponent],
   templateUrl: './my-charging-station-edit.component.html',
   styleUrl: './my-charging-station-edit.component.css'
 })
 export class MyChargingStationEditComponent {
-form!: FormGroup;
+  form!: FormGroup;
 
   locationId!: number;
   stationId!: number;
@@ -32,7 +32,7 @@ form!: FormGroup;
     private route: ActivatedRoute,
     private router: Router,
     private chargingStationService: ChargingStationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.locationId = Number(this.route.snapshot.paramMap.get('locationId'));

@@ -39,6 +39,11 @@ public class Reservation {
     public Reservation() {
     }
 
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
+
     public Reservation(LocalDateTime startDateTime, LocalDateTime endDateTime, BigDecimal amount, String receipt,
             User user, StatusReservation status) {
         this.startDateTime = startDateTime;

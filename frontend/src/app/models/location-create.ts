@@ -3,4 +3,6 @@ export interface LocationCreate {
   address: string;
   postalCode: string;
   cityId: number;
+  latitude: number;
+  longitude: number;
 }

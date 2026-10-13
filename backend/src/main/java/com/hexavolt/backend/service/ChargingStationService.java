@@ -10,6 +10,7 @@ import com.hexavolt.backend.dto.ChargingStationListDTO;
 import com.hexavolt.backend.dto.ChargingStationUpdateDTO;
 import com.hexavolt.backend.dto.WeeklyScheduleDTO;
 import com.hexavolt.backend.dto.ChargingStationEditDTO;
+import com.hexavolt.backend.dto.ChargingStationSearchDTO;
 
 public interface ChargingStationService {
 
@@ -31,5 +32,7 @@ public interface ChargingStationService {
     void updateMyChargingStation(Long id, ChargingStationUpdateDTO dto);
 
     ChargingStationEditDTO findMyChargingStationForEdit(Long id);
+
+    List<ChargingStationSearchDTO> searchActiveStations();
 
 }

@@ -3,4 +3,6 @@ export interface LocationUpdate {
   address: string;
   postalCode: string;
   cityId: number;
+  latitude:number;
+  longitude:number;
 }

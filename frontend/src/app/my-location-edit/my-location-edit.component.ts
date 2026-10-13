@@ -12,6 +12,7 @@ import { CityService } from '../services/city';
 import { City } from '../models/city';
 import { ApiError } from '../models/api-error';
 import { LocationUpdate } from '../models/location-update';
+import { GeocodingService } from '../services/geocoding.service';
 
 @Component({
   selector: 'app-my-location-edit',
@@ -24,6 +25,8 @@ export class MyLocationEditComponent implements OnInit {
 
   citySearch = new FormControl('');
 
+  geocodingError: string | null = null;
+  isGeocoding = false;
   locationId!: number;
 
   cities: readonly City[] = [];
@@ -38,8 +41,9 @@ export class MyLocationEditComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private locationService: LocationService,
-    private cityService: CityService
-  ) {}
+    private cityService: CityService,
+    private geocodingService: GeocodingService
+  ) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -47,6 +51,8 @@ export class MyLocationEditComponent implements OnInit {
       address: ['', Validators.required],
       postalCode: ['', Validators.required],
       cityId: [null, Validators.required],
+      latitude: [null, Validators.required],
+      longitude: [null, Validators.required],
     });
 
     this.locationId = Number(this.route.snapshot.paramMap.get('id'));
@@ -69,6 +75,8 @@ export class MyLocationEditComponent implements OnInit {
       address: this.form.value.address,
       postalCode: this.form.value.postalCode,
       cityId: this.form.value.cityId,
+      latitude: this.form.value.latitude,
+      longitude: this.form.value.longitude,
     };
 
     this.locationService.update(this.locationId, payload).subscribe({
@@ -163,5 +171,40 @@ export class MyLocationEditComponent implements OnInit {
           this.citySearchError = 'Impossible de rechercher les villes.';
         },
       });
+  }
+
+  positionAddressOnMap(): void {
+    this.geocodingError = null;
+
+    const address = this.form.value.address;
+    const postalCode = this.form.value.postalCode;
+    const cityId = this.form.value.cityId;
+
+    if (!address || !postalCode || !cityId) {
+      this.geocodingError = 'Renseignez une adresse, un code postal et une ville avant de repositionner le lieu.';
+      return;
+    }
+
+    this.isGeocoding = true;
+
+    this.geocodingService.geocodeAddress(address, postalCode, cityId).subscribe({
+      next: result => {
+        this.form.patchValue({
+          latitude: result.latitude,
+          longitude: result.longitude
+        });
+
+        delete this.fieldErrors['latitude'];
+        delete this.fieldErrors['longitude'];
+
+        this.isGeocoding = false;
+      },
+      error: error => {
+        this.geocodingError =
+          error.error?.message ?? 'Impossible de repositionner cette adresse.';
+
+        this.isGeocoding = false;
+      }
+    });
   }
 }

@@ -31,6 +31,12 @@ public class StationLocation {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    @Column(nullable = true)
+    private Double latitude;
+
+    @Column(nullable = true)
+    private Double longitude;
+
     // --- Constructors ---
     public StationLocation() {
     }
@@ -81,5 +87,21 @@ public class StationLocation {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }

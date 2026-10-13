@@ -21,6 +21,12 @@ public class StationLocationUpdateDTO {
     @NotNull(message = "La ville est obligatoire.")
     private Long cityId;
 
+    @NotNull(message = "La latitude du lieu est obligatoire.")
+    private Double latitude;
+
+    @NotNull(message = "La longitude du lieu est obligatoire.")
+    private Double longitude;
+
     public String getNickname() {
         return nickname;
     }
@@ -51,5 +57,21 @@ public class StationLocationUpdateDTO {
 
     public void setCityId(Long cityId) {
         this.cityId = cityId;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }

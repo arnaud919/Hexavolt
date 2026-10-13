@@ -22,6 +22,7 @@ import com.hexavolt.backend.dto.ChargingStationCreateDTO;
 import com.hexavolt.backend.dto.ChargingStationDetailDTO;
 import com.hexavolt.backend.dto.ChargingStationEditDTO;
 import com.hexavolt.backend.dto.ChargingStationListDTO;
+import com.hexavolt.backend.dto.ChargingStationSearchDTO;
 import com.hexavolt.backend.dto.WeeklyScheduleDTO;
 import com.hexavolt.backend.dto.ChargingStationUpdateDTO;
 import com.hexavolt.backend.service.ChargingStationService;
@@ -50,6 +51,11 @@ public class ChargingStationController {
     @GetMapping("/me")
     public List<ChargingStationListDTO> getMyStations() {
         return chargingStationService.findMyChargingStations();
+    }
+
+    @GetMapping("/search")
+    public List<ChargingStationSearchDTO> searchActiveStations() {
+        return chargingStationService.searchActiveStations();
     }
 
     @GetMapping("/{id}")

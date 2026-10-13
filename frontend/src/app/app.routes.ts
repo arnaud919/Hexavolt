@@ -10,9 +10,10 @@ import { ContactComponent } from './contact/contact.component';
 import { SignupConfirmationComponent } from './signup-confirmation/signup-confirmation.component';
 import { VerifyPageComponent } from './verify-page/verify-page.component';
 import { StationPublicDetailComponent } from './station-public-detail/station-public-detail.component';
-import { FindStationComponent } from './find-station/find-station.component';
+import { ChargingStationSearchComponent } from './charging-station-search/charging-station-search.component';
 
 import { authGuard } from './services/auth.guard';
+
 
 export const routes: Routes = [
   { path: '', component: IndexComponent },
@@ -25,8 +26,7 @@ export const routes: Routes = [
   { path: 'politique_de_confidentialite', component: PrivacyPolicyComponent },
   { path: 'contact', component: ContactComponent },
   { path: 'bornes/:id', component: StationPublicDetailComponent },
-  { path: 'chercher-une-borne', component: FindStationComponent },
-
+  { path: 'chercher-une-borne', component: ChargingStationSearchComponent },
   {
     path: 'reservations/nouvelle/:id',
     loadComponent: () =>

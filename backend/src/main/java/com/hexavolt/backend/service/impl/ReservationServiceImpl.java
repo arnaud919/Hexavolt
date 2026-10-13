@@ -1,15 +1,17 @@
 package com.hexavolt.backend.service.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.hexavolt.backend.dto.MyReservationResponseDTO;
 import com.hexavolt.backend.dto.OwnerReservationResponseDTO;
-import com.hexavolt.backend.dto.ReservationCreateRequestDTO;
-import com.hexavolt.backend.dto.ReservationResponseDTO;
+import com.hexavolt.backend.dto.ReservationCreateDTO;
 import com.hexavolt.backend.entity.ChargingStation;
 import com.hexavolt.backend.entity.ChargingStationReservation;
 import com.hexavolt.backend.entity.Reservation;
@@ -23,7 +25,7 @@ import com.hexavolt.backend.repository.ChargingStationRepository;
 import com.hexavolt.backend.repository.ChargingStationReservationRepository;
 import com.hexavolt.backend.repository.ReservationRepository;
 import com.hexavolt.backend.repository.StatusReservationRepository;
-import com.hexavolt.backend.service.ChargingStationAvailabilityService;
+import com.hexavolt.backend.repository.UserRepository;
 import com.hexavolt.backend.service.ReservationPricingService;
 import com.hexavolt.backend.service.ReservationService;
 
@@ -35,7 +37,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         private static final String STATUS_PENDING = "EN_ATTENTE";
         private static final String STATUS_CONFIRMED = "CONFIRMEE";
-        private static final String STATUS_CANCELLED = "ANNULEE";
+        private static final String STATUS_REFUSED = "REFUSEE";
         private static final String STATUS_FINISHED = "TERMINEE";
         private static final String STATUS_ABSENCE = "ABSENCE";
 
@@ -43,76 +45,61 @@ public class ReservationServiceImpl implements ReservationService {
         private final ChargingStationRepository chargingStationRepository;
         private final ChargingStationReservationRepository chargingStationReservationRepository;
         private final StatusReservationRepository statusReservationRepository;
+        private final UserRepository userRepository;
         private final ReservationMapper reservationMapper;
         private final ReservationPricingService pricingService;
-        private final ChargingStationAvailabilityService availabilityService;
 
         public ReservationServiceImpl(
                         ReservationRepository reservationRepository,
                         ChargingStationRepository chargingStationRepository,
                         ChargingStationReservationRepository chargingStationReservationRepository,
                         StatusReservationRepository statusReservationRepository,
+                        UserRepository userRepository,
                         ReservationMapper reservationMapper,
-                        ReservationPricingService pricingService,
-                        ChargingStationAvailabilityService availabilityService) {
+                        ReservationPricingService pricingService) {
                 this.reservationRepository = reservationRepository;
                 this.chargingStationRepository = chargingStationRepository;
                 this.chargingStationReservationRepository = chargingStationReservationRepository;
                 this.statusReservationRepository = statusReservationRepository;
+                this.userRepository = userRepository;
                 this.reservationMapper = reservationMapper;
                 this.pricingService = pricingService;
-                this.availabilityService = availabilityService;
         }
 
         @Override
-        public ReservationResponseDTO createReservation(
-                        ReservationCreateRequestDTO request,
-                        User connectedUser) {
+        public void createReservation(ReservationCreateDTO dto) {
+                validateReservationCreateDTO(dto);
 
-                validateReservationRequest(request);
+                User user = getCurrentUser();
 
-                ChargingStation chargingStation = chargingStationRepository
-                                .findById(request.getChargingStationId())
+                LocalDateTime start = dto.getStartDateTime();
+                LocalDateTime end = dto.getEndDateTime();
+
+                ChargingStation station = chargingStationRepository.findById(dto.getChargingStationId())
                                 .orElseThrow(() -> new ResourceNotFoundException("Borne introuvable."));
 
-                boolean available = availabilityService.isAvailable(
-                                chargingStation,
-                                request.getStartDateTime(),
-                                request.getEndDateTime());
+                ensureStationIsActive(station);
+                ensureUserDoesNotOwnStation(station, user);
+                ensureNoBlockingConflict(station, start, end);
 
-                if (!available) {
-                        throw new BusinessException("La borne n'est pas disponible sur ce créneau.");
-                }
-
-                long conflicts = chargingStationReservationRepository
-                                .countConfirmedReservationConflict(
-                                                chargingStation.getId(),
-                                                request.getStartDateTime(),
-                                                request.getEndDateTime());
-
-                if (conflicts > 0) {
-                        throw new BusinessException("Ce créneau est déjà réservé pour cette borne.");
-                }
-
-                StatusReservation statusEnAttente = findStatusByName(STATUS_PENDING);
+                StatusReservation pendingStatus = findStatusByName(STATUS_PENDING);
 
                 Reservation reservation = new Reservation();
-                reservation.setStartDateTime(request.getStartDateTime());
-                reservation.setEndDateTime(request.getEndDateTime());
-                reservation.setAmount(BigDecimal.ZERO);
+                reservation.setStartDateTime(start);
+                reservation.setEndDateTime(end);
+                reservation.setAmount(calculateAmount(station, start, end));
                 reservation.setReceipt(null);
-                reservation.setUser(connectedUser);
-                reservation.setStatus(statusEnAttente);
+                reservation.setUser(user);
+                reservation.setStatus(pendingStatus);
+                reservation.setCreatedAt(LocalDateTime.now());
 
                 reservationRepository.save(reservation);
 
-                ChargingStationReservation csr = new ChargingStationReservation();
-                csr.setChargingStation(chargingStation);
-                csr.setReservation(reservation);
+                ChargingStationReservation link = new ChargingStationReservation();
+                link.setChargingStation(station);
+                link.setReservation(reservation);
 
-                chargingStationReservationRepository.save(csr);
-
-                return reservationMapper.toResponseDTO(reservation, chargingStation);
+                chargingStationReservationRepository.save(link);
         }
 
         @Override
@@ -125,7 +112,6 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         @Override
-        @Transactional
         public void confirmReservation(Long reservationId, User connectedUser) {
                 ChargingStationReservation csr = findChargingStationReservation(reservationId);
 
@@ -150,7 +136,6 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         @Override
-        @Transactional
         public void rejectReservation(Long reservationId, User connectedUser) {
                 ChargingStationReservation csr = findChargingStationReservation(reservationId);
 
@@ -160,9 +145,9 @@ public class ReservationServiceImpl implements ReservationService {
                 ensureOwner(station, connectedUser);
                 ensureStatus(reservation, STATUS_PENDING, "La réservation n'est pas en attente.");
 
-                StatusReservation cancelled = findStatusByName(STATUS_CANCELLED);
+                StatusReservation refused = findStatusByName(STATUS_REFUSED);
 
-                reservation.setStatus(cancelled);
+                reservation.setStatus(refused);
         }
 
         @Override
@@ -177,7 +162,6 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         @Override
-        @Transactional
         public void completeReservation(Long reservationId, User connectedUser) {
                 ChargingStationReservation csr = findChargingStationReservation(reservationId);
 
@@ -197,7 +181,6 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         @Override
-        @Transactional
         public void markReservationAsAbsent(Long reservationId, User connectedUser) {
                 ChargingStationReservation csr = findChargingStationReservation(reservationId);
 
@@ -213,26 +196,89 @@ public class ReservationServiceImpl implements ReservationService {
                 reservation.setStatus(absence);
         }
 
-        private void validateReservationRequest(ReservationCreateRequestDTO request) {
-                if (request == null) {
+        private void validateReservationCreateDTO(ReservationCreateDTO dto) {
+                if (dto == null) {
                         throw new BusinessException("Les informations de réservation sont obligatoires.");
                 }
 
-                if (request.getChargingStationId() == null) {
+                if (dto.getChargingStationId() == null) {
                         throw new BusinessException("La borne est obligatoire.");
                 }
 
-                if (request.getStartDateTime() == null || request.getEndDateTime() == null) {
-                        throw new BusinessException("Les dates de début et de fin sont obligatoires.");
+                if (dto.getStartDateTime() == null) {
+                        throw new BusinessException("La date de début est obligatoire.");
                 }
 
-                if (!request.getStartDateTime().isBefore(request.getEndDateTime())) {
-                        throw new BusinessException("La date de début doit être antérieure à la date de fin.");
+                if (dto.getEndDateTime() == null) {
+                        throw new BusinessException("La date de fin est obligatoire.");
                 }
 
-                if (request.getStartDateTime().isBefore(LocalDateTime.now())) {
+                if (!dto.getStartDateTime().isAfter(LocalDateTime.now())) {
                         throw new BusinessException("La date de début doit être dans le futur.");
                 }
+
+                if (!dto.getEndDateTime().isAfter(dto.getStartDateTime())) {
+                        throw new BusinessException("La date de fin doit être après la date de début.");
+                }
+        }
+
+        private static final String STATUS_STATION_ACTIVE = "ACTIVE";
+
+        private void ensureStationIsActive(ChargingStation station) {
+                if (station.getStatus() == null || !STATUS_STATION_ACTIVE.equals(station.getStatus().getName())) {
+                        throw new BusinessException("Cette borne n'est pas disponible à la réservation.");
+                }
+        }
+
+        private void ensureUserDoesNotOwnStation(ChargingStation station, User user) {
+                User owner = station.getLocation().getUser();
+
+                if (owner != null && owner.getId().equals(user.getId())) {
+                        throw new BusinessException("Vous ne pouvez pas réserver votre propre borne.");
+                }
+        }
+
+        private void ensureNoBlockingConflict(
+                        ChargingStation station,
+                        LocalDateTime start,
+                        LocalDateTime end) {
+                long conflicts = chargingStationReservationRepository.countBlockingReservationConflict(
+                                station.getId(),
+                                start,
+                                end);
+
+                if (conflicts > 0) {
+                        throw new BusinessException("Ce créneau est déjà demandé ou réservé.");
+                }
+        }
+
+        private BigDecimal calculateAmount(
+                        ChargingStation station,
+                        LocalDateTime start,
+                        LocalDateTime end) {
+                long minutes = Duration.between(start, end).toMinutes();
+
+                BigDecimal hours = BigDecimal.valueOf(minutes)
+                                .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
+
+                BigDecimal amount = station.getHourlyRate()
+                                .multiply(hours)
+                                .setScale(2, RoundingMode.HALF_UP);
+
+                if (amount.compareTo(new BigDecimal("999.99")) > 0) {
+                        throw new BusinessException("Le montant de la réservation est trop élevé.");
+                }
+
+                return amount;
+        }
+
+        private User getCurrentUser() {
+                String email = SecurityContextHolder.getContext()
+                                .getAuthentication()
+                                .getName();
+
+                return userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur introuvable."));
         }
 
         private ChargingStationReservation findChargingStationReservation(Long reservationId) {
@@ -262,7 +308,6 @@ public class ReservationServiceImpl implements ReservationService {
                         Reservation reservation,
                         String expectedStatus,
                         String errorMessage) {
-
                 if (reservation.getStatus() == null
                                 || !expectedStatus.equals(reservation.getStatus().getName())) {
                         throw new BusinessException(errorMessage);

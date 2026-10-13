@@ -21,10 +21,18 @@ import { LocationService } from '../services/location.service';
 import { CityService } from '../services/city';
 import { City } from '../models/city';
 import { ApiError } from '../models/api-error';
+import { LocationCreate } from '../models/location-create';
+import { LocationMapComponent } from '../location-map/location-map.component';
+import { GeocodingService } from '../services/geocoding.service';
 
 @Component({
   selector: 'app-location-create',
-  imports: [ReactiveFormsModule, CommonModule, ProfileLayoutComponent],
+  imports: [
+    ReactiveFormsModule,
+    CommonModule,
+    ProfileLayoutComponent,
+    LocationMapComponent
+  ],
   templateUrl: './my-location-create.component.html',
   styleUrl: './my-location-create.component.css'
 })
@@ -34,6 +42,9 @@ export class MyLocationCreateComponent implements OnInit {
   citySearch = new FormControl('');
   cities: readonly City[] = [];
 
+  geocodingError: string | null = null;
+  isGeocoding = false;
+
   citySearchError: string | null = null;
   submitError: string | null = null;
   fieldErrors: Record<string, string> = {};
@@ -42,7 +53,8 @@ export class MyLocationCreateComponent implements OnInit {
     private fb: FormBuilder,
     private locationService: LocationService,
     private cityService: CityService,
-    private router: Router
+    private router: Router,
+    private geocodingService: GeocodingService,
   ) { }
 
   ngOnInit(): void {
@@ -51,21 +63,32 @@ export class MyLocationCreateComponent implements OnInit {
       address: ['', Validators.required],
       postalCode: ['', Validators.required],
       cityId: [null, Validators.required],
+      latitude: [null, Validators.required],
+      longitude: [null, Validators.required],
     });
 
     this.listenCitySearch();
   }
 
   submit(): void {
+    this.submitError = null;
+    this.fieldErrors = {};
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    this.submitError = null;
-    this.fieldErrors = {};
+    const payload: LocationCreate = {
+      nickname: this.form.value.nickname,
+      address: this.form.value.address,
+      postalCode: this.form.value.postalCode,
+      cityId: this.form.value.cityId,
+      latitude: this.form.value.latitude,
+      longitude: this.form.value.longitude,
+    };
 
-    this.locationService.create(this.form.value).subscribe({
+    this.locationService.create(payload).subscribe({
       next: () => {
         this.router.navigate(['/profil/lieux']);
       },
@@ -76,6 +99,16 @@ export class MyLocationCreateComponent implements OnInit {
         this.fieldErrors = apiError?.fieldErrors ?? {};
       }
     });
+  }
+
+  onMapPositionSelected(position: { lat: number; lng: number }): void {
+    this.form.patchValue({
+      latitude: position.lat,
+      longitude: position.lng,
+    });
+
+    delete this.fieldErrors['latitude'];
+    delete this.fieldErrors['longitude'];
   }
 
   selectCity(city: City): void {
@@ -126,6 +159,38 @@ export class MyLocationCreateComponent implements OnInit {
       error: () => {
         this.cities = [];
         this.citySearchError = 'Impossible de rechercher les villes.';
+      }
+    });
+  }
+
+  positionAddressOnMap(): void {
+    this.geocodingError = null;
+
+    const address = this.form.value.address;
+    const postalCode = this.form.value.postalCode;
+    const cityId = this.form.value.cityId;
+
+    if (!address || !postalCode || !cityId) {
+      this.geocodingError = 'Renseignez une adresse, un code postal et une ville avant de positionner le lieu.';
+      return;
+    }
+
+    this.isGeocoding = true;
+
+    this.geocodingService.geocodeAddress(address, postalCode, cityId).subscribe({
+      next: result => {
+        this.form.patchValue({
+          latitude: result.latitude,
+          longitude: result.longitude
+        });
+
+        this.isGeocoding = false;
+      },
+      error: error => {
+        this.geocodingError =
+          error.error?.message ?? 'Impossible de positionner cette adresse.';
+
+        this.isGeocoding = false;
       }
     });
   }

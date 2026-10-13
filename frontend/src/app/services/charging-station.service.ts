@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { ChargingStationDetail } from '../models/charging-station-detail';
 import { ChargingStationEdit } from '../models/charging-station-edit';
 import { ChargingStationUpdate } from '../models/charging-station-update';
+import { ChargingStationSearch } from '../models/charging-station-search';
 
 @Injectable({
   providedIn: 'root'
@@ -61,5 +62,12 @@ export class ChargingStationService {
       withCredentials: true,
     });
   }
+
+  searchActiveStations() {
+  return this.http.get<readonly ChargingStationSearch[]>(
+    '/api/stations/search',
+    { withCredentials: true }
+  );
+}
 
 }

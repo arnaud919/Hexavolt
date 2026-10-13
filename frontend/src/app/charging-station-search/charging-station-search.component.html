@@ -1,0 +1,93 @@
+<section class="max-w-7xl mx-auto p-6">
+  <h1 class="text-3xl font-bold text-center mb-8">
+    Trouver une borne
+  </h1>
+
+  @if (isLoading) {
+    <p class="text-center text-gray-600">
+      Chargement des bornes disponibles...
+    </p>
+  } @else if (errorMessage) {
+    <p class="text-center text-red-600">
+      {{ errorMessage }}
+    </p>
+  } @else if (stations.length === 0) {
+    <p class="text-center text-gray-600">
+      Aucune borne disponible pour le moment.
+    </p>
+  } @else {
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2">
+        <app-charging-station-search-map
+          [stations]="stations"
+          (stationSelected)="selectStation($event)"
+        ></app-charging-station-search-map>
+      </div>
+
+      <aside class="lg:col-span-1">
+        @if (selectedStation) {
+          <article class="card bg-white shadow-md border border-gray-200 overflow-hidden">
+            @if (selectedStation.photoUrl) {
+              <figure class="h-56 overflow-hidden">
+                <img
+                  [src]="selectedStation.photoUrl"
+                  [alt]="selectedStation.name ?? 'Photo de la borne'"
+                  class="w-full h-full object-cover"
+                />
+              </figure>
+            } @else {
+              <div class="h-56 bg-gray-100 flex items-center justify-center text-gray-500 text-sm">
+                Aucune photo disponible
+              </div>
+            }
+
+            <div class="card-body">
+              <h2 class="card-title">
+                {{ selectedStation.name || 'Borne de recharge' }}
+              </h2>
+
+              <p class="text-sm text-gray-600">
+                {{ selectedStation.locationAddress }}
+              </p>
+
+              <p class="text-sm text-gray-600">
+                {{ selectedStation.cityName }}
+              </p>
+
+              <div class="mt-4 space-y-2">
+                <p>
+                  <span class="font-semibold">Puissance :</span>
+                  {{ selectedStation.power }} kVA
+                </p>
+
+                <p>
+                  <span class="font-semibold">Tarif :</span>
+                  {{ selectedStation.hourlyRate }} € / heure
+                </p>
+              </div>
+
+              <div class="card-actions justify-end mt-6">
+                <a
+                  [routerLink]="['/bornes', selectedStation.id]"
+                  class="bg-yellow hover:bg-yellow/50 px-4 py-2 rounded-full text-center"
+                >
+                  Voir la borne
+                </a>
+              </div>
+            </div>
+          </article>
+        } @else {
+          <div class="bg-white border border-gray-200 rounded-2xl p-6 text-center text-gray-600">
+            <p class="font-semibold mb-2">
+              Sélectionnez une borne
+            </p>
+
+            <p class="text-sm">
+              Cliquez sur une icône de la carte pour voir les informations de la borne.
+            </p>
+          </div>
+        }
+      </aside>
+    </div>
+  }
+</section>

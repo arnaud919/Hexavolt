@@ -11,17 +11,13 @@
       </label>
 
       <div class="w-full flex-1">
-        <input
-          id="nickname"
-          type="text"
-          formControlName="nickname"
-          class="w-full px-4 py-2 border border-gray-400 rounded-full bg-white"
-        />
+        <input id="nickname" type="text" formControlName="nickname"
+          class="w-full px-4 py-2 border border-gray-400 rounded-full bg-white" />
 
         @if (getFieldError('nickname')) {
-          <p class="text-sm text-red-600 mt-1">
-            {{ getFieldError('nickname') }}
-          </p>
+        <p class="text-sm text-red-600 mt-1">
+          {{ getFieldError('nickname') }}
+        </p>
         }
       </div>
     </div>
@@ -33,17 +29,13 @@
       </label>
 
       <div class="w-full flex-1">
-        <input
-          id="address"
-          type="text"
-          formControlName="address"
-          class="w-full px-4 py-2 border border-gray-400 rounded-full bg-white"
-        />
+        <input id="address" type="text" formControlName="address"
+          class="w-full px-4 py-2 border border-gray-400 rounded-full bg-white" />
 
         @if (getFieldError('address')) {
-          <p class="text-sm text-red-600 mt-1">
-            {{ getFieldError('address') }}
-          </p>
+        <p class="text-sm text-red-600 mt-1">
+          {{ getFieldError('address') }}
+        </p>
         }
       </div>
     </div>
@@ -55,17 +47,13 @@
       </label>
 
       <div class="w-full flex-1">
-        <input
-          id="postalCode"
-          type="text"
-          formControlName="postalCode"
-          class="w-full px-4 py-2 border border-gray-400 rounded-full bg-white"
-        />
+        <input id="postalCode" type="text" formControlName="postalCode"
+          class="w-full px-4 py-2 border border-gray-400 rounded-full bg-white" />
 
         @if (getFieldError('postalCode')) {
-          <p class="text-sm text-red-600 mt-1">
-            {{ getFieldError('postalCode') }}
-          </p>
+        <p class="text-sm text-red-600 mt-1">
+          {{ getFieldError('postalCode') }}
+        </p>
         }
       </div>
     </div>
@@ -77,61 +65,101 @@
       </label>
 
       <div class="w-full flex-1 relative">
-        <input
-          id="citySearch"
-          type="text"
-          [formControl]="citySearch"
-          placeholder="Rechercher une ville"
-          class="w-full px-4 py-2 border border-gray-400 rounded-full bg-white"
-          autocomplete="off"
-        />
+        <input id="citySearch" type="text" [formControl]="citySearch" placeholder="Rechercher une ville"
+          class="w-full px-4 py-2 border border-gray-400 rounded-full bg-white" autocomplete="off" />
 
         @if (cities.length > 0) {
-          <ul class="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-            @for (city of cities; track city.id) {
-              <li
-                class="px-4 py-2 cursor-pointer hover:bg-gray-100"
-                (click)="selectCity(city)"
-              >
-                {{ city.name }}
-              </li>
-            }
-          </ul>
+        <ul
+          class="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+          @for (city of cities; track city.id) {
+          <li class="px-4 py-2 cursor-pointer hover:bg-gray-100" (click)="selectCity(city)">
+            {{ city.name }}
+          </li>
+          }
+        </ul>
         }
 
         @if (citySearchError) {
-          <p class="text-sm text-red-600 mt-1">
-            {{ citySearchError }}
-          </p>
+        <p class="text-sm text-red-600 mt-1">
+          {{ citySearchError }}
+        </p>
         }
 
         @if (getFieldError('cityId')) {
-          <p class="text-sm text-red-600 mt-1">
-            {{ getFieldError('cityId') }}
-          </p>
+        <p class="text-sm text-red-600 mt-1">
+          {{ getFieldError('cityId') }}
+        </p>
         }
 
         @if (form.get('cityId')?.invalid && form.get('cityId')?.touched) {
-          <p class="text-sm text-red-600 mt-1">
-            Vous devez sélectionner une ville dans la liste.
-          </p>
+        <p class="text-sm text-red-600 mt-1">
+          Vous devez sélectionner une ville dans la liste.
+        </p>
         }
       </div>
     </div>
 
-    @if (submitError) {
-      <p class="text-sm text-red-600 text-center">
-        {{ submitError }}
+    <section class="space-y-3">
+      <h2 class="font-bold">Position du lieu</h2>
+
+      <p class="text-sm text-gray-600">
+        Cliquez sur la carte pour placer l’adresse du lieu.
       </p>
+
+      <app-location-map 
+      [latitude]="form.get('latitude')?.value" 
+      [longitude]="form.get('longitude')?.value"
+        (positionSelected)="onMapPositionSelected($event)">
+      </app-location-map>
+
+      <div class="flex justify-center">
+        <input type="button" [value]="isGeocoding ? 'Positionnement en cours...' : 'Positionner l’adresse sur la carte'"
+          (click)="positionAddressOnMap()" [disabled]="isGeocoding" class="button" />
+      </div>
+
+      @if (geocodingError) {
+      <p class="text-sm text-red-600 text-center">
+        {{ geocodingError }}
+      </p>
+      }
+
+      @if (form.get('latitude')?.value && form.get('longitude')?.value) {
+      <div class="text-sm text-gray-600">
+        <p>
+          Latitude :
+          <strong>{{ form.get('latitude')?.value }}</strong>
+        </p>
+
+        <p>
+          Longitude :
+          <strong>{{ form.get('longitude')?.value }}</strong>
+        </p>
+      </div>
+      }
+
+      @if (form.get('latitude')?.touched && form.get('latitude')?.invalid) {
+      <p class="text-sm text-red-600">
+        La position du lieu est obligatoire.
+      </p>
+      }
+
+      @if (getFieldError('latitude')) {
+      <p class="text-sm text-red-600">{{ getFieldError('latitude') }}</p>
+      }
+
+      @if (getFieldError('longitude')) {
+      <p class="text-sm text-red-600">{{ getFieldError('longitude') }}</p>
+      }
+    </section>
+
+    @if (submitError) {
+    <p class="text-sm text-red-600 text-center">
+      {{ submitError }}
+    </p>
     }
 
     <!-- Bouton -->
-    <input
-      type="submit"
-      class="button"
-      value="Enregistrer le lieu"
-      [disabled]="form.invalid"
-    >
+    <input type="submit" class="button" value="Enregistrer le lieu" [disabled]="form.invalid">
   </form>
 
 </app-profile-layout>

@@ -75,6 +75,8 @@ CREATE TABLE station_location (
     postal_code VARCHAR(10) NOT NULL,
     city BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
+    latitude DOUBLE NOT NULL,
+    longitude DOUBLE NOT NULL,
     CONSTRAINT fk_station_location_city FOREIGN KEY (city) REFERENCES city(id),
     CONSTRAINT fk_station_location_user FOREIGN KEY (user_id) REFERENCES app_user(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

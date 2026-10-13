@@ -4,15 +4,12 @@ import java.util.List;
 
 import com.hexavolt.backend.dto.MyReservationResponseDTO;
 import com.hexavolt.backend.dto.OwnerReservationResponseDTO;
-import com.hexavolt.backend.dto.ReservationCreateRequestDTO;
-import com.hexavolt.backend.dto.ReservationResponseDTO;
+import com.hexavolt.backend.dto.ReservationCreateDTO;
 import com.hexavolt.backend.entity.User;
 
 public interface ReservationService {
 
-    ReservationResponseDTO createReservation(
-            ReservationCreateRequestDTO request,
-            User connectedUser);
+    void createReservation(ReservationCreateDTO dto);
 
     List<MyReservationResponseDTO> getMyReservations(User connectedUser);
 

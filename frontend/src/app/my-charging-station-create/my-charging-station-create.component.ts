@@ -9,6 +9,9 @@ import { LocationMapComponent } from "../location-map/location-map.component";
 import { ProfileLayoutComponent } from '../layout/profile-layout/profile-layout.component';
 import { StatusChargingStation } from '../models/status-charging-station';
 import { StatusChargingStationService } from '../services/status-charging-station.service.service';
+import { LocationService } from '../services/location.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ApiError } from '../models/api-error';
 
 @Component({
   selector: 'app-station-create',
@@ -23,6 +26,8 @@ export class MyChargingStationCreateComponent implements OnInit {
   selectedPhoto: File | null = null;
   selectedVideo: File | null = null;
   statuses: StatusChargingStation[] = [];
+  submitError: string | null = null;
+  fieldErrors: Record<string, string> = {};
 
   constructor(
     private fb: FormBuilder,
@@ -31,6 +36,7 @@ export class MyChargingStationCreateComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private statusService: StatusChargingStationService,
+    private locationService: LocationService
   ) { }
 
   ngOnInit(): void {
@@ -63,12 +69,16 @@ export class MyChargingStationCreateComponent implements OnInit {
     });
   }
 
-  onPositionSelected(pos: { lat: number; lng: number }) {
-    this.form.patchValue({
-      latitude: pos.lat,
-      longitude: pos.lng
-    });
-  }
+onPositionSelected(pos: { lat: number; lng: number }): void {
+  this.form.patchValue({
+    latitude: pos.lat,
+    longitude: pos.lng,
+    isCustom: true,
+  });
+
+  delete this.fieldErrors['latitude'];
+  delete this.fieldErrors['longitude'];
+}
 
   onPhotoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -124,7 +134,31 @@ export class MyChargingStationCreateComponent implements OnInit {
           'bornes'
         ]);
       },
-      error: err => console.error('ERREUR BACKEND', err)
+      error: (error: HttpErrorResponse) => {
+        const apiError = error.error as ApiError | undefined;
+
+        this.submitError = apiError?.message ?? 'Impossible de créer la borne.';
+        this.fieldErrors = apiError?.fieldErrors ?? {};
+      }
     });
   }
+
+  getFieldError(fieldName: string): string | null {
+    return this.fieldErrors[fieldName] ?? null;
+  }
+
+  private loadLocationPosition(): void {
+  this.locationService.getMyLocationById(this.locationId).subscribe({
+    next: location => {
+      this.form.patchValue({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        isCustom: false,
+      });
+    },
+    error: () => {
+      this.submitError = 'Impossible de charger la position du lieu.';
+    }
+  });
+}
 }
