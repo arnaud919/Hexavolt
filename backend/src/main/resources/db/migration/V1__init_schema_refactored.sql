@@ -9,7 +9,9 @@
 CREATE TABLE city (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    CONSTRAINT uk_city_name UNIQUE (name)
+    insee_code VARCHAR(5) NOT NULL,
+    CONSTRAINT uk_city_insee_code UNIQUE (insee_code),
+    INDEX idx_city_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE power (
@@ -24,8 +26,14 @@ CREATE TABLE day_of_week (
 
 CREATE TABLE status_reservation (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(10) NOT NULL,
+    name VARCHAR(20) NOT NULL,
     CONSTRAINT uk_status_reservation_name UNIQUE (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE status_charging_station (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(20) NOT NULL,
+    CONSTRAINT uk_status_charging_station_name UNIQUE (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE notification_type (
@@ -83,7 +91,8 @@ CREATE TABLE station_location (
 
 CREATE TABLE charging_station (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    hourly_rate DECIMAL(4,2) NOT NULL,
+    name VARCHAR(100),
+    hourly_rate DECIMAL(5,2) NOT NULL,
     photo_name VARCHAR(255),
     video_name VARCHAR(255),
     latitude DOUBLE NOT NULL,
@@ -92,8 +101,10 @@ CREATE TABLE charging_station (
     power BIGINT NOT NULL,
     location BIGINT NOT NULL,
     is_custom BOOLEAN NOT NULL,
+    status BIGINT NOT NULL,
     CONSTRAINT fk_charging_station_power FOREIGN KEY (power) REFERENCES power(id),
-    CONSTRAINT fk_charging_station_location FOREIGN KEY (location) REFERENCES station_location(id)
+    CONSTRAINT fk_charging_station_location FOREIGN KEY (location) REFERENCES station_location(id),
+    CONSTRAINT fk_charging_station_status FOREIGN KEY (status) REFERENCES status_charging_station(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE nickname_location (
@@ -118,6 +129,7 @@ CREATE TABLE reservation (
     receipt VARCHAR(255),
     user_id BIGINT NOT NULL,
     status_reservation BIGINT NOT NULL,
+    created_at DATETIME NOT NULL,
     CONSTRAINT fk_reservation_user FOREIGN KEY (user_id) REFERENCES app_user(id),
     CONSTRAINT fk_reservation_status FOREIGN KEY (status_reservation) REFERENCES status_reservation(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

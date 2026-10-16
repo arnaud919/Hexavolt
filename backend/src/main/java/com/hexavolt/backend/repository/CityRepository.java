@@ -1,6 +1,7 @@
 package com.hexavolt.backend.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -9,4 +10,6 @@ import com.hexavolt.backend.entity.City;
 public interface CityRepository extends JpaRepository<City, Long> {
     
     List<City> findTop20ByNameStartingWithIgnoreCaseOrderByNameAsc(String prefix);
+
+    Optional<City> findByInseeCode(String inseeCode);
 }

@@ -9,13 +9,23 @@ export interface AddressGeocodeResult {
   score: number;
 }
 
+export interface AddressReverseGeocodeResult {
+  address: string;
+  postalCode: string;
+  cityName: string;
+  cityCode: string;
+  cityId: number | null;
+  label: string;
+  type: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class GeocodingService {
-  private readonly apiUrl = '/api/geocoding/address';
+  private readonly apiUrl = '/api/geocoding';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   geocodeAddress(
     address: string,
@@ -27,7 +37,18 @@ export class GeocodingService {
       .set('postalCode', postalCode)
       .set('cityId', cityId);
 
-    return this.http.get<AddressGeocodeResult>(this.apiUrl, {
+    return this.http.get<AddressGeocodeResult>(`${this.apiUrl}/address`, {
+      params,
+      withCredentials: true
+    });
+  }
+
+  reverseGeocode(latitude: number, longitude: number): Observable<AddressReverseGeocodeResult> {
+    const params = new HttpParams()
+      .set('latitude', latitude)
+      .set('longitude', longitude);
+
+    return this.http.get<AddressReverseGeocodeResult>(`${this.apiUrl}/reverse`, {
       params,
       withCredentials: true
     });

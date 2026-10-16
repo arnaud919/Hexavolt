@@ -70,6 +70,7 @@ public class ChargingStationServiceImpl implements ChargingStationService {
         }
 
         private static final double MAX_DISTANCE_FROM_LOCATION_METERS = 300.0;
+        private static final String STATUS_STATION_DISABLED = "DESACTIVEE";
 
         @Override
         @Transactional
@@ -440,5 +441,28 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 station.setLongitude(station.getLongitude() + longitudeDelta);
                         }
                 }
+        }
+
+        @Override
+        public void withdrawMyChargingStation(Long id) {
+                User user = getCurrentUser();
+
+                Long stationId = requireId(
+                                id,
+                                "L'identifiant de la borne est obligatoire.");
+
+                ChargingStation station = findOwnedStation(stationId, user);
+
+                if (STATUS_STATION_DISABLED.equals(station.getStatus().getName())) {
+                        throw new BusinessException("Cette borne est déjà retirée.");
+                }
+
+                StatusChargingStation disabledStatus = statusChargingStationRepo
+                                .findByName(STATUS_STATION_DISABLED)
+                                .orElseThrow(() -> new ResourceNotFoundException("Statut de borne introuvable."));
+
+                station.setStatus(disabledStatus);
+
+                stationRepo.save(station);
         }
 }

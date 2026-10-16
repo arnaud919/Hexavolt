@@ -58,16 +58,24 @@ export class ChargingStationService {
   }
 
   update(id: number, payload: ChargingStationUpdate) {
-    return this.http.put<void>(`/api/stations/${id}`, payload, {
+    return this.http.put<void>(`${this.apiUrl}/stations/${id}`, payload, {
       withCredentials: true,
     });
   }
 
   searchActiveStations() {
-  return this.http.get<readonly ChargingStationSearch[]>(
-    '/api/stations/search',
-    { withCredentials: true }
-  );
-}
+    return this.http.get<readonly ChargingStationSearch[]>(
+      `${this.apiUrl}/stations/search`,
+      { withCredentials: true }
+    );
+  }
+
+  withdraw(id: number) {
+    return this.http.patch<void>(
+      `${this.apiUrl}/stations/${id}/withdraw`,
+      {},
+      { withCredentials: true }
+    );
+  }
 
 }

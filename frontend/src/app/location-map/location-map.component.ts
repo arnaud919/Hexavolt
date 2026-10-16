@@ -44,7 +44,7 @@ const hexavoltIcon = L.divIcon({
   selector: 'app-location-map',
   standalone: true,
   template: `
-    <div #mapContainer class="h-80 rounded-lg"></div>
+    <div #mapContainer class="h-[420px] lg:h-[560px] w-full rounded-lg"></div>
   `
 })
 export class LocationMapComponent implements AfterViewInit, OnChanges, OnDestroy {
@@ -66,8 +66,8 @@ export class LocationMapComponent implements AfterViewInit, OnChanges, OnDestroy
 
   ngAfterViewInit(): void {
     this.map = L.map(this.mapContainer.nativeElement).setView(
-      [48.8566, 2.3522],
-      13
+      [46.603354, 1.888334],
+      6
     );
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

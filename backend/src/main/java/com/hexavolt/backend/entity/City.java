@@ -21,6 +21,9 @@ public class City {
     @Column(length = 100, nullable = false)
     private String name;
 
+    @Column(name = "insee_code", nullable = false, unique = true, length = 5)
+    private String inseeCode;
+
     // --- Constructors ---
     public City() {
     }
@@ -44,5 +47,13 @@ public class City {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getInseeCode() {
+        return inseeCode;
+    }
+
+    public void setInseeCode(String inseeCode) {
+        this.inseeCode = inseeCode;
     }
 }

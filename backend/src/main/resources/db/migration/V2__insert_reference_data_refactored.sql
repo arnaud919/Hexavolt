@@ -23,7 +23,18 @@ INSERT INTO status_reservation (id, name) VALUES
   (3, 'ANNULEE'),
   (4, 'TERMINEE'),
   (5, 'EXPIREE'),
-  (6, 'ABSENCE');
+  (6, 'ABSENCE'),
+  (7, 'REFUSEE');
+
+-- =====================
+-- status_charging_station
+-- =====================
+INSERT INTO status_charging_station (id, name) VALUES
+  (1, 'ACTIVE'),
+  (2, 'HORS_SERVICE'),
+  (3, 'MAINTENANCE'),
+  (4, 'DESACTIVEE'),
+  (5, 'RETIRE');
 
 -- =====================
 -- notification_type
@@ -56,5 +67,6 @@ CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ',' ENCLOSED BY '"' ESCAPED BY '\\'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(@name)
-SET name = TRIM(TRAILING '\r' FROM @name);
+(@name, @insee_code)
+SET name = TRIM(TRAILING '\r' FROM @name),
+    insee_code = TRIM(TRAILING '\r' FROM @insee_code);

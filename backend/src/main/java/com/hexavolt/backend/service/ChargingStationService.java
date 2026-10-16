@@ -35,4 +35,5 @@ public interface ChargingStationService {
 
     List<ChargingStationSearchDTO> searchActiveStations();
 
+    void withdrawMyChargingStation(Long id);
 }
