@@ -67,18 +67,20 @@ export class MyChargingStationCreateComponent implements OnInit {
         });
       }
     });
+
+    this.loadLocationPosition();
   }
 
-onPositionSelected(pos: { lat: number; lng: number }): void {
-  this.form.patchValue({
-    latitude: pos.lat,
-    longitude: pos.lng,
-    isCustom: true,
-  });
+  onPositionSelected(pos: { lat: number; lng: number }): void {
+    this.form.patchValue({
+      latitude: pos.lat,
+      longitude: pos.lng,
+      isCustom: true,
+    });
 
-  delete this.fieldErrors['latitude'];
-  delete this.fieldErrors['longitude'];
-}
+    delete this.fieldErrors['latitude'];
+    delete this.fieldErrors['longitude'];
+  }
 
   onPhotoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -148,17 +150,17 @@ onPositionSelected(pos: { lat: number; lng: number }): void {
   }
 
   private loadLocationPosition(): void {
-  this.locationService.getMyLocationById(this.locationId).subscribe({
-    next: location => {
-      this.form.patchValue({
-        latitude: location.latitude,
-        longitude: location.longitude,
-        isCustom: false,
-      });
-    },
-    error: () => {
-      this.submitError = 'Impossible de charger la position du lieu.';
-    }
-  });
-}
+    this.locationService.getMyLocationById(this.locationId).subscribe({
+      next: location => {
+        this.form.patchValue({
+          latitude: location.latitude,
+          longitude: location.longitude,
+          isCustom: false,
+        });
+      },
+      error: () => {
+        this.submitError = 'Impossible de charger la position du lieu.';
+      }
+    });
+  }
 }

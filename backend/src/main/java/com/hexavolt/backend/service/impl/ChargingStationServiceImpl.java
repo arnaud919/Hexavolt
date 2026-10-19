@@ -70,7 +70,7 @@ public class ChargingStationServiceImpl implements ChargingStationService {
         }
 
         private static final double MAX_DISTANCE_FROM_LOCATION_METERS = 300.0;
-        private static final String STATUS_STATION_DISABLED = "DESACTIVEE";
+        private static final String STATUS_STATION_WITHDRAWN = "RETIRE";
 
         @Override
         @Transactional
@@ -92,6 +92,7 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 NicknameLocation nicknameLocation = findUserLocation(locationId, user);
                 Power power = findPower(powerId);
                 StatusChargingStation status = findStatus(statusId);
+                validateStatusNotWithdrawn(status);
 
                 validateStationCloseToLocation(
                                 nicknameLocation.getStationLocation(),
@@ -204,13 +205,7 @@ public class ChargingStationServiceImpl implements ChargingStationService {
 
         @Override
         public void deleteMyChargingStation(Long id) {
-                User user = getCurrentUser();
-
-                Long stationId = requireId(id, "L'identifiant de la borne est obligatoire.");
-
-                ChargingStation station = findOwnedStation(stationId, user);
-
-                stationRepo.delete(station);
+                withdrawMyChargingStation(id);
         }
 
         @Override
@@ -219,10 +214,10 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                         List<WeeklyScheduleDTO> schedules) {
 
                 User user = getCurrentUser();
-
                 Long validStationId = requireId(stationId, "L'identifiant de la borne est obligatoire.");
-
                 ChargingStation station = findOwnedStation(validStationId, user);
+
+                validateStationNotWithdrawn(station);
 
                 if (schedules == null) {
                         throw new BusinessException("La liste des horaires est obligatoire.");
@@ -320,18 +315,32 @@ public class ChargingStationServiceImpl implements ChargingStationService {
         @Override
         public void updateMyChargingStation(Long id, ChargingStationUpdateDTO dto) {
                 if (dto == null) {
-                        throw new BusinessException("Les informations de la borne sont obligatoires.");
+                        throw new BusinessException(
+                                        "Les informations de la borne sont obligatoires.");
                 }
 
                 User user = getCurrentUser();
 
-                Long stationId = requireId(id, "L'identifiant de la borne est obligatoire.");
-                Long powerId = requireId(dto.getPowerId(), "La puissance est obligatoire.");
-                Long statusId = requireId(dto.getStatusId(), "Le statut est obligatoire.");
+                Long stationId = requireId(
+                                id,
+                                "L'identifiant de la borne est obligatoire.");
+
+                Long powerId = requireId(
+                                dto.getPowerId(),
+                                "La puissance est obligatoire.");
+
+                Long statusId = requireId(
+                                dto.getStatusId(),
+                                "Le statut est obligatoire.");
 
                 ChargingStation station = findOwnedStation(stationId, user);
+
+                validateStationNotWithdrawn(station);
+
                 Power power = findPower(powerId);
                 StatusChargingStation status = findStatus(statusId);
+
+                validateStatusNotWithdrawn(status);
 
                 validateStationCloseToLocation(
                                 station.getLocation(),
@@ -357,6 +366,8 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 Long stationId = requireId(id, "L'identifiant de la borne est obligatoire.");
 
                 ChargingStation station = findOwnedStation(stationId, user);
+
+                validateStationNotWithdrawn(station);
 
                 return new ChargingStationEditDTO(
                                 station.getId(),
@@ -453,16 +464,31 @@ public class ChargingStationServiceImpl implements ChargingStationService {
 
                 ChargingStation station = findOwnedStation(stationId, user);
 
-                if (STATUS_STATION_DISABLED.equals(station.getStatus().getName())) {
-                        throw new BusinessException("Cette borne est déjà retirée.");
-                }
+                validateStationNotWithdrawn(station);
 
-                StatusChargingStation disabledStatus = statusChargingStationRepo
-                                .findByName(STATUS_STATION_DISABLED)
-                                .orElseThrow(() -> new ResourceNotFoundException("Statut de borne introuvable."));
+                StatusChargingStation withdrawnStatus = statusChargingStationRepo
+                                .findByName(STATUS_STATION_WITHDRAWN)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Statut de borne introuvable."));
 
-                station.setStatus(disabledStatus);
+                station.setStatus(withdrawnStatus);
 
                 stationRepo.save(station);
         }
+
+        private void validateStationNotWithdrawn(ChargingStation station) {
+                if (station.getStatus() != null
+                                && STATUS_STATION_WITHDRAWN.equals(station.getStatus().getName())) {
+                        throw new BusinessException(
+                                        "Cette borne a été retirée définitivement et ne peut plus être modifiée.");
+                }
+        }
+
+        private void validateStatusNotWithdrawn(StatusChargingStation status) {
+                if (STATUS_STATION_WITHDRAWN.equals(status.getName())) {
+                        throw new BusinessException(
+                                        "Le retrait définitif doit être effectué via l'action dédiée.");
+                }
+        }
+
 }

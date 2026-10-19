@@ -1,15 +1,26 @@
 <app-profile-layout>
 
-  <div *ngIf="chargingStation() as station" class="cards p-6 rounded-sm leading-8 mt-6 max-w-4xl mx-auto">
+  @if (loadError()) {
+  <p class="text-center text-red-600 mt-6">
+    {{ loadError() }}
+  </p>
+  }
+
+  @if (chargingStation(); as station) {
+
+  <div class="cards p-6 rounded-sm leading-8 mt-6 max-w-4xl mx-auto">
 
     <h1>{{ station.name || 'Borne de recharge' }}</h1>
 
-    <img *ngIf="station.photoUrl" [src]="station.photoUrl" alt="Photo de la borne"
-      class="mt-6 rounded-md w-full h-80 object-cover" />
+    @if (station.photoUrl) {
+    <img [src]="station.photoUrl" alt="Photo de la borne" class="mt-6 rounded-md w-full h-80 object-cover" />
+    }
 
-    <video *ngIf="station.videoUrl" controls class="mt-6 rounded-md w-full">
+    @if (station.videoUrl) {
+    <video controls class="mt-6 rounded-md w-full">
       <source [src]="station.videoUrl" type="video/mp4">
     </video>
+    }
 
     <div class="mt-6 space-y-2">
 
@@ -25,7 +36,9 @@
 
       <p>
         <strong>Statut :</strong>
-        {{ station.statusName || 'Non défini' }}
+        {{ station.statusName === 'RETIRE'
+        ? 'Retirée définitivement'
+        : (station.statusName || 'Non défini') }}
       </p>
 
       <p>
@@ -38,44 +51,63 @@
         {{ station.locationAddress }} – {{ station.cityName }}
       </p>
 
-      <p *ngIf="station.instruction">
+      @if (station.instruction) {
+      <p>
         <strong>Instructions :</strong>
         {{ station.instruction }}
       </p>
+      }
 
       <p>
         <strong>Coordonnées :</strong>
         {{ station.latitude }}, {{ station.longitude }}
       </p>
 
-      <div *ngIf="station.weeklySchedules.length > 0" class="mt-6">
-        <h2 class="font-bold">Disponibilités hebdomadaires</h2>
+      @if (station.weeklySchedules.length > 0) {
+
+      <div class="mt-6">
+        <h2 class="font-bold">
+          Disponibilités hebdomadaires
+        </h2>
 
         <div class="mt-3 space-y-2">
 
-          <p *ngFor="let schedule of station.weeklySchedules">
-
+          @for (schedule of station.weeklySchedules; track $index) {
+          <p>
             <strong>
               {{ dayLabels.get(schedule.dayOfWeekId) }}
             </strong>
-
             :
             {{ schedule.startTime }}
             -
             {{ schedule.endTime }}
-
           </p>
+          }
 
         </div>
       </div>
 
-      <p *ngIf="station.weeklySchedules.length === 0" class="mt-6 text-sm text-gray-600">
+      } @else {
+
+      <p class="mt-6 text-sm text-gray-600">
         Aucun horaire hebdomadaire défini pour cette borne.
       </p>
 
+      }
+
     </div>
 
+    @if (withdrawSuccess()) {
+    <p class="text-center text-green-700 mt-6">
+      La borne a été retirée définitivement.
+    </p>
+    }
+
+    @if (station.statusName !== 'RETIRE') {
+
+    <!-- Actions classiques -->
     <div class="mt-6 flex justify-between gap-4">
+
       <a [routerLink]="['/profil/bornes', station.id, 'disponibilites']" class="underline text-sm">
         Gérer les disponibilités
       </a>
@@ -83,8 +115,73 @@
       <a [routerLink]="['/profil/bornes', station.id, 'modification']" class="underline text-sm">
         Modifier la borne
       </a>
+
     </div>
 
+    <!-- Retrait définitif -->
+    <div class="mt-8 border-t border-gray-300 pt-6">
+
+      @if (!showWithdrawConfirmation()) {
+
+      <div class="flex justify-center">
+        <button type="button" class="button bg-red-600 hover:bg-red-700 text-white rounded-full p-1"
+          (click)="openWithdrawConfirmation()">
+          Retirer définitivement la borne
+        </button>
+      </div>
+
+      } @else {
+
+      <div class="space-y-4">
+
+        <p class="text-center font-bold">
+          Voulez-vous vraiment retirer cette borne ?
+        </p>
+
+        <p class="text-center text-sm text-gray-600 ">
+          Cette action est définitive.
+          La borne ne pourra plus être réactivée
+          ni proposée à la réservation.
+        </p>
+
+        @if (withdrawError()) {
+        <p class="text-center text-sm text-red-600">
+          {{ withdrawError() }}
+        </p>
+        }
+
+        <div class="flex flex-wrap justify-center gap-4">
+
+          <button type="button" class="button" [disabled]="isWithdrawing()" (click)="cancelWithdraw()">
+            Annuler
+          </button>
+
+          <button type="button" class="button bg-red-600 hover:bg-red-700 text-white rounded-full p-1" [disabled]="isWithdrawing()"
+            (click)="confirmWithdraw()">
+            {{ isWithdrawing()
+            ? 'Retrait en cours...'
+            : 'Confirmer le retrait' }}
+          </button>
+
+        </div>
+
+      </div>
+
+      }
+
+    </div>
+
+    } @else {
+
+    <p class="text-center text-gray-600 mt-8">
+      Cette borne a été retirée définitivement.
+      Elle ne peut plus être modifiée ou réactivée.
+    </p>
+
+    }
+
   </div>
+
+  }
 
 </app-profile-layout>
