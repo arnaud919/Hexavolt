@@ -57,9 +57,9 @@ export class MyChargingStationCreateComponent implements OnInit {
       .subscribe(powers => this.powers = powers);
 
     this.statusService.getAll().subscribe(statuses => {
-      this.statuses = statuses;
+      this.statuses = statuses.filter(status => status.name !== 'RETIRE');
 
-      const status = statuses.find(status => status.name === 'ACTIVE');
+      const status = this.statuses.find(status => status.name === 'ACTIVE');
 
       if (status) {
         this.form.patchValue({

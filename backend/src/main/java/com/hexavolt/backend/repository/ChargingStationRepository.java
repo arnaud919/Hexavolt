@@ -16,19 +16,28 @@ public interface ChargingStationRepository extends JpaRepository<ChargingStation
 
   Optional<ChargingStation> findByIdAndLocationUser(Long id, User user);
 
-  @Query("""
-      SELECT cs
-      FROM ChargingStation cs
-      JOIN FETCH cs.power p
-      JOIN FETCH cs.location l
-      JOIN FETCH l.city c
-      JOIN cs.status s
-      WHERE s.name = 'ACTIVE'
-      ORDER BY c.name ASC, cs.hourlyRate ASC
-      """)
+@Query("""
+    SELECT cs
+    FROM ChargingStation cs
+    JOIN FETCH cs.power p
+    JOIN FETCH cs.location l
+    JOIN FETCH l.city c
+    JOIN cs.status s
+    WHERE s.name = 'ACTIVE'
+    AND EXISTS (
+        SELECT ws.id
+        FROM WeeklySchedule ws
+        WHERE ws.chargingStation = cs
+    )
+    ORDER BY c.name ASC, cs.hourlyRate ASC
+    """)
   List<ChargingStation> findActiveStationsForSearch();
 
   List<ChargingStation> findByLocationIdAndStatusName(Long locationId, String statusName);
+
+  Optional<ChargingStation> findByIdAndStatusName(
+        Long id,
+        String statusName);
 
   // Page<ChargingStation> findByOwner_Id(Integer ownerId, Pageable pageable);
   // Page<ChargingStation> findByActiveTrue(Pageable pageable);

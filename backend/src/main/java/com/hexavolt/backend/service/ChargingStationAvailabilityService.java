@@ -11,5 +11,10 @@ public interface ChargingStationAvailabilityService {
             LocalDateTime start,
             LocalDateTime end
     );
+
+    boolean isWithinWeeklySchedule(
+        Long stationId,
+        LocalDateTime start,
+        LocalDateTime end);
 }
 

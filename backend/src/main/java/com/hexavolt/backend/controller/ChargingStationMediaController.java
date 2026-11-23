@@ -1,6 +1,7 @@
 package com.hexavolt.backend.controller;
 
 import com.hexavolt.backend.entity.ChargingStation;
+import com.hexavolt.backend.entity.User;
 import com.hexavolt.backend.exception.BusinessException;
 import com.hexavolt.backend.exception.ResourceNotFoundException;
 import com.hexavolt.backend.repository.ChargingStationRepository;
@@ -9,6 +10,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,8 +77,33 @@ public class ChargingStationMediaController {
     }
 
     private ChargingStation findStationById(Long id) {
-        return stationRepo.findById(id)
+
+        ChargingStation station = stationRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Borne introuvable."));
+
+        // Une borne active est accessible publiquement.
+        if (station.getStatus() != null
+                && "ACTIVE".equals(station.getStatus().getName())) {
+            return station;
+        }
+
+        // Sinon, seul son propriétaire peut accéder aux médias.
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null
+                && authentication.getPrincipal() instanceof User user) {
+
+            boolean isOwner = stationRepo
+                    .findByIdAndLocationUser(id, user)
+                    .isPresent();
+
+            if (isOwner) {
+                return station;
+            }
+        }
+
+        throw new ResourceNotFoundException(
+                "Borne introuvable ou indisponible.");
     }
 
     private Path resolveSafePath(Path directory, String fileName) {

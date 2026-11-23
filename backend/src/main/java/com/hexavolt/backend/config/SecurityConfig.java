@@ -55,6 +55,7 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.GET, "/api/stations/search").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/api/stations/*/photo").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/api/stations/*/video").permitAll()
+                                                .requestMatchers(HttpMethod.GET,"/api/public/stations/*").permitAll()
 
                                                 // 🔐 Auth protégée
                                                 .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()

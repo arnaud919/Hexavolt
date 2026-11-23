@@ -1,5 +1,6 @@
 package com.hexavolt.backend.service.impl;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -45,6 +46,29 @@ public class ChargingStationAvailabilityServiceImpl
                         LocalDateTime end) {
 
                 LocalDate date = start.toLocalDate();
+
+                if (station == null || start == null || end == null) {
+                        return false;
+                }
+
+                if (!end.isAfter(start)) {
+                        return false;
+                }
+
+                // Une réservation doit rester sur une seule journée.
+                if (!start.toLocalDate().equals(end.toLocalDate())) {
+                        return false;
+                }
+
+                // Les horaires doivent être définis par tranches de 30 minutes.
+                if (!isHalfHourBoundary(start) || !isHalfHourBoundary(end)) {
+                        return false;
+                }
+
+                // Durée minimale de 30 minutes.
+                if (Duration.between(start, end).toMinutes() < 30) {
+                        return false;
+                }
 
                 // 🔴 1️⃣ Jour fermé (priorité absolue)
                 boolean closed = closedDayRepository
@@ -102,5 +126,49 @@ public class ChargingStationAvailabilityServiceImpl
                         LocalTime allowedEnd) {
                 return !requestedStart.isBefore(allowedStart)
                                 && !requestedEnd.isAfter(allowedEnd);
+        }
+
+        @Override
+        public boolean isWithinWeeklySchedule(
+                        Long stationId,
+                        LocalDateTime start,
+                        LocalDateTime end) {
+
+                if (stationId == null || start == null || end == null) {
+                        return false;
+                }
+
+                if (!end.isAfter(start)) {
+                        return false;
+                }
+
+                // Pour l'instant, une réservation ne couvre qu'une journée.
+                if (!start.toLocalDate().equals(end.toLocalDate())) {
+                        return false;
+                }
+
+                // Les réservations utilisent des tranches de 30 minutes.
+                if (!isHalfHourBoundary(start) || !isHalfHourBoundary(end)) {
+                        return false;
+                }
+
+                if (Duration.between(start, end).toMinutes() < 30) {
+                        return false;
+                }
+
+                int dayOfWeek = start.getDayOfWeek().getValue();
+
+                return weeklyScheduleRepository
+                                .findByChargingStationId(stationId)
+                                .stream()
+                                .anyMatch(schedule -> schedule.getDayOfWeek().getId().intValue() == dayOfWeek
+                                                && !start.toLocalTime().isBefore(schedule.getStartTime())
+                                                && !end.toLocalTime().isAfter(schedule.getEndTime()));
+        }
+
+        private boolean isHalfHourBoundary(LocalDateTime dateTime) {
+                return dateTime.getMinute() % 30 == 0
+                                && dateTime.getSecond() == 0
+                                && dateTime.getNano() == 0;
         }
 }

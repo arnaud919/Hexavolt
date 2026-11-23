@@ -1,1 +1,111 @@
-<p>station-public-detail works!</p>
+<div class="max-w-4xl mx-auto px-4 py-8">
+
+  <div class="mb-6">
+    <a routerLink="/chercher-une-borne" class="underline">
+      Retour à la recherche
+    </a>
+  </div>
+
+  @if (isLoading()) {
+  <p class="text-center text-gray-600">
+    Chargement de la borne...
+  </p>
+  } @else if (errorMessage()) {
+  <p class="text-center text-red-600">
+    {{ errorMessage() }}
+  </p>
+  } @else {
+  @if (station(); as currentStation) {
+
+  <div class="cards p-6 rounded-lg leading-8">
+
+    <h1 class="text-2xl font-bold">
+      {{ currentStation.name || 'Borne de recharge' }}
+    </h1>
+
+    @if (currentStation.photoUrl) {
+    <img [src]="currentStation.photoUrl" alt="Photo de la borne" class="mt-6 rounded-md w-full h-80 object-cover" />
+    }
+
+    @if (currentStation.videoUrl) {
+    <video controls class="mt-6 rounded-md w-full">
+      <source [src]="currentStation.videoUrl" type="video/mp4">
+    </video>
+    }
+
+    <div class="mt-6 space-y-2">
+
+      <p>
+        <strong>Puissance :</strong>
+        {{ currentStation.power }} kVA
+      </p>
+
+      <p>
+        <strong>Tarif :</strong>
+        {{ currentStation.hourlyRate }} € / heure
+      </p>
+
+      <p>
+        <strong>Adresse :</strong>
+        {{ currentStation.locationAddress }}
+        – {{ currentStation.cityName }}
+      </p>
+
+      @if (currentStation.instruction) {
+      <p>
+        <strong>Instructions :</strong>
+        {{ currentStation.instruction }}
+      </p>
+      }
+
+    </div>
+
+    <div class="mt-8">
+
+      <h2 class="font-bold text-lg">
+        Disponibilités hebdomadaires
+      </h2>
+
+      @if (currentStation.weeklySchedules.length > 0) {
+
+      <div class="mt-3 space-y-2">
+
+        @for (
+        schedule of currentStation.weeklySchedules;
+        track $index
+        ) {
+        <p>
+          <strong>
+            {{ dayLabels.get(schedule.dayOfWeekId) }}
+          </strong>
+          :
+          {{ schedule.startTime }}
+          -
+          {{ schedule.endTime }}
+        </p>
+        }
+
+      </div>
+
+      } @else {
+      <p class="mt-3 text-gray-600">
+        Aucune disponibilité hebdomadaire renseignée.
+      </p>
+      }
+
+    </div>
+
+    <div class="flex justify-center mt-8">
+      <a [routerLink]="[
+            '/reservations/nouvelle',
+            currentStation.id
+          ]" class="inline-block bg-yellow hover:bg-yellow/50 rounded-full px-6 py-2 text-center">
+        Réserver cette borne
+      </a>
+    </div>
+
+  </div>
+  }
+  }
+
+</div>

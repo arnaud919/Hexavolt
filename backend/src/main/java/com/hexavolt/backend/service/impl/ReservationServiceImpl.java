@@ -26,6 +26,7 @@ import com.hexavolt.backend.repository.ChargingStationReservationRepository;
 import com.hexavolt.backend.repository.ReservationRepository;
 import com.hexavolt.backend.repository.StatusReservationRepository;
 import com.hexavolt.backend.repository.UserRepository;
+import com.hexavolt.backend.service.ChargingStationAvailabilityService;
 import com.hexavolt.backend.service.ReservationPricingService;
 import com.hexavolt.backend.service.ReservationService;
 
@@ -48,6 +49,7 @@ public class ReservationServiceImpl implements ReservationService {
         private final UserRepository userRepository;
         private final ReservationMapper reservationMapper;
         private final ReservationPricingService pricingService;
+        private final ChargingStationAvailabilityService availabilityService;
 
         public ReservationServiceImpl(
                         ReservationRepository reservationRepository,
@@ -56,7 +58,8 @@ public class ReservationServiceImpl implements ReservationService {
                         StatusReservationRepository statusReservationRepository,
                         UserRepository userRepository,
                         ReservationMapper reservationMapper,
-                        ReservationPricingService pricingService) {
+                        ReservationPricingService pricingService,
+                        ChargingStationAvailabilityService availabilityService) {
                 this.reservationRepository = reservationRepository;
                 this.chargingStationRepository = chargingStationRepository;
                 this.chargingStationReservationRepository = chargingStationReservationRepository;
@@ -64,6 +67,7 @@ public class ReservationServiceImpl implements ReservationService {
                 this.userRepository = userRepository;
                 this.reservationMapper = reservationMapper;
                 this.pricingService = pricingService;
+                this.availabilityService = availabilityService;
         }
 
         @Override
@@ -75,11 +79,18 @@ public class ReservationServiceImpl implements ReservationService {
                 LocalDateTime start = dto.getStartDateTime();
                 LocalDateTime end = dto.getEndDateTime();
 
-                ChargingStation station = chargingStationRepository.findById(dto.getChargingStationId())
+                ChargingStation station = chargingStationRepository
+                                .findById(dto.getChargingStationId())
                                 .orElseThrow(() -> new ResourceNotFoundException("Borne introuvable."));
 
                 ensureStationIsActive(station);
                 ensureUserDoesNotOwnStation(station, user);
+
+                if (!availabilityService.isAvailable(station, start, end)) {
+                        throw new BusinessException(
+                                        "Le créneau demandé ne correspond pas aux disponibilités de la borne.");
+                }
+                
                 ensureNoBlockingConflict(station, start, end);
 
                 StatusReservation pendingStatus = findStatusByName(STATUS_PENDING);

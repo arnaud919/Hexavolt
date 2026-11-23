@@ -11,6 +11,7 @@ import com.hexavolt.backend.dto.ChargingStationCreateDTO;
 import com.hexavolt.backend.dto.ChargingStationDetailDTO;
 import com.hexavolt.backend.dto.ChargingStationEditDTO;
 import com.hexavolt.backend.dto.ChargingStationListDTO;
+import com.hexavolt.backend.dto.ChargingStationPublicDetailDTO;
 import com.hexavolt.backend.dto.ChargingStationSearchDTO;
 import com.hexavolt.backend.dto.ChargingStationUpdateDTO;
 import com.hexavolt.backend.dto.WeeklyScheduleDTO;
@@ -173,17 +174,7 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                 ? "/api/public/stations/" + station.getId() + "/video"
                                 : null;
 
-                List<WeeklyScheduleDTO> weeklySchedules = weeklyScheduleRepo
-                                .findByChargingStationId(station.getId())
-                                .stream()
-                                .map(schedule -> {
-                                        WeeklyScheduleDTO dto = new WeeklyScheduleDTO();
-                                        dto.setDayOfWeekId(schedule.getDayOfWeek().getId().longValue());
-                                        dto.setStartTime(schedule.getStartTime());
-                                        dto.setEndTime(schedule.getEndTime());
-                                        return dto;
-                                })
-                                .toList();
+                List<WeeklyScheduleDTO> weeklySchedules = getWeeklySchedules(station.getId());
 
                 return new ChargingStationDetailDTO(
                                 station.getId(),
@@ -435,25 +426,6 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 return earthRadiusMeters * c;
         }
 
-        private void moveAttachedStationsWithLocation(
-                        Long locationId,
-                        Double oldLatitude,
-                        Double oldLongitude,
-                        Double newLatitude,
-                        Double newLongitude) {
-                List<ChargingStation> stations = stationRepo.findByLocationId(locationId);
-
-                double latitudeDelta = newLatitude - oldLatitude;
-                double longitudeDelta = newLongitude - oldLongitude;
-
-                for (ChargingStation station : stations) {
-                        if (station.getLatitude() != null && station.getLongitude() != null) {
-                                station.setLatitude(station.getLatitude() + latitudeDelta);
-                                station.setLongitude(station.getLongitude() + longitudeDelta);
-                        }
-                }
-        }
-
         @Override
         public void withdrawMyChargingStation(Long id) {
                 User user = getCurrentUser();
@@ -489,6 +461,63 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                         throw new BusinessException(
                                         "Le retrait définitif doit être effectué via l'action dédiée.");
                 }
+        }
+
+        @Override
+        public ChargingStationPublicDetailDTO findPublicChargingStationById(Long id) {
+
+                Long stationId = requireId(
+                                id,
+                                "L'identifiant de la borne est obligatoire.");
+
+                ChargingStation station = stationRepo
+                                .findByIdAndStatusName(stationId, "ACTIVE")
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Borne introuvable ou indisponible."));
+
+                String photoUrl = station.getPhotoName() != null
+                                ? "/api/public/stations/" + station.getId() + "/photo"
+                                : null;
+
+                String videoUrl = station.getVideoName() != null
+                                ? "/api/public/stations/" + station.getId() + "/video"
+                                : null;
+
+                List<WeeklyScheduleDTO> weeklySchedules = getWeeklySchedules(station.getId());
+
+                return new ChargingStationPublicDetailDTO(
+                                station.getId(),
+                                station.getName(),
+                                station.getPower().getKvaPower(),
+                                station.getHourlyRate(),
+                                station.getInstruction(),
+                                station.getLatitude(),
+                                station.getLongitude(),
+                                station.getLocation().getAddress(),
+                                station.getLocation().getCity().getName(),
+                                photoUrl,
+                                videoUrl,
+                                weeklySchedules);
+        }
+
+        private List<WeeklyScheduleDTO> getWeeklySchedules(Long stationId) {
+
+                return weeklyScheduleRepo
+                                .findByChargingStationId(stationId)
+                                .stream()
+                                .map(schedule -> {
+
+                                        WeeklyScheduleDTO dto = new WeeklyScheduleDTO();
+
+                                        dto.setDayOfWeekId(
+                                                        schedule.getDayOfWeek().getId().longValue());
+
+                                        dto.setStartTime(schedule.getStartTime());
+                                        dto.setEndTime(schedule.getEndTime());
+
+                                        return dto;
+                                })
+                                .toList();
         }
 
 }

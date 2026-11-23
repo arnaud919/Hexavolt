@@ -6,6 +6,7 @@ import { ChargingStationEdit } from '../models/charging-station-edit';
 import { ChargingStationUpdate } from '../models/charging-station-update';
 import { ChargingStationSearch } from '../models/charging-station-search';
 import { Observable } from 'rxjs';
+import { ChargingStationPublicDetail } from '../models/charging-station-public-detail';
 
 @Injectable({
   providedIn: 'root'
@@ -80,11 +81,17 @@ export class ChargingStationService {
   }
 
   withdrawMyChargingStation(id: number): Observable<void> {
-  return this.http.patch<void>(
-    `${this.apiUrl}/stations/${id}/withdraw`,
-    null,
-    { withCredentials: true }
-  );
-}
+    return this.http.patch<void>(
+      `${this.apiUrl}/stations/${id}/withdraw`,
+      null,
+      { withCredentials: true }
+    );
+  }
+
+  getPublicChargingStationById(id: number): Observable<ChargingStationPublicDetail> {
+    return this.http.get<ChargingStationPublicDetail>(
+      `${this.apiUrl}/public/stations/${id}`
+    );
+  }
 
 }
