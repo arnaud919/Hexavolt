@@ -1,5 +1,7 @@
 package com.hexavolt.backend.service.impl;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -14,9 +16,13 @@ import com.hexavolt.backend.dto.ChargingStationListDTO;
 import com.hexavolt.backend.dto.ChargingStationPublicDetailDTO;
 import com.hexavolt.backend.dto.ChargingStationSearchDTO;
 import com.hexavolt.backend.dto.ChargingStationUpdateDTO;
+import com.hexavolt.backend.dto.ClosedDayDTO;
+import com.hexavolt.backend.dto.ModifiedScheduleDTO;
 import com.hexavolt.backend.dto.WeeklyScheduleDTO;
 import com.hexavolt.backend.entity.ChargingStation;
+import com.hexavolt.backend.entity.ClosedDay;
 import com.hexavolt.backend.entity.DayOfWeek;
+import com.hexavolt.backend.entity.ModifiedSchedule;
 import com.hexavolt.backend.entity.NicknameLocation;
 import com.hexavolt.backend.entity.Power;
 import com.hexavolt.backend.entity.StationLocation;
@@ -26,7 +32,10 @@ import com.hexavolt.backend.entity.WeeklySchedule;
 import com.hexavolt.backend.exception.BusinessException;
 import com.hexavolt.backend.exception.ResourceNotFoundException;
 import com.hexavolt.backend.repository.ChargingStationRepository;
+import com.hexavolt.backend.repository.ClosedDayRepository;
+import com.hexavolt.backend.repository.ChargingStationReservationRepository;
 import com.hexavolt.backend.repository.DayOfWeekRepository;
+import com.hexavolt.backend.repository.ModifiedScheduleRepository;
 import com.hexavolt.backend.repository.NicknameLocationRepository;
 import com.hexavolt.backend.repository.PowerRepository;
 import com.hexavolt.backend.repository.StatusChargingStationRepository;
@@ -50,6 +59,9 @@ public class ChargingStationServiceImpl implements ChargingStationService {
         private final FileStorageService fileStorageService;
         private final StatusChargingStationRepository statusChargingStationRepo;
         private final ChargingStationMapper chargingStationMapper;
+        private final ClosedDayRepository closedDayRepo;
+        private final ChargingStationReservationRepository chargingStationReservationRepo;
+        private final ModifiedScheduleRepository modifiedScheduleRepo;
 
         public ChargingStationServiceImpl(
                         ChargingStationRepository stationRepo,
@@ -59,7 +71,10 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                         WeeklyScheduleRepository weeklyScheduleRepo,
                         FileStorageService fileStorageService,
                         StatusChargingStationRepository statusChargingStationRepo,
-                        ChargingStationMapper chargingStationMapper) {
+                        ChargingStationMapper chargingStationMapper,
+                        ClosedDayRepository closedDayRepo,
+                        ChargingStationReservationRepository chargingStationReservationRepo,
+                        ModifiedScheduleRepository modifiedScheduleRepo) {
                 this.stationRepo = stationRepo;
                 this.nicknameLocationRepo = nicknameLocationRepo;
                 this.powerRepo = powerRepo;
@@ -68,6 +83,10 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 this.fileStorageService = fileStorageService;
                 this.statusChargingStationRepo = statusChargingStationRepo;
                 this.chargingStationMapper = chargingStationMapper;
+                this.closedDayRepo = closedDayRepo;
+                this.chargingStationReservationRepo = chargingStationReservationRepo;
+                this.modifiedScheduleRepo = modifiedScheduleRepo;
+
         }
 
         private static final double MAX_DISTANCE_FROM_LOCATION_METERS = 300.0;
@@ -209,6 +228,19 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                 ChargingStation station = findOwnedStation(validStationId, user);
 
                 validateStationNotWithdrawn(station);
+
+                long conflicts = chargingStationReservationRepo
+                                .countBlockingReservationConflict(
+                                                station.getId(),
+                                                LocalDateTime.now(),
+                                                LocalDateTime.of(9999, 12, 31, 23, 59, 59));
+
+                if (conflicts > 0) {
+                        throw new BusinessException(
+                                        "Impossible de modifier les horaires hebdomadaires : "
+                                                        + "cette borne possède des réservations à venir "
+                                                        + "en attente ou confirmées.");
+                }
 
                 if (schedules == null) {
                         throw new BusinessException("La liste des horaires est obligatoire.");
@@ -518,6 +550,181 @@ public class ChargingStationServiceImpl implements ChargingStationService {
                                         return dto;
                                 })
                                 .toList();
+        }
+
+        @Override
+        public List<ClosedDayDTO> getClosedDays(Long stationId) {
+                User user = getCurrentUser();
+                ChargingStation station = findOwnedStation(stationId, user);
+
+                return closedDayRepo
+                                .findByChargingStationIdOrderByDateAsc(station.getId())
+                                .stream()
+                                .map(closedDay -> new ClosedDayDTO(closedDay.getDate()))
+                                .toList();
+        }
+
+        @Override
+        public void addClosedDay(Long stationId, ClosedDayDTO dto) {
+                if (dto == null || dto.getDate() == null) {
+                        throw new BusinessException("La date de fermeture est obligatoire.");
+                }
+
+                LocalDate date = dto.getDate();
+
+                if (date.isBefore(LocalDate.now())) {
+                        throw new BusinessException(
+                                        "La date de fermeture ne peut pas être dans le passé.");
+                }
+
+                User user = getCurrentUser();
+                ChargingStation station = findOwnedStation(stationId, user);
+
+                if (closedDayRepo.existsByChargingStationIdAndDate(
+                                station.getId(), date)) {
+                        throw new BusinessException(
+                                        "Cette journée est déjà enregistrée comme fermée.");
+                }
+
+                long conflicts = chargingStationReservationRepo
+                                .countBlockingReservationConflict(
+                                                station.getId(),
+                                                date.atStartOfDay(),
+                                                date.plusDays(1).atStartOfDay());
+
+                if (conflicts > 0) {
+                        throw new BusinessException(
+                                        "Cette journée possède des réservations en attente ou confirmées.");
+                }
+
+                ClosedDay closedDay = new ClosedDay();
+                closedDay.setChargingStation(station);
+                closedDay.setDate(date);
+
+                closedDayRepo.save(closedDay);
+        }
+
+        @Override
+        public void deleteClosedDay(Long stationId, LocalDate date) {
+                User user = getCurrentUser();
+                ChargingStation station = findOwnedStation(stationId, user);
+
+                ClosedDay closedDay = closedDayRepo
+                                .findByChargingStationIdAndDate(station.getId(), date)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Journée de fermeture introuvable."));
+
+                closedDayRepo.delete(closedDay);
+        }
+
+        @Override
+        public List<ModifiedScheduleDTO> getModifiedSchedules(Long stationId) {
+                User user = getCurrentUser();
+                ChargingStation station = findOwnedStation(stationId, user);
+
+                return modifiedScheduleRepo
+                                .findByChargingStationIdOrderByDateAsc(station.getId())
+                                .stream()
+                                .map(schedule -> new ModifiedScheduleDTO(
+                                                schedule.getDate(),
+                                                schedule.getStartTime(),
+                                                schedule.getEndTime()))
+                                .toList();
+        }
+
+        @Override
+        public void saveModifiedSchedule(
+                        Long stationId,
+                        ModifiedScheduleDTO dto) {
+
+                if (dto == null || dto.getDate() == null
+                                || dto.getStartTime() == null
+                                || dto.getEndTime() == null) {
+                        throw new BusinessException(
+                                        "La date et les horaires sont obligatoires.");
+                }
+
+                if (dto.getDate().isBefore(LocalDate.now())) {
+                        throw new BusinessException(
+                                        "La date ne peut pas être dans le passé.");
+                }
+
+                if (!isValidHalfHour(dto.getStartTime())
+                                || !isValidHalfHour(dto.getEndTime())) {
+                        throw new BusinessException(
+                                        "Les horaires doivent être par tranches de 30 minutes.");
+                }
+
+                if (!dto.getStartTime().isBefore(dto.getEndTime())) {
+                        throw new BusinessException(
+                                        "L'heure de début doit être avant l'heure de fin.");
+                }
+
+                User user = getCurrentUser();
+                ChargingStation station = findOwnedStation(stationId, user);
+
+                if (closedDayRepo.existsByChargingStationIdAndDate(
+                                station.getId(), dto.getDate())) {
+                        throw new BusinessException(
+                                        "Cette journée est déjà enregistrée comme fermée.");
+                }
+
+                long conflicts = chargingStationReservationRepo
+                                .countBlockingReservationConflict(
+                                                station.getId(),
+                                                dto.getDate().atStartOfDay(),
+                                                dto.getDate().plusDays(1).atStartOfDay());
+
+                if (conflicts > 0) {
+                        throw new BusinessException(
+                                        "Cette journée possède des réservations en attente ou confirmées.");
+                }
+
+                ModifiedSchedule schedule = modifiedScheduleRepo
+                                .findByChargingStationIdAndDate(station.getId(), dto.getDate())
+                                .orElseGet(() -> {
+                                        ModifiedSchedule newSchedule = new ModifiedSchedule();
+                                        newSchedule.setChargingStation(station);
+                                        newSchedule.setDate(dto.getDate());
+                                        return newSchedule;
+                                });
+
+                schedule.setStartTime(dto.getStartTime());
+                schedule.setEndTime(dto.getEndTime());
+
+                modifiedScheduleRepo.save(schedule);
+        }
+
+        @Override
+        public void deleteModifiedSchedule(Long stationId, LocalDate date) {
+                User user = getCurrentUser();
+                ChargingStation station = findOwnedStation(stationId, user);
+
+                ModifiedSchedule schedule = modifiedScheduleRepo
+                                .findByChargingStationIdAndDate(station.getId(), date)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Horaire exceptionnel introuvable."));
+
+                long conflicts = chargingStationReservationRepo
+                                .countBlockingReservationConflict(
+                                                station.getId(),
+                                                date.atStartOfDay(),
+                                                date.plusDays(1).atStartOfDay());
+
+                if (conflicts > 0) {
+                        throw new BusinessException(
+                                        "Impossible de supprimer cet horaire exceptionnel : "
+                                                        + "cette journée possède des réservations "
+                                                        + "en attente ou confirmées.");
+                }
+
+                modifiedScheduleRepo.delete(schedule);
+        }
+
+        private boolean isValidHalfHour(LocalTime time) {
+                return (time.getMinute() == 0 || time.getMinute() == 30)
+                                && time.getSecond() == 0
+                                && time.getNano() == 0;
         }
 
 }

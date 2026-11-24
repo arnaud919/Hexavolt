@@ -1,7 +1,9 @@
 package com.hexavolt.backend.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,8 @@ import com.hexavolt.backend.dto.ChargingStationListDTO;
 import com.hexavolt.backend.dto.ChargingStationSearchDTO;
 import com.hexavolt.backend.dto.WeeklyScheduleDTO;
 import com.hexavolt.backend.dto.ChargingStationUpdateDTO;
+import com.hexavolt.backend.dto.ClosedDayDTO;
+import com.hexavolt.backend.dto.ModifiedScheduleDTO;
 import com.hexavolt.backend.service.ChargingStationService;
 
 @RestController
@@ -96,4 +100,53 @@ public class ChargingStationController {
         chargingStationService.withdrawMyChargingStation(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/closed-days")
+    public List<ClosedDayDTO> getClosedDays(@PathVariable Long id) {
+        return chargingStationService.getClosedDays(id);
+    }
+
+    @PostMapping("/{id}/closed-days")
+    public ResponseEntity<Void> addClosedDay(
+            @PathVariable Long id,
+            @RequestBody ClosedDayDTO dto) {
+
+        chargingStationService.addClosedDay(id, dto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @DeleteMapping("/{id}/closed-days/{date}")
+    public ResponseEntity<Void> deleteClosedDay(
+            @PathVariable Long id,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        chargingStationService.deleteClosedDay(id, date);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/modified-schedules")
+    public List<ModifiedScheduleDTO> getModifiedSchedules(
+            @PathVariable Long id) {
+
+        return chargingStationService.getModifiedSchedules(id);
+    }
+
+    @PutMapping("/{id}/modified-schedules")
+    public ResponseEntity<Void> saveModifiedSchedule(
+            @PathVariable Long id,
+            @RequestBody ModifiedScheduleDTO dto) {
+
+        chargingStationService.saveModifiedSchedule(id, dto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/modified-schedules/{date}")
+    public ResponseEntity<Void> deleteModifiedSchedule(
+            @PathVariable Long id,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        chargingStationService.deleteModifiedSchedule(id, date);
+        return ResponseEntity.noContent().build();
+    }
+
 }

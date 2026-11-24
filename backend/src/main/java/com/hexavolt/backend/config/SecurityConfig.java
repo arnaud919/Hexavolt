@@ -47,15 +47,14 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.POST, "/api/auth/verify/resend").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/api/auth/verify").permitAll()
                                                 .requestMatchers("/api/auth/password/**").permitAll()
-                                                .requestMatchers("/api/public/stations/*/photo").permitAll()
-                                                .requestMatchers("/api/public/stations/*/video").permitAll()
+                                                .requestMatchers("/api/public/stations/**").permitAll()
 
                                                 // 🌍 Public métier
                                                 .requestMatchers(HttpMethod.GET, "/api/cities/**").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/api/stations/search").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/api/stations/*/photo").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/api/stations/*/video").permitAll()
-                                                .requestMatchers(HttpMethod.GET,"/api/public/stations/*").permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/public/stations/*").permitAll()
 
                                                 // 🔐 Auth protégée
                                                 .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
